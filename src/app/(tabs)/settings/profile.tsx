@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button, Card } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding, updateWedding } from '../../../services/wedding';
 import { User, Wedding } from '../../../database/types';
@@ -12,6 +13,7 @@ import { SyncEngine } from '../../../services/syncEngine';
 export default function WeddingProfileScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -132,7 +134,7 @@ export default function WeddingProfileScreen() {
         </Card>
 
       </ScrollView>
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderColor: theme.colors.borderLight, backgroundColor: theme.colors.surface }]}>
         <Button label="Save Changes" onPress={handleSave} isLoading={isSaving} />
       </View>
     </ScreenContainer>
@@ -141,21 +143,19 @@ export default function WeddingProfileScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   scroll: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingBottom: 40,
   },
   sectionHeader: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderColor: theme.colors.borderLight,
-    backgroundColor: theme.colors.surface,
   }
 });

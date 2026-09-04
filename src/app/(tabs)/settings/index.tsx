@@ -3,21 +3,26 @@ import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, Card } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { useLanguage } from '../../../i18n';
 
 type IoniconsName = keyof typeof Ionicons.glyphMap;
 
 export default function SettingsIndexScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
   const { t } = useLanguage();
 
   const renderSettingItem = (title: string, subtitle: string, icon: IoniconsName, route: any) => (
-    <Pressable 
-      style={({ pressed }) => [styles.item, pressed && styles.pressedState]} 
+    <Pressable
+      style={({ pressed }) => [
+        styles.item,
+        { backgroundColor: pressed ? theme.colors.surfaceElevated : theme.colors.surface },
+      ]}
       onPress={() => router.push(route)}
     >
-      <View style={styles.iconContainer}>
+      <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
         <Ionicons name={icon} size={22} color={theme.colors.primary} />
       </View>
       <View style={styles.textContainer}>
@@ -44,27 +49,27 @@ export default function SettingsIndexScreen() {
         <Typography variant="sectionTitle" style={styles.sectionTitle}>{t('settings.general')}</Typography>
         <Card style={styles.card}>
           {renderSettingItem(t('settings.appearance'), t('settings.appearanceDesc'), 'color-palette', '/(tabs)/settings/appearance')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderSettingItem(t('settings.language'), t('settings.languageDesc'), 'language', '/(tabs)/settings/language')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderSettingItem(t('settings.ai'), t('settings.aiDesc'), 'sparkles-outline', '/(tabs)/settings/ai-assistant')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderSettingItem(t('settings.notifications'), t('settings.notificationsDesc'), 'notifications-outline', '/(tabs)/settings/notifications')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderSettingItem(t('settings.whatsapp'), t('settings.whatsappDesc'), 'logo-whatsapp', '/(tabs)/settings/whatsapp')}
         </Card>
 
         <Typography variant="sectionTitle" style={styles.sectionTitle}>{t('settings.dataSync')}</Typography>
         <Card style={styles.card}>
           {renderSettingItem(t('settings.syncStatus'), t('settings.syncDesc'), 'cloud-outline', '/(tabs)/settings/sync')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderSettingItem(t('settings.backup'), t('settings.backupDesc'), 'download-outline', '/(tabs)/settings/backup')}
         </Card>
         
         <Typography variant="sectionTitle" style={styles.sectionTitle}>{t('settings.system')}</Typography>
         <Card style={styles.card}>
           {renderSettingItem(t('settings.privacy'), t('settings.privacyDesc'), 'shield-checkmark-outline', '/(tabs)/settings/privacy')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderSettingItem(t('settings.about'), t('settings.aboutDesc'), 'information-circle-outline', '/(tabs)/settings/about')}
         </Card>
 
@@ -76,21 +81,19 @@ export default function SettingsIndexScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: {
-    paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.lg, paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.md,
   },
-  content: { padding: theme.spacing.lg, paddingBottom: 100 },
-  sectionTitle: { marginBottom: theme.spacing.md, marginTop: theme.spacing.lg },
+  content: { padding: spacing.lg, paddingBottom: 100 },
+  sectionTitle: { marginBottom: spacing.md, marginTop: spacing.lg },
   card: { padding: 0, overflow: 'hidden' },
   item: {
     flexDirection: 'row', alignItems: 'center',
-    padding: theme.spacing.lg, backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
   },
-  pressedState: { backgroundColor: theme.colors.surfaceElevated },
   iconContainer: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: theme.colors.primary + '15',
-    justifyContent: 'center', alignItems: 'center', marginRight: theme.spacing.md,
+    justifyContent: 'center', alignItems: 'center', marginRight: spacing.md,
   },
   textContainer: { flex: 1 },
-  divider: { height: 1, backgroundColor: theme.colors.borderLight, marginLeft: 72 },
+  divider: { height: 1, marginLeft: 72 },
 });

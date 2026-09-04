@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { GuestService } from '../../../services/guest';
 import { GroupService } from '../../../services/group';
 import { RoomAssignmentService } from '../../../services/roomAssignment';
@@ -16,6 +17,17 @@ export default function GuestProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
+
+  const avatarStyle = [styles.avatarPlaceholder, { backgroundColor: theme.colors.border }];
+  const badgeGroupStyle = [styles.badge, styles.badgeGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }];
+  const badgeTextGroupStyle = [styles.badgeTextGroup, { color: theme.colors.textSecondary }];
+  const sectionLabelStyle = [styles.sectionLabel, { color: theme.colors.textSecondary }];
+  const sectionBlockStyle = [styles.sectionBlock, { backgroundColor: theme.colors.surface }];
+  const listRowBorderStyle = { borderBottomColor: theme.colors.borderLight };
+  const badgeSentStyle = { backgroundColor: theme.colors.success };
+  const badgeDefaultStyle = { backgroundColor: theme.colors.border };
+  const deleteButtonStyle = [styles.deleteButton, { borderColor: theme.colors.error }];
 
   const [guest, setGuest] = useState<Guest | null>(null);
   const [group, setGroup] = useState<GuestGroup | null>(null);
@@ -175,7 +187,7 @@ export default function GuestProfileScreen() {
         </View>
 
         <View style={styles.profileHeader}>
-          <View style={styles.avatarPlaceholder}>
+          <View style={avatarStyle}>
             <Typography variant="screenTitle" color={theme.colors.surface}>
               {guest.full_name.charAt(0).toUpperCase()}
             </Typography>
@@ -194,14 +206,14 @@ export default function GuestProfileScreen() {
             )}
             {group ? (
               <Pressable onPress={() => router.push(`/(tabs)/guests/${guest.id}/edit`)}>
-                <View style={[styles.badge, styles.badgeGroup]}>
-                  <Typography variant="caption" weight="medium" style={styles.badgeTextGroup}>{group.name}</Typography>
+                <View style={badgeGroupStyle}>
+                  <Typography variant="caption" weight="medium" style={badgeTextGroupStyle}>{group.name}</Typography>
                 </View>
               </Pressable>
             ) : (
               <Pressable onPress={() => router.push(`/(tabs)/guests/${guest.id}/edit`)}>
-                <View style={[styles.badge, styles.badgeGroup]}>
-                  <Typography variant="caption" weight="medium" style={styles.badgeTextGroup}>+ Add to Group</Typography>
+                <View style={badgeGroupStyle}>
+                  <Typography variant="caption" weight="medium" style={badgeTextGroupStyle}>+ Add to Group</Typography>
                 </View>
               </Pressable>
             )}
@@ -217,22 +229,22 @@ export default function GuestProfileScreen() {
            />
         </View>
 
-        <Typography variant="caption" weight="semibold" style={styles.sectionLabel}>PERSONAL DETAILS</Typography>
-        <View style={styles.sectionBlock}>
-          <View style={styles.listRow}>
+        <Typography variant="caption" weight="semibold" style={sectionLabelStyle}>PERSONAL DETAILS</Typography>
+        <View style={sectionBlockStyle}>
+          <View style={[styles.listRow, listRowBorderStyle]}>
             <Ionicons name="people-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
             <Typography variant="body" style={styles.rowLabel}>Party Size</Typography>
             <Typography variant="body" color={theme.colors.textSecondary}>{guest.party_size} {guest.party_size === 1 ? 'person' : 'people'}</Typography>
           </View>
 
-          <View style={[styles.listRow, {borderBottomWidth: guest.phone || guest.notes ? 1 : 0}]}>
+          <View style={[styles.listRow, listRowBorderStyle, {borderBottomWidth: guest.phone || guest.notes ? 1 : 0}]}>
             <Ionicons name="mail-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
             <Typography variant="body" style={styles.rowLabel}>Wedding RSVP</Typography>
             <Typography variant="body" color={theme.colors.textSecondary}>{rsvpDisplay}</Typography>
           </View>
 
           {guest.phone && (
-            <View style={[styles.listRow, {borderBottomWidth: guest.notes ? 1 : 0}]}>
+            <View style={[styles.listRow, listRowBorderStyle, {borderBottomWidth: guest.notes ? 1 : 0}]}>
               <Ionicons name="call-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <Typography variant="body" style={styles.rowLabel}>Phone</Typography>
               <Typography variant="body" color={theme.colors.textSecondary}>{guest.phone}</Typography>
@@ -240,7 +252,7 @@ export default function GuestProfileScreen() {
           )}
 
           {guest.notes && (
-            <View style={styles.listRow}>
+            <View style={[styles.listRow, listRowBorderStyle]}>
               <Ionicons name="document-text-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <View style={{flex: 1}}>
                 <Typography variant="body" style={styles.rowLabel}>Notes</Typography>
@@ -249,10 +261,10 @@ export default function GuestProfileScreen() {
             </View>
           )}
         </View>
-        <Typography variant="caption" weight="semibold" style={styles.sectionLabel}>ACCOMMODATION</Typography>
-        <View style={styles.sectionBlock}>
+        <Typography variant="caption" weight="semibold" style={sectionLabelStyle}>ACCOMMODATION</Typography>
+        <View style={sectionBlockStyle}>
           {assignment ? (
-            <Pressable style={styles.listRow} onPress={() => router.push(`/(tabs)/rooms/${assignment.room_id}` as any)}>
+            <Pressable style={[styles.listRow, listRowBorderStyle]} onPress={() => router.push(`/(tabs)/rooms/${assignment.room_id}` as any)}>
               <Ionicons name="bed" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <View style={{flex: 1}}>
                 <Typography variant="body">Room {assignment.room_number}</Typography>
@@ -261,7 +273,7 @@ export default function GuestProfileScreen() {
               <Ionicons name="chevron-forward" size={20} color={theme.colors.border} />
             </Pressable>
           ) : (
-            <Pressable style={styles.listRow} onPress={() => router.push(`/(tabs)/guests/${guest.id}/assign-room`)}>
+            <Pressable style={[styles.listRow, listRowBorderStyle]} onPress={() => router.push(`/(tabs)/guests/${guest.id}/assign-room`)}>
               <Ionicons name="bed-outline" size={20} color={theme.colors.textMuted} style={styles.rowIcon} />
               <Typography variant="body" color={theme.colors.textSecondary} style={{flex: 1}}>Not assigned</Typography>
               <Typography variant="body" color={theme.colors.primary}>Assign</Typography>
@@ -271,12 +283,12 @@ export default function GuestProfileScreen() {
 
         {events.length > 0 && (
           <>
-            <Typography variant="caption" weight="semibold" style={styles.sectionLabel}>EVENTS</Typography>
-            <View style={styles.sectionBlock}>
+            <Typography variant="caption" weight="semibold" style={sectionLabelStyle}>EVENTS</Typography>
+            <View style={sectionBlockStyle}>
               {events.map((ev, idx) => (
                 <Pressable 
                   key={ev.id} 
-                  style={[styles.listRow, {borderBottomWidth: idx < events.length - 1 ? 1 : 0}]}
+                  style={[styles.listRow, listRowBorderStyle, {borderBottomWidth: idx < events.length - 1 ? 1 : 0}]}
                   onPress={() => router.push(`/(tabs)/events/${ev.id}` as any)}
                 >
                   <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
@@ -286,7 +298,7 @@ export default function GuestProfileScreen() {
                       {ev.date ? new Date(ev.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBD'}
                     </Typography>
                   </View>
-                  <View style={[styles.badge, ev.event_rsvp_status === 'ATTENDING' ? styles.badgeSent : styles.badgeDefault]}>
+                  <View style={[styles.badge, ev.event_rsvp_status === 'ATTENDING' ? [styles.badgeSent, badgeSentStyle] : [styles.badgeDefault, badgeDefaultStyle]]}>
                     <Typography variant="caption" color={ev.event_rsvp_status === 'ATTENDING' ? '#fff' : '#333'}>
                       {ev.event_rsvp_status === 'PENDING' ? 'No RSVP' : ev.event_rsvp_status}
                     </Typography>
@@ -299,10 +311,10 @@ export default function GuestProfileScreen() {
 
         {invitations.length > 0 && (
           <>
-            <Typography variant="caption" weight="semibold" style={styles.sectionLabel}>INVITATIONS</Typography>
-            <View style={styles.sectionBlock}>
+            <Typography variant="caption" weight="semibold" style={sectionLabelStyle}>INVITATIONS</Typography>
+            <View style={sectionBlockStyle}>
               {invitations.map((inv, idx) => (
-                <View key={inv.id} style={[styles.listRow, {borderBottomWidth: idx < invitations.length - 1 ? 1 : 0}]}>
+                <View key={inv.id} style={[styles.listRow, listRowBorderStyle, {borderBottomWidth: idx < invitations.length - 1 ? 1 : 0}]}>
                   <Ionicons name="mail-open-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
                   <View style={{flex: 1}}>
                     <Typography variant="body">{inv.invitation_title}</Typography>
@@ -310,7 +322,7 @@ export default function GuestProfileScreen() {
                       {inv.event_name ? `Event: ${inv.event_name}` : 'Main Wedding'}
                     </Typography>
                   </View>
-                  <View style={[styles.badge, inv.status === 'SENT' ? styles.badgeSent : styles.badgeDefault]}>
+                  <View style={[styles.badge, inv.status === 'SENT' ? [styles.badgeSent, badgeSentStyle] : [styles.badgeDefault, badgeDefaultStyle]]}>
                     <Typography variant="caption" color={inv.status === 'SENT' ? '#fff' : '#333'}>
                       {inv.status}
                     </Typography>
@@ -321,11 +333,11 @@ export default function GuestProfileScreen() {
           </>
         )}
 
-        <Button 
-          label="Delete Guest" 
+        <Button
+          label="Delete Guest"
           variant="outline"
           onPress={handleDelete}
-          style={styles.deleteButton}
+          style={deleteButtonStyle}
         />
         
       </ScrollView>
@@ -339,15 +351,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingTop: theme.spacing.sm,
+    marginBottom: spacing.xl,
+    paddingTop: spacing.sm,
   },
   backButton: {
     flexDirection: 'row',
@@ -356,24 +368,23 @@ const styles = StyleSheet.create({
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   avatarPlaceholder: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: theme.colors.border,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   name: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   badgesRow: {
     flexDirection: 'row',
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
   },
   badge: {
     paddingHorizontal: 8,
@@ -393,36 +404,25 @@ const styles = StyleSheet.create({
     color: '#BE185D', // Dark pink
   },
   badgeGroup: {
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
-  badgeTextGroup: {
-    color: theme.colors.textSecondary,
-  },
-  badgeSent: {
-    backgroundColor: theme.colors.success,
-  },
-  badgeDefault: {
-    backgroundColor: theme.colors.border,
-  },
+  badgeTextGroup: {},
+  badgeSent: {},
+  badgeDefault: {},
   sectionLabel: {
-    color: theme.colors.textSecondary,
     marginLeft: 16,
     marginBottom: 8,
     marginTop: 24,
     letterSpacing: 1,
   },
   sectionBlock: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.lg,
+    borderRadius: radii.lg,
     overflow: 'hidden',
   },
   listRow: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderBottomColor: theme.colors.borderLight,
   },
   rowIcon: {
     marginRight: 16,
@@ -431,7 +431,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deleteButton: {
-    marginTop: theme.spacing.xxl,
-    borderColor: theme.colors.error,
+    marginTop: spacing.xxl,
   }
 });

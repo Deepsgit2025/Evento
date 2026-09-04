@@ -4,7 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, Card, Button, IconButton } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { SettingsService, NotificationPrefKey } from '../../../services/settings';
@@ -12,6 +13,7 @@ import { SettingsService, NotificationPrefKey } from '../../../services/settings
 export default function NotificationSettingsScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
   const [weddingId, setWeddingId] = useState<string | null>(null);
   
   const [prefs, setPrefs] = useState<Record<string, boolean>>({
@@ -99,13 +101,13 @@ export default function NotificationSettingsScreen() {
 
         <Card style={styles.card}>
           {renderToggle(
-            'pref_notify_event', 
+            'pref_notify_event',
             'Event Reminders', 
             'Alerts before your events begin', 
             'calendar.badge.clock', 
             theme.colors.primary
           )}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderToggle(
             'pref_notify_payment', 
             'Payment Reminders', 
@@ -113,7 +115,7 @@ export default function NotificationSettingsScreen() {
             'creditcard.trianglebadge.exclamationmark', 
             theme.colors.error
           )}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderToggle(
             'pref_notify_invitation', 
             'Invitation Alerts', 
@@ -121,7 +123,7 @@ export default function NotificationSettingsScreen() {
             'envelope.badge', 
             theme.colors.warning
           )}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderToggle(
             'pref_notify_sync', 
             'Sync Issues', 
@@ -129,7 +131,7 @@ export default function NotificationSettingsScreen() {
             'arrow.triangle.2.circlepath.circle', 
             theme.colors.textSecondary
           )}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderToggle(
             'pref_notify_general', 
             'General Reminders', 
@@ -151,20 +153,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
   },
   backBtn: {
     paddingHorizontal: 0,
     width: 40,
   },
   scrollContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   description: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   card: {
     padding: 0,
@@ -173,7 +175,7 @@ const styles = StyleSheet.create({
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   iconContainer: {
     width: 40,
@@ -181,15 +183,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
   },
   toggleText: {
     flex: 1,
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
     marginLeft: 72, // Align with text
   },
 });

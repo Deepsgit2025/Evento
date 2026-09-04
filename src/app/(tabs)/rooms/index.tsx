@@ -4,7 +4,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ScreenContainer, Typography, EmptyState, Card } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { HotelService } from '../../../services/hotel';
@@ -19,7 +20,8 @@ type RoomWithOccupancy = Room & { occupancy: number };
 export default function RoomsDashboard() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [rooms, setRooms] = useState<RoomWithOccupancy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,7 +120,11 @@ export default function RoomsDashboard() {
         {(['All', 'Available', 'Full', 'Empty'] as FilterType[]).map((f) => (
           <Pressable
             key={f}
-            style={[styles.filterChip, filter === f && styles.filterChipActive]}
+            style={[
+              styles.filterChip,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+              filter === f && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+            ]}
             onPress={() => setFilter(f)}
           >
             <Typography
@@ -158,7 +164,7 @@ export default function RoomsDashboard() {
         </View>
 
         {hotelRooms.length === 0 ? (
-          <Card style={styles.emptyRoomsCard}>
+          <Card style={[styles.emptyRoomsCard, { backgroundColor: theme.colors.background }]}>
             <Typography variant="bodySecondary" color={theme.colors.textMuted}>No rooms in this property.</Typography>
           </Card>
         ) : (
@@ -176,7 +182,7 @@ export default function RoomsDashboard() {
                     </View>
                     <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
                   </View>
-                  <View style={styles.roomFooter}>
+                  <View style={[styles.roomFooter, { borderTopColor: theme.colors.borderLight }]}>
                     <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>
                       Occupancy: {room.occupancy} / {room.capacity} people
                     </Typography>
@@ -199,8 +205,12 @@ export default function RoomsDashboard() {
     <ScreenContainer>
       <View style={styles.header}>
         <Typography variant="sectionTitle">Accommodation</Typography>
-        <Pressable 
-          style={({ pressed }) => [styles.addButton, pressed && styles.pressedState]} 
+        <Pressable
+          style={({ pressed }) => [
+            styles.addButton,
+            { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            pressed && styles.pressedState,
+          ]}
           onPress={() => router.push('/(tabs)/rooms/add-hotel')}
         >
           <Ionicons name="add" size={20} color={theme.colors.primary} />
@@ -241,19 +251,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radii.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
   addButtonText: {
     marginLeft: 4,
@@ -266,17 +274,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   listContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   hotelGroup: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   hotelHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
     paddingHorizontal: 4,
   },
   hotelTitleRow: {
@@ -291,26 +299,25 @@ const styles = StyleSheet.create({
   hotelActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   deleteIcon: {
     padding: 4,
   },
   emptyRoomsCard: {
-    padding: theme.spacing.md,
+    padding: spacing.md,
     alignItems: 'center',
-    backgroundColor: theme.colors.background,
     borderStyle: 'dashed',
   },
   roomCard: {
-    marginBottom: theme.spacing.md,
-    padding: theme.spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
   },
   roomHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   deleteIconRoom: {
     padding: 4,
@@ -320,13 +327,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
-    paddingTop: theme.spacing.sm,
+    paddingTop: spacing.sm,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: theme.radii.sm,
+    borderRadius: radii.sm,
   },
   badgeAvailable: {
     backgroundColor: '#DCFCE7', // Light green
@@ -341,26 +347,20 @@ const styles = StyleSheet.create({
     color: '#991B1B', // Dark red
   },
   filterWrapper: {
-    paddingHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   filterScroll: {
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
   },
   filterChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: theme.radii.full,
-    backgroundColor: theme.colors.surface,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  filterChipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   emptyFilterContainer: {
     alignItems: 'center',
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   }
 });

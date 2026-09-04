@@ -177,8 +177,8 @@ export default function SendPatrikaScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
+      <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.borderLight }]}>
+        <Button
           label={`Queue ${selectedGuestIds.size} Guests`}
           onPress={handleQueue}
           disabled={selectedGuestIds.size === 0}
@@ -190,56 +190,44 @@ export default function SendPatrikaScreen() {
 
 const styles = StyleSheet.create({
   section: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   eventSelection: {
     flexDirection: 'row',
   },
   eventBtn: {
-    marginRight: theme.spacing.sm,
+    marginRight: spacing.sm,
   },
   quickFilters: {
     flexDirection: 'row',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   filterBtn: {
-    marginRight: theme.spacing.sm,
+    marginRight: spacing.sm,
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
   guestList: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.lg,
+    borderRadius: radii.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
   },
   guestItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.md,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
-  },
-  guestItemSelected: {
-    backgroundColor: theme.colors.primary + '10',
-  },
-  guestItemDisabled: {
-    backgroundColor: theme.colors.background,
-    opacity: 0.6,
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: theme.colors.border,
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -248,9 +236,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   footer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.background,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
   }
 });

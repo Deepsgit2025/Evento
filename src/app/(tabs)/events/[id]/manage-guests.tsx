@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, EmptyState, TextInput, Card, Button } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing, radii } from '../../../../theme';
 import { AuthService } from '../../../../services/auth';
 import { getUserWedding } from '../../../../services/wedding';
 import { GuestService } from '../../../../services/guest';
@@ -16,7 +17,8 @@ export default function EventManageGuestsScreen() {
   const { id: eventId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [weddingId, setWeddingId] = useState('');
   const [guests, setGuests] = useState<Guest[]>([]);
   const [groups, setGroups] = useState<GuestGroup[]>([]);
@@ -150,9 +152,12 @@ export default function EventManageGuestsScreen() {
 
     return (
       <Pressable onPress={() => toggleGuestSelection(item.id)}>
-        <Card style={[styles.guestCard, isSelected && styles.guestCardSelected]}>
+        <Card style={[
+          styles.guestCard,
+          isSelected && [styles.guestCardSelected, { borderColor: theme.colors.primary, backgroundColor: theme.colors.primary + '10' }]
+        ]}>
           <View style={styles.cardContent}>
-            <View style={styles.checkbox}>
+            <View style={[styles.checkbox, { borderColor: theme.colors.primary, backgroundColor: theme.colors.primary }]}>
               {isSelected && <Ionicons name="checkmark" size={14} color="#fff" />}
             </View>
             <View style={{flex: 1}}>
@@ -175,7 +180,7 @@ export default function EventManageGuestsScreen() {
                   </View>
                 )}
                 {group && (
-                  <View style={[styles.badge, {backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border}]}>
+                  <View style={[styles.badge, { backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border }]}>
                     <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>{group.name}</Typography>
                   </View>
                 )}
@@ -188,8 +193,12 @@ export default function EventManageGuestsScreen() {
   };
 
   const FilterPill = ({ label, isActive, onPress }: { label: string, isActive: boolean, onPress: () => void }) => (
-    <Pressable 
-      style={[styles.filterPill, isActive && styles.filterPillActive]}
+    <Pressable
+      style={[
+        styles.filterPill,
+        { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+        isActive && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
+      ]}
       onPress={onPress}
     >
       <Typography 
@@ -227,8 +236,8 @@ export default function EventManageGuestsScreen() {
           <FilterPill label="Groom's Side" isActive={sideFilter === 'Groom'} onPress={() => handleSideFilter('Groom')} />
           <FilterPill label="Bride's Side" isActive={sideFilter === 'Bride'} onPress={() => handleSideFilter('Bride')} />
           
-          <View style={styles.filterDivider} />
-          
+          <View style={[styles.filterDivider, { backgroundColor: theme.colors.border }]} />
+
           {groups.sort((a,b) => a.sort_order - b.sort_order).map(group => (
             <FilterPill 
               key={group.id} 
@@ -240,7 +249,7 @@ export default function EventManageGuestsScreen() {
         </ScrollView>
       </View>
 
-      <View style={styles.bulkActions}>
+      <View style={[styles.bulkActions, { borderBottomColor: theme.colors.borderLight }]}>
         <Pressable onPress={selectAllFiltered} style={{marginRight: 16}}>
           <Typography variant="body" weight="semibold" color={theme.colors.primary}>Select All</Typography>
         </Pressable>
@@ -263,7 +272,7 @@ export default function EventManageGuestsScreen() {
         />
       )}
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.borderLight }]}>
         <Typography variant="body" weight="medium">
           {selectedGuestIds.size} guests selected
         </Typography>
@@ -275,57 +284,47 @@ export default function EventManageGuestsScreen() {
 
 const styles = StyleSheet.create({
   searchContainer: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
+    padding: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   filterScrollContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
-    gap: theme.spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
     alignItems: 'center',
   },
   filterPill: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 6,
-    borderRadius: theme.radii.full,
-    backgroundColor: theme.colors.surface,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  filterPillActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   filterDivider: {
     width: 1,
     height: 20,
-    backgroundColor: theme.colors.border,
     marginHorizontal: 4,
   },
   bulkActions: {
     flexDirection: 'row',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   listContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
-    paddingTop: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+    paddingTop: spacing.md,
   },
   guestCard: {
-    marginBottom: theme.spacing.sm,
-    padding: theme.spacing.md,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
   },
   guestCardSelected: {
-    borderColor: theme.colors.primary,
     borderWidth: 2,
-    backgroundColor: theme.colors.primary + '10',
   },
   cardContent: {
     flexDirection: 'row',
@@ -336,12 +335,10 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: theme.colors.primary,
     marginRight: 12,
     marginTop: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.primary,
   },
   guestHeader: {
     flexDirection: 'row',
@@ -352,19 +349,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
     flex: 1,
   },
   badge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: theme.radii.sm,
+    borderRadius: radii.sm,
   },
   footer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

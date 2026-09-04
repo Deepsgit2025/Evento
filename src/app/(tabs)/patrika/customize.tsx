@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, shadows } from '../../../theme';
 import { TEMPLATES, PatrikaProps } from '../../../components/patrika/Templates';
 import { PatrikaService, PatrikaDTO, PatrikaCustomization } from '../../../services/patrika';
 import { AuthService } from '../../../services/auth';
@@ -15,6 +16,7 @@ export default function CustomizeScreen() {
   const { templateId, editId } = useLocalSearchParams<{ templateId: string, editId?: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const template = TEMPLATES.find((t: any) => t.id === templateId);
   
@@ -167,7 +169,7 @@ export default function CustomizeScreen() {
 
         </View>
       </ScrollView>
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
         <Button label="Save & Preview" onPress={handleSave} isLoading={isSubmitting} />
       </View>
     </ScreenContainer>
@@ -184,18 +186,17 @@ const styles = StyleSheet.create({
   previewWrapper: {
     overflow: 'hidden',
     backgroundColor: '#fff',
-    ...theme.shadows.md,
+    ...shadows.md,
   },
   formSection: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   formTitle: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingTop: 0,
-    backgroundColor: theme.colors.background,
   }
 });

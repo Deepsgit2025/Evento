@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem, SmartSuggestionBanner } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { EventService } from '../../../services/event';
 import { VendorEventService } from '../../../services/vendorEvent';
 import { EventGuestService } from '../../../services/eventGuest';
@@ -16,6 +17,7 @@ export default function EventProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [event, setEvent] = useState<Event | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -163,7 +165,7 @@ export default function EventProfileScreen() {
         </View>
 
         <View style={styles.profileHeader}>
-          <View style={styles.avatarPlaceholder}>
+          <View style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary }]}>
             <Ionicons name="calendar-outline" size={40} color={theme.colors.surface} />
           </View>
           <Typography variant="screenTitle" style={styles.name}>{event.name}</Typography>
@@ -175,8 +177,15 @@ export default function EventProfileScreen() {
               </View>
             )}
             {countdown && (
-              <View style={[styles.badge, countdown.isPast ? styles.badgePast : styles.badgeFuture]}>
-                <Typography variant="caption" weight="medium" style={countdown.isPast ? styles.badgeTextPast : styles.badgeTextFuture}>
+              <View style={[
+                styles.badge,
+                countdown.isPast ? [styles.badgePast, { backgroundColor: theme.colors.surfaceElevated }] : styles.badgeFuture
+              ]}>
+                <Typography
+                  variant="caption"
+                  weight="medium"
+                  style={countdown.isPast ? { color: theme.colors.textSecondary } : { color: theme.colors.primary }}
+                >
                   {countdown.label}
                 </Typography>
               </View>
@@ -253,7 +262,7 @@ export default function EventProfileScreen() {
           </View>
           
           {guests.length > 0 && (
-            <Typography variant="caption" color={theme.colors.textSecondary} style={{marginBottom: theme.spacing.md}}>
+            <Typography variant="caption" color={theme.colors.textSecondary} style={{marginBottom: spacing.md}}>
               {guests.length} {guests.length === 1 ? 'record' : 'records'} · {guests.reduce((acc, g) => acc + g.party_size, 0)} people
             </Typography>
           )}
@@ -274,7 +283,7 @@ export default function EventProfileScreen() {
                 />
               ))}
               {guests.length > 5 && (
-                <View style={{padding: theme.spacing.md, alignItems: 'center'}}>
+                <View style={{padding: spacing.md, alignItems: 'center'}}>
                   <Typography variant="body" color={theme.colors.textSecondary}>
                     + {guests.length - 5} more guests
                   </Typography>
@@ -282,7 +291,7 @@ export default function EventProfileScreen() {
               )}
             </Card>
           ) : (
-            <Typography variant="body" color={theme.colors.textSecondary} style={{ marginBottom: theme.spacing.md }}>
+            <Typography variant="body" color={theme.colors.textSecondary} style={{ marginBottom: spacing.md }}>
               No guests assigned yet.
             </Typography>
           )}
@@ -308,14 +317,14 @@ export default function EventProfileScreen() {
               ))}
             </Card>
           ) : (
-            <Typography variant="body" color={theme.colors.textSecondary} style={{ marginBottom: theme.spacing.md }}>
+            <Typography variant="body" color={theme.colors.textSecondary} style={{ marginBottom: spacing.md }}>
               No vendors assigned yet.
             </Typography>
           )}
 
           {unassignedVendors.length > 0 && (
-            <Card style={[styles.listCard, { marginTop: theme.spacing.sm }]}>
-              <View style={{ padding: theme.spacing.md, backgroundColor: theme.colors.surfaceElevated }}>
+            <Card style={[styles.listCard, { marginTop: spacing.sm }]}>
+              <View style={{ padding: spacing.md, backgroundColor: theme.colors.surfaceElevated }}>
                 <Typography variant="body" weight="medium">Assign vendors</Typography>
               </View>
               {unassignedVendors.map(vendor => (
@@ -334,11 +343,11 @@ export default function EventProfileScreen() {
           )}
         </View>
 
-        <Button 
-          label="Delete Event" 
+        <Button
+          label="Delete Event"
           variant="outline"
           onPress={handleDelete}
-          style={styles.deleteButton}
+          style={[styles.deleteButton, { borderColor: theme.colors.error }]}
         />
         
       </ScrollView>
@@ -352,15 +361,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingTop: theme.spacing.sm,
+    marginBottom: spacing.xl,
+    paddingTop: spacing.sm,
   },
   backButton: {
     flexDirection: 'row',
@@ -369,29 +378,28 @@ const styles = StyleSheet.create({
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   avatarPlaceholder: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   name: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   badgesRow: {
     flexDirection: 'row',
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: theme.radii.sm,
+    borderRadius: radii.sm,
   },
   badgeType: {
     backgroundColor: '#F3E8FF', // Light purple
@@ -400,41 +408,33 @@ const styles = StyleSheet.create({
     color: '#7E22CE', // Dark purple
   },
   badgePast: {
-    backgroundColor: theme.colors.surfaceElevated,
-  },
-  badgeTextPast: {
-    color: theme.colors.textSecondary,
   },
   badgeFuture: {
     backgroundColor: '#F0FDF4', // Light green
   },
-  badgeTextFuture: {
-    color: theme.colors.primary,
-  },
   card: {
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
   },
   cardTitle: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   detailIcon: {
-    width: 40, 
+    width: 40,
   },
   deleteButton: {
-    marginTop: theme.spacing.xl,
-    borderColor: theme.colors.error,
+    marginTop: spacing.xl,
   },
   section: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   listCard: {
     padding: 0,

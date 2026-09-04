@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Pressable, KeyboardAvoidingView, Platform
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { EventService } from '../../../services/event';
@@ -12,7 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 export default function AddEventScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [weddingId, setWeddingId] = useState<string | null>(null);
   
   const [name, setName] = useState('');
@@ -89,9 +91,13 @@ export default function AddEventScreen() {
   const renderTypeOption = (type: string) => {
     const isSelected = !isCustomType && eventType === type;
     return (
-      <Pressable 
+      <Pressable
         key={type}
-        style={[styles.typeOption, isSelected && styles.typeOptionSelected]}
+        style={[
+          styles.typeOption,
+          { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+          isSelected && [styles.typeOptionSelected, { borderColor: theme.colors.primary }]
+        ]}
         onPress={() => {
           setEventType(type);
           setIsCustomType(false);
@@ -114,7 +120,7 @@ export default function AddEventScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScreenContainer>
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: theme.colors.borderLight }]}>
           <Pressable onPress={() => router.back()} style={styles.closeButton}>
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </Pressable>
@@ -124,7 +130,7 @@ export default function AddEventScreen() {
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {error && (
-            <View style={styles.errorContainer}>
+            <View style={[styles.errorContainer, { backgroundColor: theme.colors.surface, borderLeftColor: theme.colors.error }]}>
               <Typography variant="caption" color={theme.colors.error}>{error}</Typography>
             </View>
           )}
@@ -141,8 +147,12 @@ export default function AddEventScreen() {
             <Typography variant="caption" color={theme.colors.textSecondary} style={styles.label}>Event Type</Typography>
             <View style={styles.typeOptionsContainer}>
               {EventService.PREDEFINED_TYPES.map(renderTypeOption)}
-              <Pressable 
-                style={[styles.typeOption, isCustomType && styles.typeOptionSelected]}
+              <Pressable
+                style={[
+                  styles.typeOption,
+                  { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
+                  isCustomType && [styles.typeOptionSelected, { borderColor: theme.colors.primary }]
+                ]}
                 onPress={() => setIsCustomType(true)}
               >
                 <Typography 
@@ -156,7 +166,7 @@ export default function AddEventScreen() {
             </View>
 
             {isCustomType && (
-              <View style={{ marginTop: theme.spacing.sm }}>
+              <View style={{ marginTop: spacing.sm }}>
                 <TextInput
                   placeholder="Enter custom event type"
                   value={customType}
@@ -214,8 +224,8 @@ export default function AddEventScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.footer}>
-          <Button 
+        <View style={[styles.footer, { borderTopColor: theme.colors.borderLight, backgroundColor: theme.colors.surface }]}>
+          <Button
             label={isSaving ? "Saving..." : "Save Event"} 
             variant="primary" 
             onPress={handleSave} 
@@ -235,63 +245,55 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   closeButton: {
     padding: 4,
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   errorContainer: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
-    borderRadius: theme.radii.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    borderRadius: radii.md,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.error,
   },
   section: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   label: {
-    marginBottom: theme.spacing.xs,
+    marginBottom: spacing.xs,
     marginLeft: 4,
   },
   typeOptionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
   },
   typeOption: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: theme.radii.full,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surface,
   },
   typeOptionSelected: {
-    borderColor: theme.colors.primary,
     backgroundColor: '#F0FDF4',
   },
   row: {
     flexDirection: 'row',
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   flex1: {
     flex: 1,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
-    backgroundColor: theme.colors.surface,
   },
 });
