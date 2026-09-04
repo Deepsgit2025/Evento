@@ -4,7 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, TextInput, EmptyState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { GroupService } from '../../../services/group';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
@@ -13,7 +14,8 @@ import { GuestGroup } from '../../../database/types';
 export default function GroupsManagerScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [weddingId, setWeddingId] = useState('');
   const [groups, setGroups] = useState<GuestGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,7 +107,7 @@ export default function GroupsManagerScreen() {
 
     return (
       <View style={styles.sideSection}>
-        <Typography variant="sectionTitle" style={styles.sideTitle}>{side} Side</Typography>
+        <Typography variant="sectionTitle" style={[styles.sideTitle, { borderBottomColor: theme.colors.borderLight }]}>{side} Side</Typography>
         {sideGroups.length === 0 ? (
           <Typography variant="body" color={theme.colors.textSecondary} style={{marginLeft: 8}}>No groups added.</Typography>
         ) : (
@@ -145,26 +147,26 @@ export default function GroupsManagerScreen() {
           <Button 
             label="Create New Group" 
             onPress={() => { setIsCreating(true); setNewName(''); setEditingGroupId(null); }}
-            style={{ marginBottom: theme.spacing.xl }}
+            style={{ marginBottom: spacing.xl }}
           />
         )}
 
         {isCreating && (
-          <Card style={styles.createCard}>
+          <Card style={[styles.createCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary }]}>
             <Typography variant="sectionTitle" style={{marginBottom: 12}}>
               {editingGroupId ? 'Edit Group' : 'New Group'}
             </Typography>
             
             {!editingGroupId && (
-              <View style={styles.sideToggle}>
-                <Pressable 
-                  style={[styles.toggleBtn, newSide === 'Groom' && styles.toggleBtnActive]} 
+              <View style={[styles.sideToggle, { backgroundColor: theme.colors.background }]}>
+                <Pressable
+                  style={[styles.toggleBtn, newSide === 'Groom' && { backgroundColor: theme.colors.primary }]}
                   onPress={() => setNewSide('Groom')}
                 >
                   <Typography variant="body" color={newSide === 'Groom' ? '#fff' : theme.colors.text}>Groom</Typography>
                 </Pressable>
-                <Pressable 
-                  style={[styles.toggleBtn, newSide === 'Bride' && styles.toggleBtnActive]} 
+                <Pressable
+                  style={[styles.toggleBtn, newSide === 'Bride' && { backgroundColor: theme.colors.primary }]}
                   onPress={() => setNewSide('Bride')}
                 >
                   <Typography variant="body" color={newSide === 'Bride' ? '#fff' : theme.colors.text}>Bride</Typography>
@@ -195,23 +197,22 @@ export default function GroupsManagerScreen() {
 
 const styles = StyleSheet.create({
   scroll: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   sideSection: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   sideTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
     paddingBottom: 8,
   },
   groupCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
   },
   groupInfo: {
     flex: 1,
@@ -228,30 +229,24 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   createCard: {
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.xl,
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.primary,
+    padding: spacing.md,
+    marginBottom: spacing.xl,
     borderWidth: 1,
   },
   sideToggle: {
     flexDirection: 'row',
-    marginBottom: theme.spacing.md,
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.radii.md,
+    marginBottom: spacing.md,
+    borderRadius: radii.md,
     padding: 4,
   },
   toggleBtn: {
     flex: 1,
     alignItems: 'center',
     paddingVertical: 8,
-    borderRadius: theme.radii.md,
-  },
-  toggleBtnActive: {
-    backgroundColor: theme.colors.primary,
+    borderRadius: radii.md,
   },
   createActions: {
     flexDirection: 'row',
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
   }
 });

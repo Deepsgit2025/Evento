@@ -3,7 +3,8 @@ import { View, StyleSheet, FlatList, Pressable, ActivityIndicator } from 'react-
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, EmptyState } from '../../../../components/ui';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing, radii } from '../../../../theme';
 import { RoomAssignmentService } from '../../../../services/roomAssignment';
 import { RoomService } from '../../../../services/room';
 import { GuestService } from '../../../../services/guest';
@@ -20,6 +21,7 @@ export default function AssignRoomModal() {
   const { id } = useLocalSearchParams<{ id: string }>(); // guest id
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [guest, setGuest] = useState<Guest | null>(null);
   const [rooms, setRooms] = useState<RoomWithOccupancy[]>([]);
@@ -102,7 +104,7 @@ export default function AssignRoomModal() {
 
   if (isLoading || !guest) {
     return (
-      <ScreenContainer style={styles.center}>
+      <ScreenContainer style={[styles.center, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </ScreenContainer>
     );
@@ -120,9 +122,9 @@ export default function AssignRoomModal() {
         disabled={wouldExceed}
       >
         <Card style={[
-          styles.roomCard, 
-          isSelected && styles.roomCardSelected,
-          wouldExceed && styles.roomCardDisabled
+          styles.roomCard,
+          isSelected && [styles.roomCardSelected, { borderColor: theme.colors.primary }],
+          wouldExceed && [styles.roomCardDisabled, { backgroundColor: theme.colors.borderLight }]
         ]}>
           <View style={styles.roomInfo}>
             <View>
@@ -133,7 +135,7 @@ export default function AssignRoomModal() {
                 {item.hotel_name} • {item.room_type || 'Standard'}
               </Typography>
             </View>
-            <View style={styles.occupancyBox}>
+            <View style={[styles.occupancyBox, { backgroundColor: theme.colors.background }]}>
                <Typography variant="caption" weight="medium" color={wouldExceed ? theme.colors.error : theme.colors.primary}>
                  {item.occupancy} / {item.capacity}
                </Typography>
@@ -150,8 +152,8 @@ export default function AssignRoomModal() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.borderLight }]}>
         <Typography variant="sectionTitle">Assign Room</Typography>
         <Typography variant="bodySecondary" color={theme.colors.textSecondary}>
           {guest.full_name} • Party of {guest.party_size}
@@ -159,7 +161,7 @@ export default function AssignRoomModal() {
       </View>
 
       {error && (
-        <View style={styles.errorContainer}>
+        <View style={[styles.errorContainer, { backgroundColor: theme.colors.surface, borderLeftColor: theme.colors.error }]}>
           <Typography variant="caption" color={theme.colors.error}>{error}</Typography>
         </View>
       )}
@@ -171,7 +173,7 @@ export default function AssignRoomModal() {
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={
           rooms.length > 0 ? (
-            <Pressable onPress={() => setSelectedRoomId('UNASSIGN')} style={styles.unassignOption}>
+            <Pressable onPress={() => setSelectedRoomId('UNASSIGN')} style={[styles.unassignOption, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
                <Typography variant="body" weight="medium" color={selectedRoomId === 'UNASSIGN' ? theme.colors.primary : theme.colors.textSecondary}>
                   [ Remove room assignment ]
                </Typography>
@@ -192,9 +194,9 @@ export default function AssignRoomModal() {
         }
       />
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.borderLight }]}>
+        <Button
+          label="Cancel"
           variant="outline" 
           onPress={() => router.back()} 
           style={styles.footerButton} 
@@ -217,61 +219,51 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
-    padding: theme.spacing.lg,
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   errorContainer: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.md,
-    margin: theme.spacing.lg,
-    borderRadius: theme.radii.md,
+    padding: spacing.md,
+    margin: spacing.lg,
+    borderRadius: radii.md,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.error,
   },
   emptyContainer: {
-    paddingVertical: theme.spacing.xxl,
+    paddingVertical: spacing.xxl,
     justifyContent: 'center',
   },
   listContent: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   unassignOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
   },
   roomCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   roomCardSelected: {
-    borderColor: theme.colors.primary,
     backgroundColor: '#F0FDF4',
   },
   roomCardDisabled: {
     opacity: 0.6,
-    backgroundColor: theme.colors.borderLight,
   },
   roomInfo: {
     flex: 1,
@@ -282,19 +274,16 @@ const styles = StyleSheet.create({
   occupancyBox: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: theme.radii.sm,
-    backgroundColor: theme.colors.background,
+    borderRadius: radii.sm,
   },
   checkIcon: {
-    marginLeft: theme.spacing.md,
+    marginLeft: spacing.md,
   },
   footer: {
     flexDirection: 'row',
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   footerButton: {
     flex: 1,
