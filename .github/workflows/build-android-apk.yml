@@ -1,4 +1,5 @@
 name: Build Android APK
+# Redesign + dark-mode + crypto-crash fixes build
 
 on:
   workflow_dispatch: {}
