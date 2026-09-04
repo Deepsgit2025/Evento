@@ -23,7 +23,11 @@ function InitialRoot() {
   const [isReady, setIsReady] = useState(false);
   const [authState, setAuthState] = useState<{session: any, wedding: any} | null>(null);
 
-  // 1. Fetch auth state once on mount
+  // 1. Re-fetch auth state from the DB (the source of truth) on every navigation,
+  // not just once on mount. After signup/login/wedding-creation the route changes
+  // without remounting this layout, so caching the very first fetch would leave
+  // this stuck on a stale "no session" snapshot and keep bouncing the user back
+  // to /auth/login right after they sign up or finish creating their wedding.
   useEffect(() => {
     let active = true;
     const fetchAuth = async () => {
@@ -35,21 +39,25 @@ function InitialRoot() {
         }
         if (active) {
           setAuthState({ session, wedding });
-          setIsReady(true);
-          try { SplashScreen.hideAsync(); } catch {}
+          if (!isReady) {
+            setIsReady(true);
+            try { SplashScreen.hideAsync(); } catch {}
+          }
         }
       } catch (e) {
         console.error('Auth init error:', e);
         if (active) {
           setAuthState({ session: null, wedding: null });
-          setIsReady(true);
-          try { SplashScreen.hideAsync(); } catch {}
+          if (!isReady) {
+            setIsReady(true);
+            try { SplashScreen.hideAsync(); } catch {}
+          }
         }
       }
     };
     fetchAuth();
     return () => { active = false; };
-  }, [db]);
+  }, [db, segments]);
 
   // 2. React to segments + authState changes to route the user
   useEffect(() => {
