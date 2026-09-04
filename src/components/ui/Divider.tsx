@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 
 export interface DividerProps {
   style?: StyleProp<ViewStyle>;
@@ -8,10 +9,13 @@ export interface DividerProps {
 }
 
 export function Divider({ style, vertical = false }: DividerProps) {
+  const { theme } = useTheme();
+
   return (
     <View
       style={[
         vertical ? styles.vertical : styles.horizontal,
+        { backgroundColor: theme.colors.borderLight },
         style,
       ]}
     />
@@ -21,14 +25,12 @@ export function Divider({ style, vertical = false }: DividerProps) {
 const styles = StyleSheet.create({
   horizontal: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
     width: '100%',
-    marginVertical: theme.spacing.md,
+    marginVertical: spacing.md,
   },
   vertical: {
     width: 1,
-    backgroundColor: theme.colors.borderLight,
     height: '100%',
-    marginHorizontal: theme.spacing.md,
+    marginHorizontal: spacing.md,
   },
 });

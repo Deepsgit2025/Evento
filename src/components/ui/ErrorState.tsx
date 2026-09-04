@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { Typography } from './Typography';
 import { Button } from './Button';
 
@@ -17,6 +18,8 @@ export function ErrorState({
   onRetry,
   style,
 }: ErrorStateProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={[styles.container, style]}>
       <Typography variant="sectionTitle" align="center" style={styles.title}>
@@ -37,13 +40,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   title: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   message: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
     maxWidth: 280,
   },
   retryButton: {

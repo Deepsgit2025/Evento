@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Modal, Pressable, KeyboardAvoidingView, Platform, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing, radii } from '../../theme';
 import { Typography } from './Typography';
 import { IconButton } from './IconButton';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +15,8 @@ export interface BottomSheetProps {
 }
 
 export function BottomSheet({ visible, onClose, title, children, style }: BottomSheetProps) {
+  const { theme } = useTheme();
+
   return (
     <Modal
       visible={visible}
@@ -21,26 +24,26 @@ export function BottomSheet({ visible, onClose, title, children, style }: Bottom
       animationType="slide"
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView 
-        style={styles.overlay} 
+      <KeyboardAvoidingView
+        style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, style]}>
+        <View style={[styles.sheet, { backgroundColor: theme.colors.surface }, theme.shadows.md, style]}>
           <View style={styles.handleContainer}>
-            <View style={styles.handle} />
+            <View style={[styles.handle, { backgroundColor: theme.colors.border }]} />
           </View>
-          
+
           <View style={styles.header}>
             {title ? (
               <Typography variant="sectionTitle">{title}</Typography>
             ) : <View />}
-            <IconButton 
-              icon={<Ionicons name="close" size={24} color={theme.colors.textSecondary} />} 
-              onPress={onClose} 
+            <IconButton
+              icon={<Ionicons name="close" size={24} color={theme.colors.textSecondary} />}
+              onPress={onClose}
             />
           </View>
-          
+
           <View style={styles.content}>
             {children}
           </View>
@@ -61,29 +64,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   sheet: {
-    backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: theme.radii.xl,
-    borderTopRightRadius: theme.radii.xl,
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: Platform.OS === 'ios' ? 40 : theme.spacing.lg,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: Platform.OS === 'ios' ? 40 : spacing.lg,
     maxHeight: '80%',
-    ...theme.shadows.md,
   },
   handleContainer: {
     alignItems: 'center',
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: spacing.sm,
   },
   handle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: theme.colors.border,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   content: {
     // Content can scroll if needed inside children

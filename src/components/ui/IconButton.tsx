@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, PressableProps, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { radii } from '../../theme';
 
 export interface IconButtonProps extends PressableProps {
   icon: React.ReactNode;
@@ -15,6 +16,7 @@ export function IconButton({
   disabled,
   ...props
 }: IconButtonProps) {
+  const { theme } = useTheme();
   const isPrimary = variant === 'primary';
   const isGhost = variant === 'ghost';
 
@@ -47,7 +49,7 @@ const styles = StyleSheet.create({
   base: {
     width: 44,
     height: 44,
-    borderRadius: theme.radii.full,
+    borderRadius: radii.full,
     alignItems: 'center',
     justifyContent: 'center',
   },

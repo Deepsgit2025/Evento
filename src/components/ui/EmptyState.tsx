@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { Typography } from './Typography';
 import { Button } from './Button';
 
@@ -13,6 +14,8 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ icon, title, description, actionLabel, onAction }: EmptyStateProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
@@ -37,15 +40,15 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.xxxl,
+    padding: spacing.xxxl,
   },
   iconContainer: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
     opacity: 0.7,
   },
   title: {
     textAlign: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   description: {
     textAlign: 'center',
@@ -53,7 +56,7 @@ const styles = StyleSheet.create({
     maxWidth: 280,
   },
   button: {
-    marginTop: theme.spacing.xl,
+    marginTop: spacing.xl,
     minWidth: 160,
   },
 });
