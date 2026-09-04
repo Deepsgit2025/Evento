@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import * as Notifications from 'expo-notifications';
+import * as Crypto from 'expo-crypto';
 import { SyncEngine } from './syncEngine';
 import { SettingsService, NotificationPrefKey } from './settings';
 
@@ -49,7 +50,7 @@ export const ReminderService = {
     db: SQLite.SQLiteDatabase,
     reminderData: Omit<Reminder, 'id' | 'status' | 'notification_id' | 'created_at' | 'updated_at'>
   ): Promise<string | null> {
-    const id = crypto.randomUUID();
+    const id = Crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
     
     // Determine the pref key

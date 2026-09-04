@@ -4,7 +4,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 import { ScreenContainer, Typography, Card, Button, TextInput } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii, shadows } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { BackupService } from '../../../services/backupService';
@@ -14,6 +15,7 @@ import { useLanguage } from '../../../i18n';
 export default function SyncScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
+  const { theme } = useTheme();
   const { t } = useLanguage();
   
   const [email, setEmail] = useState('');
@@ -106,7 +108,7 @@ export default function SyncScreen() {
       
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.infoContainer}>
-          <View style={styles.iconCircle}>
+          <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary + '15' }]}>
             <Ionicons name="logo-google" size={32} color={theme.colors.primary} />
           </View>
           <Typography variant="sectionTitle" style={styles.infoTitle}>Google Drive Sync</Typography>
@@ -116,19 +118,23 @@ export default function SyncScreen() {
         </View>
 
         {!loggedInEmail ? (
-          <Pressable 
-            style={({pressed}) => [styles.googleButton, pressed && { opacity: 0.8 }]}
+          <Pressable
+            style={({pressed}) => [
+              styles.googleButton,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+              pressed && { opacity: 0.8 },
+            ]}
             onPress={() => setShowGoogleModal(true)}
           >
             <Ionicons name="logo-google" size={24} color="#DB4437" />
-            <Typography variant="body" weight="semibold" style={styles.googleButtonText}>
+            <Typography variant="body" weight="semibold" style={[styles.googleButtonText, { color: theme.colors.text }]}>
               Sign in with Google
             </Typography>
           </Pressable>
         ) : (
           <Card style={styles.card}>
             <View style={styles.accountHeader}>
-              <View style={styles.avatar}>
+              <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
                 <Typography variant="body" weight="bold" color="#FFF">
                   {loggedInEmail.charAt(0).toUpperCase()}
                 </Typography>
@@ -153,7 +159,7 @@ export default function SyncScreen() {
         )}
 
         {(isScanning || isUploading || syncStatus !== 'idle') && (
-          <View style={styles.statusBox}>
+          <View style={[styles.statusBox, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
             {isScanning || isUploading ? (
               <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginBottom: 16 }} />
             ) : syncStatus === 'success' ? (
@@ -176,7 +182,7 @@ export default function SyncScreen() {
       {/* Google Login Modal */}
       <Modal visible={showGoogleModal} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <KeyboardAvoidingView style={styles.modalContent} behavior="padding">
+          <KeyboardAvoidingView style={[styles.modalContent, { backgroundColor: theme.colors.surface }]} behavior="padding">
             <View style={styles.modalHeader}>
               <View style={styles.googleIconWrapper}>
                 <Ionicons name="logo-google" size={24} color="#DB4437" />
@@ -204,7 +210,7 @@ export default function SyncScreen() {
               </Typography>
             </View>
 
-            <View style={styles.modalFooter}>
+            <View style={[styles.modalFooter, { borderColor: theme.colors.borderLight }]}>
               <Button 
                 label="Cancel" 
                 variant="ghost" 
@@ -227,29 +233,28 @@ export default function SyncScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   content: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   infoContainer: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingHorizontal: theme.spacing.md,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
   },
   iconCircle: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: theme.colors.primary + '15',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   infoTitle: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   infoDesc: {
     textAlign: 'center',
@@ -259,45 +264,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radii.full,
+    borderRadius: radii.full,
     paddingVertical: 14,
     paddingHorizontal: 24,
-    ...theme.shadows.sm,
+    ...shadows.sm,
   },
   googleButtonText: {
     marginLeft: 12,
-    color: theme.colors.text,
   },
   card: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   accountHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
     gap: 12,
   },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   syncBtn: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
   },
   statusBox: {
-    marginTop: theme.spacing.xl,
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.lg,
+    marginTop: spacing.xl,
+    padding: spacing.lg,
+    borderRadius: radii.lg,
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
     alignItems: 'center',
   },
 
@@ -306,13 +305,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   modalContent: {
-    backgroundColor: theme.colors.surface,
     borderRadius: 16,
     overflow: 'hidden',
-    ...theme.shadows.lg,
+    ...shadows.lg,
   },
   modalHeader: {
     alignItems: 'center',
@@ -331,7 +329,6 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 16,
     borderTopWidth: 1,
-    borderColor: theme.colors.borderLight,
     backgroundColor: '#FAFAFA',
   }
 });

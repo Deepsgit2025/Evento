@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ScreenContainer, Typography } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii, shadows } from '../../../theme';
 import { TEMPLATES } from '../../../components/patrika/Templates';
 
 export default function TemplateGalleryScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
 
   // Mock data for previewing templates in the gallery
   const previewData = {
@@ -30,9 +32,9 @@ export default function TemplateGalleryScreen() {
         {TEMPLATES.map((template: any) => {
           const TemplateComponent = template.component;
           return (
-            <TouchableOpacity 
-              key={template.id} 
-              style={styles.card}
+            <TouchableOpacity
+              key={template.id}
+              style={[styles.card, { backgroundColor: theme.colors.surface }]}
               onPress={() => router.push(`/(tabs)/patrika/customize?templateId=${template.id}` as any)}
             >
               <View style={styles.previewContainer}>
@@ -51,21 +53,20 @@ export default function TemplateGalleryScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: theme.spacing.md,
+    padding: spacing.md,
     justifyContent: 'space-between',
   },
   card: {
     width: '48%',
-    marginBottom: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.lg,
+    marginBottom: spacing.lg,
+    borderRadius: radii.lg,
     overflow: 'hidden',
-    ...theme.shadows.md,
+    ...shadows.md,
   },
   previewContainer: {
     width: '100%',
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   labelContainer: {
-    padding: theme.spacing.md,
+    padding: spacing.md,
     justifyContent: 'center',
     alignItems: 'center',
   }

@@ -4,7 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem, TextInput } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { FinanceService, OverallFinancialSummary } from '../../../services/finance';
 import { Expense } from '../../../database/types';
 import { AuthService } from '../../../services/auth';
@@ -15,6 +16,7 @@ const CATEGORIES = ['All', 'Decoration', 'Food', 'Travel', 'Clothing', 'Gifts', 
 export default function FinancialDashboardScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [summary, setSummary] = useState<OverallFinancialSummary | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -89,7 +91,7 @@ export default function FinancialDashboardScreen() {
 
   return (
     <ScreenContainer>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.borderLight }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color={theme.colors.primary} />
           <Typography variant="body" color={theme.colors.primary}>Home</Typography>
@@ -116,8 +118,8 @@ export default function FinancialDashboardScreen() {
               <Typography variant="screenTitle" style={styles.budgetValue}>{formatMoney(summary.budget)}</Typography>
               
               <View style={styles.progressContainer}>
-                <View style={styles.progressBarBg}>
-                  <View 
+                <View style={[styles.progressBarBg, { backgroundColor: theme.colors.borderLight }]}>
+                  <View
                     style={[
                       styles.progressBarFill, 
                       { 
@@ -148,7 +150,7 @@ export default function FinancialDashboardScreen() {
             </View>
           ) : (
             <View style={styles.emptyBudget}>
-              <Typography variant="body" color={theme.colors.textSecondary} align="center" style={{marginBottom: theme.spacing.md}}>
+              <Typography variant="body" color={theme.colors.textSecondary} align="center" style={{marginBottom: spacing.md}}>
                 You haven't set a total budget yet.
               </Typography>
               <Button label="Set Budget" variant="outline" onPress={() => router.push('/(tabs)/finance/edit-budget')} />
@@ -161,7 +163,7 @@ export default function FinancialDashboardScreen() {
         <Card style={styles.breakdownCard}>
           
           <View style={styles.breakdownRow}>
-            <View style={styles.iconBox}>
+            <View style={[styles.iconBox, { backgroundColor: theme.colors.surfaceElevated }]}>
               <Ionicons name="briefcase" size={24} color={theme.colors.primary} />
             </View>
             <View style={styles.breakdownText}>
@@ -180,10 +182,10 @@ export default function FinancialDashboardScreen() {
             </View>
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
 
           <View style={styles.breakdownRow}>
-            <View style={styles.iconBox}>
+            <View style={[styles.iconBox, { backgroundColor: theme.colors.surfaceElevated }]}>
               <Ionicons name="cart" size={24} color="#E09F3E" />
             </View>
             <View style={styles.breakdownText}>
@@ -215,9 +217,13 @@ export default function FinancialDashboardScreen() {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContent}>
           {CATEGORIES.map(cat => (
-            <TouchableOpacity 
-              key={cat} 
-              style={[styles.filterChip, selectedCategory === cat && styles.filterChipActive]}
+            <TouchableOpacity
+              key={cat}
+              style={[
+                styles.filterChip,
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                selectedCategory === cat && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
+              ]}
               onPress={() => handleCategorySelect(cat)}
             >
               <Typography 
@@ -239,7 +245,7 @@ export default function FinancialDashboardScreen() {
                 title={expense.title}
                 subtitle={`${expense.date} · ${expense.category}`}
                 leftElement={
-                  <View style={styles.miniIconBox}>
+                  <View style={[styles.miniIconBox, { backgroundColor: theme.colors.surfaceElevated }]}>
                     <Ionicons name="cart" size={16} color={theme.colors.textSecondary} />
                   </View>
                 }
@@ -271,12 +277,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-    backgroundColor: theme.colors.background,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   backButton: {
     flexDirection: 'row',
@@ -284,27 +288,26 @@ const styles = StyleSheet.create({
     width: 60,
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   budgetCard: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   budgetHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   budgetValue: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   progressContainer: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   progressBarBg: {
     height: 8,
-    backgroundColor: theme.colors.borderLight,
     borderRadius: 4,
     overflow: 'hidden',
   },
@@ -317,34 +320,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   emptyBudget: {
-    paddingVertical: theme.spacing.md,
+    paddingVertical: spacing.md,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   breakdownCard: {
-    marginBottom: theme.spacing.xl,
-    padding: theme.spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.md,
   },
   breakdownRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: spacing.sm,
   },
   iconBox: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: theme.colors.surfaceElevated,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
   },
   miniIconBox: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: theme.colors.surfaceElevated,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -356,33 +357,26 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
-    marginVertical: theme.spacing.md,
+    marginVertical: spacing.md,
   },
   expensesHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   filterScroll: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   filterContent: {
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
     paddingBottom: 4,
   },
   filterChip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  filterChipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   listCard: {
     padding: 0,
@@ -390,6 +384,6 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: 'center',
-    padding: theme.spacing.xxl,
+    padding: spacing.xxl,
   }
 });

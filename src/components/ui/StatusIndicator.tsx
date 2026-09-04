@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { Typography } from './Typography';
 
 export interface StatusIndicatorProps {
@@ -10,6 +11,8 @@ export interface StatusIndicatorProps {
 }
 
 export function StatusIndicator({ status, label, style }: StatusIndicatorProps) {
+  const { theme } = useTheme();
+
   const getDotColor = () => {
     switch (status) {
       case 'active': return theme.colors.success;
@@ -36,7 +39,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.sm,
+    gap: spacing.sm,
   },
   dot: {
     width: 8,

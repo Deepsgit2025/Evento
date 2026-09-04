@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { Typography } from './Typography';
 import { Button } from './Button';
 
@@ -19,6 +20,8 @@ export function SectionHeader({
   onActionPress,
   style,
 }: SectionHeaderProps) {
+  const { theme } = useTheme();
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.textContainer}>
@@ -46,7 +49,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   textContainer: {
     flex: 1,

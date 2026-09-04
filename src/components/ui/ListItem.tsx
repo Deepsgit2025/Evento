@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { Typography } from './Typography';
 
 export interface ListItemProps {
@@ -20,11 +21,14 @@ export function ListItem({
   onPress,
   style,
 }: ListItemProps) {
+  const { theme } = useTheme();
+
   return (
     <Pressable
       style={({ pressed }) => [
         styles.container,
-        pressed && onPress && styles.pressed,
+        { backgroundColor: theme.colors.surface },
+        pressed && onPress && { backgroundColor: theme.colors.background },
         style,
       ]}
       onPress={onPress}
@@ -48,20 +52,16 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
-  },
-  pressed: {
-    backgroundColor: theme.colors.background,
+    paddingVertical: spacing.md,
   },
   leftContainer: {
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
   },
   textContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   rightContainer: {
-    marginLeft: theme.spacing.md,
+    marginLeft: spacing.md,
   },
 });

@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 import { SyncEngine } from './syncEngine';
 
 export interface AppNotification {
@@ -37,7 +38,7 @@ export const NotificationService = {
     body: string | null = null,
     referenceId: string | null = null
   ) {
-    const id = crypto.randomUUID();
+    const id = Crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
     
     await db.runAsync(

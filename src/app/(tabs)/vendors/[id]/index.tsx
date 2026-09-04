@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, ListItem, Button, Badge, SmartSuggestionBanner } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing } from '../../../../theme';
 import { VendorService } from '../../../../services/vendor';
 import { VendorEventService } from '../../../../services/vendorEvent';
 import { PaymentService, PaymentSummary } from '../../../../services/payment';
@@ -15,7 +16,8 @@ export default function VendorDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [unassignedEvents, setUnassignedEvents] = useState<Event[]>([]);
@@ -162,7 +164,7 @@ export default function VendorDetailScreen() {
         {/* Header Card */}
         <Card style={styles.headerCard}>
           <View style={styles.headerTop}>
-            <View style={styles.iconContainer}>
+            <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
               <Ionicons name="briefcase" size={32} color={theme.colors.primary} />
             </View>
             <View style={styles.headerActions}>
@@ -361,13 +363,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   headerCard: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingTop: theme.spacing.xl,
+    marginBottom: spacing.xl,
+    paddingTop: spacing.xl,
   },
   headerTop: {
     flexDirection: 'row',
@@ -375,45 +377,44 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     position: 'absolute',
-    top: theme.spacing.lg,
-    left: theme.spacing.lg,
-    right: theme.spacing.lg,
+    top: spacing.lg,
+    left: spacing.lg,
+    right: spacing.lg,
     zIndex: 1,
   },
   iconContainer: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: theme.colors.primary + '15',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    marginTop: -theme.spacing.xl,
-    marginBottom: theme.spacing.md,
+    marginTop: -spacing.xl,
+    marginBottom: spacing.md,
   },
   headerActions: {
     flexDirection: 'row',
-    gap: theme.spacing.md,
+    gap: spacing.md,
     marginLeft: 'auto',
   },
   actionIcon: {
-    padding: theme.spacing.xs,
+    padding: spacing.xs,
   },
   title: {
     textAlign: 'center',
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.xl,
+    marginBottom: spacing.sm,
+    marginTop: spacing.xl,
   },
   section: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   listCard: {
     padding: 0,
     overflow: 'hidden',
-    marginTop: theme.spacing.md,
+    marginTop: spacing.md,
   },
   paymentSummaryGrid: {
     flexDirection: 'row',
@@ -426,9 +427,9 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   smallAction: {
-    padding: theme.spacing.xs,
+    padding: spacing.xs,
   },
 });

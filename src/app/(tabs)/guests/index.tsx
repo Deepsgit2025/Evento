@@ -4,7 +4,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ScreenContainer, Typography, EmptyState, TextInput, Card, Button } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { GuestService } from '../../../services/guest';
@@ -18,7 +19,8 @@ type AdvancedFilter = 'All' | 'Groom' | 'Bride' | 'NeedsRoom' | 'HasRoom' | 'Inv
 export default function GuestsListScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [weddingId, setWeddingId] = useState('');
   const [guests, setGuests] = useState<Guest[]>([]);
   const [groups, setGroups] = useState<GuestGroup[]>([]);
@@ -157,10 +159,10 @@ export default function GuestsListScreen() {
       <Pressable 
         onPress={() => isSelectMode ? toggleGuestSelection(item.id) : router.push(`/(tabs)/guests/${item.id}`)}
       >
-        <Card style={[styles.guestCard, isSelected && styles.guestCardSelected]}>
+        <Card style={[styles.guestCard, isSelected && [styles.guestCardSelected, { borderColor: theme.colors.primary, backgroundColor: theme.colors.primary + '10' }]]}>
           <View style={styles.cardContent}>
             {isSelectMode && (
-              <View style={styles.checkbox}>
+              <View style={[styles.checkbox, { borderColor: theme.colors.primary, backgroundColor: theme.colors.primary }]}>
                 {isSelected && <Ionicons name="checkmark" size={14} color="#fff" />}
               </View>
             )}
@@ -178,8 +180,8 @@ export default function GuestsListScreen() {
                     </View>
                   )}
                   {group && (
-                    <View style={[styles.badge, styles.badgeGroup]}>
-                      <Typography variant="caption" weight="medium" style={styles.badgeTextGroup}>{group.name}</Typography>
+                    <View style={[styles.badge, styles.badgeGroup, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                      <Typography variant="caption" weight="medium" style={[styles.badgeTextGroup, { color: theme.colors.textSecondary }]}>{group.name}</Typography>
                     </View>
                   )}
                 </View>
@@ -213,8 +215,12 @@ export default function GuestsListScreen() {
   };
 
   const FilterPill = ({ label, isActive, onPress }: { label: string, isActive: boolean, onPress: () => void }) => (
-    <Pressable 
-      style={[styles.filterPill, isActive && styles.filterPillActive]}
+    <Pressable
+      style={[
+        styles.filterPill,
+        { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+        isActive && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+      ]}
       onPress={onPress}
     >
       <Typography 
@@ -257,7 +263,7 @@ export default function GuestsListScreen() {
           <Pressable style={styles.iconBtn} onPress={toggleSelectMode}>
             <Ionicons name="checkmark-circle" size={24} color={isSelectMode ? theme.colors.success : theme.colors.primary} />
           </Pressable>
-          <Pressable style={styles.addButton} onPress={() => router.push('/(tabs)/guests/add')}>
+          <Pressable style={[styles.addButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} onPress={() => router.push('/(tabs)/guests/add')}>
             <Ionicons name="add" size={20} color={theme.colors.primary} />
           </Pressable>
         </View>
@@ -324,7 +330,7 @@ export default function GuestsListScreen() {
           <FilterPill label="Groom's Side" isActive={mainFilter === 'Groom'} onPress={() => handleMainFilter('Groom')} />
           <FilterPill label="Bride's Side" isActive={mainFilter === 'Bride'} onPress={() => handleMainFilter('Bride')} />
           
-          <View style={styles.filterDivider} />
+          <View style={[styles.filterDivider, { backgroundColor: theme.colors.border }]} />
           
           {groups.sort((a,b) => a.sort_order - b.sort_order).map(group => (
             <FilterPill 
@@ -352,7 +358,7 @@ export default function GuestsListScreen() {
       )}
 
       {isSelectMode && (
-        <View style={styles.bulkActionBar}>
+        <View style={[styles.bulkActionBar, { backgroundColor: theme.colors.text }]}>
           <Typography variant="body" weight="semibold" style={{color: '#fff', flex: 1}}>
             {selectedGuestIds.size} Selected
           </Typography>
@@ -365,14 +371,14 @@ export default function GuestsListScreen() {
       {/* Move Group Modal */}
       <Modal visible={showGroupModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
             <Typography variant="sectionTitle" style={{marginBottom: 16}}>Select Group</Typography>
             <ScrollView style={{maxHeight: 400}}>
-              <Pressable style={styles.modalRow} onPress={() => handleBulkMoveToGroup(null)}>
+              <Pressable style={[styles.modalRow, { borderBottomColor: theme.colors.borderLight }]} onPress={() => handleBulkMoveToGroup(null)}>
                 <Typography variant="body">None (Clear Group)</Typography>
               </Pressable>
               {groups.sort((a,b) => a.sort_order - b.sort_order).map(g => (
-                <Pressable key={g.id} style={styles.modalRow} onPress={() => handleBulkMoveToGroup(g.id)}>
+                <Pressable key={g.id} style={[styles.modalRow, { borderBottomColor: theme.colors.borderLight }]} onPress={() => handleBulkMoveToGroup(g.id)}>
                   <Typography variant="body">{g.name}</Typography>
                   <Typography variant="caption" color={theme.colors.textSecondary}>{g.side}</Typography>
                 </Pressable>
@@ -392,9 +398,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   headerActions: {
     flexDirection: 'row',
@@ -407,48 +413,39 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
     padding: 8,
-    borderRadius: theme.radii.full,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
   searchContainer: {
-    paddingHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   dashboardScroll: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
-    gap: theme.spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
   },
   dashCard: {
-    padding: theme.spacing.md,
+    padding: spacing.md,
     minWidth: 110,
     justifyContent: 'center',
   },
   filterScrollContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
-    gap: theme.spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+    gap: spacing.sm,
     alignItems: 'center',
   },
   filterPill: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 6,
-    borderRadius: theme.radii.full,
-    backgroundColor: theme.colors.surface,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  filterPillActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   filterDivider: {
     width: 1,
     height: 20,
-    backgroundColor: theme.colors.border,
     marginHorizontal: 4,
   },
   emptyContainer: {
@@ -456,18 +453,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   listContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
-    paddingTop: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+    paddingTop: spacing.md,
   },
   guestCard: {
-    marginBottom: theme.spacing.md,
-    padding: theme.spacing.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
   },
   guestCardSelected: {
-    borderColor: theme.colors.primary,
     borderWidth: 2,
-    backgroundColor: theme.colors.primary + '10',
   },
   cardContent: {
     flexDirection: 'row',
@@ -478,42 +473,38 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: theme.colors.primary,
     marginRight: 12,
     marginTop: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.primary,
   },
   guestHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   guestNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: theme.spacing.xs,
+    gap: spacing.xs,
     flex: 1,
-    paddingRight: theme.spacing.md,
+    paddingRight: spacing.md,
   },
   badge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: theme.radii.sm,
+    borderRadius: radii.sm,
   },
   badgeGroom: { backgroundColor: '#E0F2FE' },
   badgeTextGroom: { color: '#0369A1' },
   badgeBride: { backgroundColor: '#FCE7F3' },
   badgeTextBride: { color: '#BE185D' },
   badgeGroup: {
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
-  badgeTextGroup: { color: theme.colors.textSecondary },
+  badgeTextGroup: {},
   guestDetailRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -528,9 +519,8 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     right: 20,
-    backgroundColor: theme.colors.text,
-    borderRadius: theme.radii.lg,
-    padding: theme.spacing.md,
+    borderRadius: radii.lg,
+    padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
@@ -543,7 +533,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: theme.radii.md,
+    borderRadius: radii.md,
     marginLeft: 8,
   },
   modalOverlay: {
@@ -552,17 +542,15 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: theme.colors.background,
-    borderTopLeftRadius: theme.radii.xl,
-    borderTopRightRadius: theme.radii.xl,
-    padding: theme.spacing.xl,
+    borderTopLeftRadius: radii.xl,
+    borderTopRightRadius: radii.xl,
+    padding: spacing.xl,
     paddingBottom: 40,
   },
   modalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: theme.spacing.md,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   }
 });

@@ -3,11 +3,13 @@ import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, TextInput, Button, Card } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { AIService } from '../../../services/ai';
 
 export default function AIAssistantSettingsScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [apiKey, setApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +59,7 @@ export default function AIAssistantSettingsScreen() {
       </View>
       
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.iconCircle}>
+        <View style={[styles.iconCircle, { backgroundColor: theme.colors.primary + '15' }]}>
           <Ionicons name="sparkles" size={32} color={theme.colors.primary} />
         </View>
         <Typography variant="sectionTitle" style={styles.title}>Gemini Configuration</Typography>
@@ -91,37 +93,36 @@ export default function AIAssistantSettingsScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   content: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   iconCircle: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: theme.colors.primary + '15',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   title: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   description: {
     textAlign: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingHorizontal: theme.spacing.md,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
   },
   hint: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
   },
   saveBtn: {
     width: '100%',
-    marginTop: theme.spacing.xl,
+    marginTop: spacing.xl,
   }
 });

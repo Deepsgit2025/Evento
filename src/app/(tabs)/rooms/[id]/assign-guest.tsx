@@ -3,7 +3,8 @@ import { View, StyleSheet, FlatList, Pressable, ActivityIndicator } from 'react-
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, EmptyState } from '../../../../components/ui';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing, radii } from '../../../../theme';
 import { RoomAssignmentService } from '../../../../services/roomAssignment';
 import { RoomService } from '../../../../services/room';
 import { AuthService } from '../../../../services/auth';
@@ -15,6 +16,7 @@ export default function AssignGuestModal() {
   const { id } = useLocalSearchParams<{ id: string }>(); // room id
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [unassignedGuests, setUnassignedGuests] = useState<Guest[]>([]);
   const [room, setRoom] = useState<Room | null>(null);
@@ -76,7 +78,7 @@ export default function AssignGuestModal() {
 
   if (isLoading || !room) {
     return (
-      <ScreenContainer style={styles.center}>
+      <ScreenContainer style={[styles.center, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </ScreenContainer>
     );
@@ -92,9 +94,9 @@ export default function AssignGuestModal() {
         disabled={isTooBig}
       >
         <Card style={[
-          styles.guestCard, 
-          isSelected && styles.guestCardSelected,
-          isTooBig && styles.guestCardDisabled
+          styles.guestCard,
+          isSelected && [styles.guestCardSelected, { borderColor: theme.colors.primary }],
+          isTooBig && [styles.guestCardDisabled, { backgroundColor: theme.colors.borderLight }]
         ]}>
           <View style={styles.guestInfo}>
             <Typography variant="body" weight="semibold" color={isTooBig ? theme.colors.textMuted : theme.colors.text}>
@@ -116,8 +118,8 @@ export default function AssignGuestModal() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.borderLight }]}>
         <Typography variant="sectionTitle">Assign Guest</Typography>
         <Typography variant="bodySecondary" color={theme.colors.textSecondary}>
           Room {room.room_number} • Capacity remaining: {room.capacity - occupancy}
@@ -125,7 +127,7 @@ export default function AssignGuestModal() {
       </View>
 
       {error && (
-        <View style={styles.errorContainer}>
+        <View style={[styles.errorContainer, { backgroundColor: theme.colors.surface, borderLeftColor: theme.colors.error }]}>
           <Typography variant="caption" color={theme.colors.error}>{error}</Typography>
         </View>
       )}
@@ -147,9 +149,9 @@ export default function AssignGuestModal() {
         />
       )}
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.borderLight }]}>
+        <Button
+          label="Cancel"
           variant="outline" 
           onPress={() => router.back()} 
           style={styles.footerButton} 
@@ -172,63 +174,53 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
-    padding: theme.spacing.lg,
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   errorContainer: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.md,
-    margin: theme.spacing.lg,
-    borderRadius: theme.radii.md,
+    padding: spacing.md,
+    margin: spacing.lg,
+    borderRadius: radii.md,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.error,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   listContent: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   guestCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   guestCardSelected: {
-    borderColor: theme.colors.primary,
     backgroundColor: '#F0FDF4',
   },
   guestCardDisabled: {
     opacity: 0.6,
-    backgroundColor: theme.colors.borderLight,
   },
   guestInfo: {
     flex: 1,
   },
   footer: {
     flexDirection: 'row',
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   footerButton: {
     flex: 1,

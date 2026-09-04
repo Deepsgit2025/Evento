@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, Image } from 'react-native';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
 import { Typography } from './Typography';
 
 export interface AvatarProps {
@@ -11,6 +11,8 @@ export interface AvatarProps {
 }
 
 export function Avatar({ url, fallback, size = 'md', style }: AvatarProps) {
+  const { theme } = useTheme();
+
   const getDimensions = () => {
     switch (size) {
       case 'sm': return 32;
@@ -24,7 +26,7 @@ export function Avatar({ url, fallback, size = 'md', style }: AvatarProps) {
   const containerStyle = { width: dim, height: dim, borderRadius: dim / 2 };
 
   return (
-    <View style={[styles.container, containerStyle, style]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.borderLight }, containerStyle, style]}>
       {url ? (
         <Image source={{ uri: url }} style={[styles.image, containerStyle]} />
       ) : (
@@ -38,7 +40,6 @@ export function Avatar({ url, fallback, size = 'md', style }: AvatarProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.borderLight,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

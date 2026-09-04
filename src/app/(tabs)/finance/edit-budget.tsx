@@ -3,7 +3,8 @@ import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { FinanceService } from '../../../services/finance';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
@@ -11,7 +12,8 @@ import { getUserWedding } from '../../../services/wedding';
 export default function EditBudgetScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [budget, setBudget] = useState('');
   const [weddingId, setWeddingId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -82,11 +84,11 @@ export default function EditBudgetScreen() {
     <ScreenContainer>
       <View style={styles.content}>
         
-        <Typography variant="sectionTitle" style={{ marginBottom: theme.spacing.lg }}>
+        <Typography variant="sectionTitle" style={{ marginBottom: spacing.lg }}>
           Total Wedding Budget
         </Typography>
 
-        <Typography variant="body" color={theme.colors.textSecondary} style={{ marginBottom: theme.spacing.xl }}>
+        <Typography variant="body" color={theme.colors.textSecondary} style={{ marginBottom: spacing.xl }}>
           Setting a budget allows you to track your remaining available funds across all vendor payments and general expenses. Leave blank to disable budget tracking.
         </Typography>
         
@@ -100,11 +102,11 @@ export default function EditBudgetScreen() {
         />
 
         <View style={styles.actions}>
-          <Button 
-            label="Save Budget" 
-            onPress={handleSave} 
-            isLoading={isSubmitting} 
-            style={{ marginBottom: theme.spacing.md }}
+          <Button
+            label="Save Budget"
+            onPress={handleSave}
+            isLoading={isSubmitting}
+            style={{ marginBottom: spacing.md }}
           />
           <Button 
             label="Clear Budget" 
@@ -125,9 +127,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   actions: {
-    marginTop: theme.spacing.xxl,
+    marginTop: spacing.xxl,
   }
 });

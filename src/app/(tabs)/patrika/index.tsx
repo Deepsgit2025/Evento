@@ -4,7 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, EmptyState, Card } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { PatrikaService } from '../../../services/patrika';
 import { Invitation } from '../../../database/types';
 import { AuthService } from '../../../services/auth';
@@ -14,7 +15,8 @@ import { TEMPLATES } from '../../../components/patrika/Templates';
 export default function MyPatrikasScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -51,7 +53,7 @@ export default function MyPatrikasScreen() {
 
   return (
     <ScreenContainer>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.borderLight }]}>
         <Pressable onPress={() => router.push('/(tabs)')} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color={theme.colors.primary} />
           <Typography variant="body" color={theme.colors.primary}>Home</Typography>
@@ -95,7 +97,7 @@ export default function MyPatrikasScreen() {
                 >
                   <Card style={styles.card}>
                     {/* Mini Preview Placeholder */}
-                    <View style={styles.previewBox}>
+                    <View style={[styles.previewBox, { backgroundColor: theme.colors.surfaceElevated }]}>
                       <Ionicons name="document-text" size={32} color={theme.colors.textSecondary} />
                       <Typography variant="caption" style={{marginTop: 8}}>{template?.name || 'Template'}</Typography>
                     </View>
@@ -119,12 +121,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-    backgroundColor: theme.colors.background,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   backButton: {
     flexDirection: 'row',
@@ -136,13 +136,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   grid: {
     flexDirection: 'row',
@@ -151,17 +151,16 @@ const styles = StyleSheet.create({
   },
   cardWrapper: {
     width: '48%',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   card: {
-    padding: theme.spacing.md,
+    padding: spacing.md,
   },
   previewBox: {
-    backgroundColor: theme.colors.surfaceElevated,
-    borderRadius: theme.radii.md,
+    borderRadius: radii.md,
     aspectRatio: 0.7,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   }
 });

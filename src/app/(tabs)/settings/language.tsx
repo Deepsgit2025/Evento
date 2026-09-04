@@ -3,11 +3,13 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, Card } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { useLanguage, Language } from '../../../i18n';
 
 export default function LanguageScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
 
   const handleSelectLanguage = (lang: Language) => {
@@ -15,8 +17,12 @@ export default function LanguageScreen() {
   };
 
   const renderOption = (id: Language, title: string, subtitle: string) => (
-    <Pressable 
-      style={({pressed}) => [styles.option, pressed && styles.pressed]}
+    <Pressable
+      style={({pressed}) => [
+        styles.option,
+        { backgroundColor: theme.colors.surface },
+        pressed && { backgroundColor: theme.colors.surfaceElevated },
+      ]}
       onPress={() => handleSelectLanguage(id)}
     >
       <View style={styles.textContainer}>
@@ -40,7 +46,7 @@ export default function LanguageScreen() {
       <View style={styles.content}>
         <Card style={styles.card}>
           {renderOption('en', 'English', 'Application standard language')}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
           {renderOption('hi', 'हिंदी (Hindi)', 'ऐप की मानक भाषा')}
         </Card>
       </View>
@@ -50,12 +56,12 @@ export default function LanguageScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   content: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   card: {
     padding: 0,
@@ -64,18 +70,13 @@ const styles = StyleSheet.create({
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-  },
-  pressed: {
-    backgroundColor: theme.colors.surfaceElevated,
+    padding: spacing.lg,
   },
   textContainer: {
     flex: 1,
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
     marginLeft: 16,
   },
 });

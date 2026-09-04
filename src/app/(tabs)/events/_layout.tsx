@@ -1,8 +1,11 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { typography } from '../../../theme';
 
 export default function EventsLayout() {
+  const { theme } = useTheme();
+
   return (
     <Stack
       screenOptions={{
@@ -10,8 +13,8 @@ export default function EventsLayout() {
           backgroundColor: theme.colors.surface,
         },
         headerTitleStyle: {
-          fontFamily: theme.typography.fontFamily,
-          fontSize: theme.typography.sizes.lg,
+          fontFamily: typography.fontFamily,
+          fontSize: typography.sizes.lg,
           fontWeight: '600',
           color: theme.colors.text,
         },

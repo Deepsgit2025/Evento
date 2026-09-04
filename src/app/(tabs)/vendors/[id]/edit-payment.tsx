@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicato
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../../components/ui';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing } from '../../../../theme';
 import { PaymentService, PaymentDTO } from '../../../../services/payment';
 
 const PAYMENT_METHODS = ['Cash', 'UPI', 'Bank Transfer', 'Card', 'Cheque', 'Other'];
@@ -12,7 +13,8 @@ export default function EditPaymentScreen() {
   const { paymentId } = useLocalSearchParams<{ paymentId: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [amount, setAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -118,7 +120,8 @@ export default function EditPaymentScreen() {
               key={method}
               style={[
                 styles.methodChip,
-                paymentMethod === method && styles.methodChipActive
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                paymentMethod === method && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
               ]}
               onPress={() => setPaymentMethod(method)}
             >
@@ -143,9 +146,9 @@ export default function EditPaymentScreen() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Update Payment" 
+      <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
+        <Button
+          label="Update Payment"
           onPress={handleSave} 
           isLoading={isSubmitting} 
         />
@@ -160,34 +163,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   label: {
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   methodGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   methodChip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  methodChipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingTop: 0,
-    backgroundColor: theme.colors.background,
   }
 });

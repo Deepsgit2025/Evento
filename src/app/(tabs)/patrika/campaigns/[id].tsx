@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
 import { InvitationCampaign, InvitationRecipient } from '../../../../database/types';
 import * as Print from 'expo-print';
@@ -14,6 +15,7 @@ export default function CampaignDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [campaign, setCampaign] = useState<InvitationCampaign | null>(null);
   const [recipients, setRecipients] = useState<(InvitationRecipient & { guest_name: string })[]>([]);
@@ -174,11 +176,11 @@ export default function CampaignDetailsScreen() {
       <ScrollView>
         <Card style={styles.card}>
           <Typography variant="sectionTitle">{campaign.name}</Typography>
-          <View style={[styles.badge, campaign.status === 'COMPLETED' ? styles.badgeComplete : styles.badgePending]}>
+          <View style={[styles.badge, { backgroundColor: campaign.status === 'COMPLETED' ? theme.colors.success : theme.colors.border }]}>
             <Typography variant="caption" color={campaign.status === 'COMPLETED' ? '#fff' : '#333'}>{campaign.status}</Typography>
           </View>
 
-          <View style={styles.statsGrid}>
+          <View style={[styles.statsGrid, { borderTopColor: theme.colors.borderLight }]}>
             <View style={styles.statBox}>
               <Typography variant="screenTitle">{stats.total}</Typography>
               <Typography variant="caption" color={theme.colors.textSecondary}>Total</Typography>
@@ -208,22 +210,25 @@ export default function CampaignDetailsScreen() {
           </View>
         ) : null}
 
-        <View style={styles.listSection}>
+        <View style={[styles.listSection, { backgroundColor: theme.colors.surface }]}>
           <Typography variant="sectionTitle" style={styles.listTitle}>Recipients Breakdown</Typography>
-          {recipients.map(r => (
-            <Pressable key={r.id} onPress={() => handleResend(r)}>
-              <ListItem
-                title={r.guest_name}
-                subtitle={`Status: ${r.status}`}
-                rightElement={
-                  <View style={[styles.statusBadge, r.status === 'SENT' ? styles.statusBadgeSent : (r.status === 'FAILED' ? styles.statusBadgeFailed : styles.statusBadgePending)]}>
-                    <Typography variant="caption" color={r.status === 'QUEUED' ? '#333' : '#fff'}>{r.status}</Typography>
-                  </View>
-                }
-                style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.borderLight }}
-              />
-            </Pressable>
-          ))}
+          {recipients.map(r => {
+            const statusColor = r.status === 'SENT' ? theme.colors.success : (r.status === 'FAILED' ? theme.colors.error : theme.colors.border);
+            return (
+              <Pressable key={r.id} onPress={() => handleResend(r)}>
+                <ListItem
+                  title={r.guest_name}
+                  subtitle={`Status: ${r.status}`}
+                  rightElement={
+                    <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+                      <Typography variant="caption" color={r.status === 'QUEUED' ? '#333' : '#fff'}>{r.status}</Typography>
+                    </View>
+                  }
+                  style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.borderLight }}
+                />
+              </Pressable>
+            );
+          })}
         </View>
       </ScrollView>
     </ScreenContainer>
@@ -232,57 +237,40 @@ export default function CampaignDetailsScreen() {
 
 const styles = StyleSheet.create({
   card: {
-    margin: theme.spacing.lg,
-    padding: theme.spacing.lg,
+    margin: spacing.lg,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   badge: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 16,
-  },
-  badgeComplete: {
-    backgroundColor: theme.colors.success,
-  },
-  badgePending: {
-    backgroundColor: theme.colors.border,
   },
   statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    marginTop: theme.spacing.xl,
-    paddingTop: theme.spacing.lg,
+    marginTop: spacing.xl,
+    paddingTop: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
   },
   statBox: {
     alignItems: 'center',
   },
   actions: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   listSection: {
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: theme.spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
   listTitle: {
-    paddingVertical: theme.spacing.md,
+    paddingVertical: spacing.md,
   },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  statusBadgeSent: {
-    backgroundColor: theme.colors.success,
-  },
-  statusBadgeFailed: {
-    backgroundColor: theme.colors.error,
-  },
-  statusBadgePending: {
-    backgroundColor: theme.colors.border,
-  }
 });

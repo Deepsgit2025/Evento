@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Button, TextInput } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing, radii } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
 import { PatrikaService } from '../../../../services/patrika';
 import { GuestService } from '../../../../services/guest';
@@ -17,6 +18,7 @@ import { Guest, Event, GuestGroup, Invitation } from '../../../../database/types
 export default function CreateCampaignScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
   const [weddingId, setWeddingId] = useState('');
@@ -142,7 +144,7 @@ export default function CreateCampaignScreen() {
   return (
     <ScreenContainer>
       <ScrollView>
-        <View style={styles.section}>
+        <View style={[styles.section, { borderBottomColor: theme.colors.borderLight }]}>
           <TextInput
             label="Campaign Name"
             placeholder="e.g., Mehndi Invites - Bride Side"
@@ -151,7 +153,7 @@ export default function CreateCampaignScreen() {
           />
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, { borderBottomColor: theme.colors.borderLight }]}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>Select Patrika</Typography>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hSelection}>
             {invitations.map(inv => (
@@ -166,7 +168,7 @@ export default function CreateCampaignScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, { borderBottomColor: theme.colors.borderLight }]}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>Select Event</Typography>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hSelection}>
             <Button 
@@ -187,7 +189,7 @@ export default function CreateCampaignScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, { borderBottomColor: theme.colors.borderLight }]}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>Select Recipients</Typography>
           
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickFilters}>
@@ -200,20 +202,21 @@ export default function CreateCampaignScreen() {
             ))}
           </ScrollView>
 
-          <View style={styles.guestList}>
+          <View style={[styles.guestList, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
             {guests.map(guest => {
               const isSelected = selectedGuestIds.has(guest.id);
 
               return (
-                <Pressable 
-                  key={guest.id} 
+                <Pressable
+                  key={guest.id}
                   style={[
-                    styles.guestItem, 
-                    isSelected && styles.guestItemSelected
+                    styles.guestItem,
+                    { borderBottomColor: theme.colors.borderLight },
+                    isSelected && { backgroundColor: theme.colors.primary + '10' }
                   ]}
                   onPress={() => toggleGuest(guest.id)}
                 >
-                  <View style={styles.checkbox}>
+                  <View style={[styles.checkbox, { borderColor: theme.colors.border }]}>
                     {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
                   </View>
                   <View style={styles.guestInfo}>
@@ -230,8 +233,8 @@ export default function CreateCampaignScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
+      <View style={[styles.footer, { backgroundColor: theme.colors.background, borderTopColor: theme.colors.borderLight }]}>
+        <Button
           label={`Review Campaign (${selectedGuestIds.size})`}
           onPress={handleLaunch}
           disabled={selectedGuestIds.size === 0 || isSubmitting}
@@ -244,47 +247,39 @@ export default function CreateCampaignScreen() {
 
 const styles = StyleSheet.create({
   section: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   hSelection: {
     flexDirection: 'row',
   },
   quickFilters: {
     flexDirection: 'row',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   btn: {
-    marginRight: theme.spacing.sm,
+    marginRight: spacing.sm,
   },
   guestList: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.lg,
+    borderRadius: radii.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
   },
   guestItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.md,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
-  },
-  guestItemSelected: {
-    backgroundColor: theme.colors.primary + '10',
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: theme.colors.border,
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -293,9 +288,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   footer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.background,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
   }
 });

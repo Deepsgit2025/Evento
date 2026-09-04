@@ -3,7 +3,8 @@ import { View, StyleSheet, Pressable } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography, Button } from '.';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing, radii } from '../../theme';
 import { ReminderService, Reminder } from '../../services/reminder';
 import { Event, Vendor, Payment } from '../../database/types';
 
@@ -18,6 +19,7 @@ interface SmartSuggestionProps {
 
 export const SmartSuggestionBanner = ({ type, entityId, weddingId, contextData, onAddReminder, onDismiss }: SmartSuggestionProps) => {
   const db = useSQLiteContext();
+  const { theme } = useTheme();
   const [isVisible, setIsVisible] = useState(false);
   const [suggestion, setSuggestion] = useState<Partial<Reminder> | null>(null);
   const [message, setMessage] = useState('');
@@ -99,16 +101,24 @@ export const SmartSuggestionBanner = ({ type, entityId, weddingId, contextData, 
   if (!isVisible || !suggestion) return null;
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.primary + '1A', // light primary tint
+          borderColor: theme.colors.primary + '33',
+        },
+      ]}
+    >
       <View style={styles.iconContainer}>
         <Ionicons name="sparkles" size={20} color={theme.colors.primary} />
       </View>
-      <Typography variant="caption" weight="medium" style={styles.message}>
+      <Typography variant="caption" weight="medium" style={[styles.message, { color: theme.colors.primary }]}>
         {message}
       </Typography>
-      <Button 
-        variant="primary" 
-        label="Add" 
+      <Button
+        variant="primary"
+        label="Add"
         onPress={() => onAddReminder(suggestion)}
         style={[styles.button, { paddingVertical: 4 }]}
       />
@@ -125,26 +135,23 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.primary + '1A', // light primary tint
-    padding: theme.spacing.sm,
-    borderRadius: theme.radii.md,
+    padding: spacing.sm,
+    borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: theme.colors.primary + '33',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   iconContainer: {
-    marginRight: theme.spacing.sm,
+    marginRight: spacing.sm,
   },
   message: {
     flex: 1,
-    color: theme.colors.primary,
   },
   button: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     height: 28,
   },
   dismiss: {
-    padding: theme.spacing.xs,
-    marginLeft: theme.spacing.xs,
+    padding: spacing.xs,
+    marginLeft: spacing.xs,
   }
 });

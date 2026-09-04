@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Pressable
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { GuestService } from '../../../services/guest';
 import { GroupService } from '../../../services/group';
 import { AuthService } from '../../../services/auth';
@@ -14,7 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 export default function AddGuestModal() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
+  const chipStyle = (selected: boolean) => [
+    styles.chip,
+    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+    selected && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  ];
+
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [fullName, setFullName] = useState('');
   const [side, setSide] = useState<'Groom' | 'Bride'>('Groom');
@@ -114,8 +122,8 @@ export default function AddGuestModal() {
   const visibleGroups = groups.filter(g => g.side === side);
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -124,7 +132,7 @@ export default function AddGuestModal() {
         </View>
 
         {error && (
-          <View style={styles.errorContainer}>
+          <View style={[styles.errorContainer, { backgroundColor: theme.colors.surface, borderLeftColor: theme.colors.error }]}>
             <Typography variant="caption" color={theme.colors.error}>{error}</Typography>
           </View>
         )}
@@ -146,13 +154,13 @@ export default function AddGuestModal() {
               label="Groom" 
               variant={side === 'Groom' ? 'primary' : 'outline'}
               onPress={() => handleSideChange('Groom')}
-              style={[styles.sideButton, side === 'Groom' ? undefined : styles.sideButtonInactive]}
+              style={[styles.sideButton, side === 'Groom' ? undefined : { borderColor: theme.colors.border }]}
             />
-            <Button 
-              label="Bride" 
+            <Button
+              label="Bride"
               variant={side === 'Bride' ? 'primary' : 'outline'}
               onPress={() => handleSideChange('Bride')}
-              style={[styles.sideButton, side === 'Bride' ? undefined : styles.sideButtonInactive]}
+              style={[styles.sideButton, side === 'Bride' ? undefined : { borderColor: theme.colors.border }]}
             />
           </View>
         </View>
@@ -163,7 +171,7 @@ export default function AddGuestModal() {
             {visibleGroups.map(group => (
               <Pressable 
                 key={group.id} 
-                style={[styles.chip, selectedGroupId === group.id && styles.chipSelected]}
+                style={chipStyle(selectedGroupId === group.id)}
                 onPress={() => setSelectedGroupId(selectedGroupId === group.id ? null : group.id)}
               >
                 <Typography 
@@ -177,7 +185,7 @@ export default function AddGuestModal() {
             ))}
             
             {!isCreatingGroup ? (
-              <Pressable style={styles.chipAdd} onPress={() => setIsCreatingGroup(true)}>
+              <Pressable style={[styles.chipAdd, { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary }]} onPress={() => setIsCreatingGroup(true)}>
                 <Ionicons name="add" size={14} color={theme.colors.primary} />
                 <Typography variant="caption" weight="medium" color={theme.colors.primary} style={styles.chipAddText}>
                   New Group
@@ -234,9 +242,9 @@ export default function AddGuestModal() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.borderLight }]}>
+        <Button
+          label="Cancel"
           variant="outline" 
           onPress={() => router.back()} 
           style={styles.footerButton} 
@@ -257,68 +265,54 @@ export default function AddGuestModal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   scrollContent: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   header: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
     alignItems: 'center',
-    paddingTop: theme.spacing.md,
+    paddingTop: spacing.md,
   },
   errorContainer: {
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.md,
-    borderRadius: theme.radii.md,
-    marginBottom: theme.spacing.md,
+    padding: spacing.md,
+    borderRadius: radii.md,
+    marginBottom: spacing.md,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.error,
   },
   formGroup: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   label: {
-    marginBottom: theme.spacing.xs,
+    marginBottom: spacing.xs,
   },
   sideToggle: {
     flexDirection: 'row',
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   sideButton: {
     flex: 1,
   },
-  sideButtonInactive: {
-    borderColor: theme.colors.border,
-  },
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.xs,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   chip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
-    borderRadius: theme.radii.full,
-    backgroundColor: theme.colors.surface,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  chipSelected: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   chipAdd: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
-    borderRadius: theme.radii.full,
-    backgroundColor: theme.colors.surface,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.primary,
     borderStyle: 'dashed',
   },
   chipAddText: {
@@ -327,8 +321,8 @@ const styles = StyleSheet.create({
   createGroupRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: theme.spacing.md,
-    gap: theme.spacing.sm,
+    marginTop: spacing.md,
+    gap: spacing.sm,
   },
   createGroupInput: {
     flex: 1,
@@ -342,11 +336,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: theme.colors.borderLight,
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   footerButton: {
     flex: 1,

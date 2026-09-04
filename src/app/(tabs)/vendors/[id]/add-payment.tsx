@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-nat
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../../components/ui';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing } from '../../../../theme';
 import { PaymentService, PaymentDTO } from '../../../../services/payment';
 import { AuthService } from '../../../../services/auth';
 import { getUserWedding } from '../../../../services/wedding';
@@ -14,7 +15,8 @@ export default function AddPaymentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>(); // vendor id
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [amount, setAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0]);
@@ -98,7 +100,8 @@ export default function AddPaymentScreen() {
               key={method}
               style={[
                 styles.methodChip,
-                paymentMethod === method && styles.methodChipActive
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                paymentMethod === method && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
               ]}
               onPress={() => setPaymentMethod(method)}
             >
@@ -124,9 +127,9 @@ export default function AddPaymentScreen() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Record Payment" 
+      <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
+        <Button
+          label="Record Payment"
           onPress={handleSave} 
           isLoading={isSubmitting} 
         />
@@ -137,34 +140,27 @@ export default function AddPaymentScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   label: {
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   methodGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   methodChip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  methodChipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingTop: 0,
-    backgroundColor: theme.colors.background,
   }
 });

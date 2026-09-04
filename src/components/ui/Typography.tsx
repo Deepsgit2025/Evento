@@ -68,11 +68,13 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
     lineHeight: theme.typography.sizes.xxl * 1.25,
+    letterSpacing: -0.2,
   },
   sectionTitle: {
     fontSize: theme.typography.sizes.xl,
     fontWeight: theme.typography.weights.semibold,
     lineHeight: theme.typography.sizes.xl * 1.3,
+    letterSpacing: 0.2,
   },
   cardTitle: {
     fontSize: theme.typography.sizes.lg,
@@ -93,6 +95,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.xs,
     fontWeight: theme.typography.weights.regular,
     lineHeight: theme.typography.sizes.xs * 1.4,
+    letterSpacing: 0.3,
   },
   button: {
     fontSize: theme.typography.sizes.md,

@@ -4,7 +4,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ScreenContainer, Typography, EmptyState, Card, Button } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { EventService } from '../../../services/event';
@@ -14,7 +15,8 @@ import { groupEventsByDate, getEventCountdown } from '../../../utils/date';
 export default function EventsTimelineScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [events, setEvents] = useState<Event[]>([]);
   const [groupedEvents, setGroupedEvents] = useState<any[]>([]);
   const [nextEvent, setNextEvent] = useState<Event | null>(null);
@@ -139,14 +141,14 @@ export default function EventsTimelineScreen() {
           <View style={styles.timeCol}>
             <Typography variant="body" weight="semibold">{formatTime(item.start_time)}</Typography>
             {countdown?.isNow && (
-              <View style={styles.nowBadge}>
+              <View style={[styles.nowBadge, { backgroundColor: theme.colors.primary }]}>
                 <Typography variant="caption" style={styles.nowBadgeText}>NOW</Typography>
               </View>
             )}
           </View>
 
           <View style={styles.cardCol}>
-            <Card style={styles.eventCard}>
+            <Card style={[styles.eventCard, { borderLeftColor: theme.colors.primary }]}>
               <View style={styles.eventNameContainer}>
                 <Typography variant="body" weight="semibold">{item.name}</Typography>
                 {item.event_type && (
@@ -174,7 +176,7 @@ export default function EventsTimelineScreen() {
   };
 
   const renderSectionHeader = ({ section }: { section: any }) => (
-    <View style={styles.sectionHeader}>
+    <View style={[styles.sectionHeader, { backgroundColor: theme.colors.background }]}>
       <Typography variant="body" weight="bold" color={section.isToday ? theme.colors.primary : theme.colors.textMuted}>
         {section.isToday ? `TODAY • ${section.data.length} event${section.data.length !== 1 ? 's' : ''}` : section.title}
       </Typography>
@@ -190,7 +192,7 @@ export default function EventsTimelineScreen() {
           <Typography variant="caption" weight="bold" color={theme.colors.primary} style={styles.heroLabel}>
             NEXT EVENT
           </Typography>
-          <Card style={styles.heroCard}>
+          <Card style={[styles.heroCard, { backgroundColor: theme.colors.surface }]}>
             <Typography variant="sectionTitle" style={styles.heroTitle}>{nextEvent.name}</Typography>
             <View style={styles.heroDetailRow}>
               <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
@@ -222,8 +224,12 @@ export default function EventsTimelineScreen() {
     <ScreenContainer>
       <View style={styles.header}>
         <Typography variant="sectionTitle">Timeline</Typography>
-        <Pressable 
-          style={({ pressed }) => [styles.addButton, pressed && styles.pressedState]} 
+        <Pressable
+          style={({ pressed }) => [
+            styles.addButton,
+            { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight },
+            pressed && styles.pressedState
+          ]}
           onPress={() => router.push('/(tabs)/events/add')}
         >
           <Ionicons name="add" size={20} color={theme.colors.primary} />
@@ -283,19 +289,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radii.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.full,
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
   },
   addButtonText: {
     marginLeft: 4,
@@ -308,33 +312,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pastStateContainer: {
-    paddingVertical: theme.spacing.xl,
+    paddingVertical: spacing.xl,
     alignItems: 'center',
   },
   pastStateText: {
     fontStyle: 'italic',
   },
   listContent: {
-    paddingBottom: theme.spacing.xxl,
+    paddingBottom: spacing.xxl,
   },
   sectionHeader: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    backgroundColor: theme.colors.background, // sticky header blends in
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    // sticky header blends in
   },
   eventRow: {
     flexDirection: 'row',
-    paddingHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   timeCol: {
     width: 80,
-    paddingRight: theme.spacing.md,
+    paddingRight: spacing.md,
     alignItems: 'flex-start',
-    paddingTop: theme.spacing.sm,
+    paddingTop: spacing.sm,
   },
   nowBadge: {
-    backgroundColor: theme.colors.primary,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -349,22 +352,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eventCard: {
-    padding: theme.spacing.md,
+    padding: spacing.md,
     marginBottom: 0,
     borderLeftWidth: 4,
-    borderLeftColor: theme.colors.primary,
   },
   eventNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: theme.spacing.xs,
-    marginBottom: theme.spacing.xs,
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: theme.radii.sm,
+    borderRadius: radii.sm,
     backgroundColor: '#F3E8FF',
   },
   badgeText: {
@@ -382,35 +384,34 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroContainer: {
-    paddingHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.xl,
-    marginTop: theme.spacing.sm,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.xl,
+    marginTop: spacing.sm,
   },
   heroLabel: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
     letterSpacing: 1,
   },
   heroCard: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
+    padding: spacing.lg,
   },
   heroTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   heroDetailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   heroDetailText: {
     marginLeft: 8,
   },
   countdownPill: {
     alignSelf: 'flex-start',
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
     backgroundColor: '#F0FDF4', // Light green
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radii.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.full,
   },
 });

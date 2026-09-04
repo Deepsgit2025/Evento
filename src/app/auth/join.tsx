@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 import { ScreenContainer, Typography, TextInput, Button, Card } from '../../components/ui';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { setupAccountAndWedding } from '../../services/wedding';
 import { AuthService } from '../../services/auth';
 
 export default function JoinWeddingScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [mode, setMode] = useState<'options' | 'create' | 'join'>('options');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +39,7 @@ export default function JoinWeddingScreen() {
       // We pass the session data back into setup to create the wedding
       // Since they are already signed up, we can modify setupAccountAndWedding or just create it directly here.
       // Let's create it directly here for simplicity since they are already a user.
-      const weddingId = crypto.randomUUID();
+      const weddingId = Crypto.randomUUID();
       const timestamp = Math.floor(Date.now() / 1000);
       
       await db.withTransactionAsync(async () => {
@@ -46,7 +49,7 @@ export default function JoinWeddingScreen() {
           [weddingId, brideName, groomName, weddingDate || null, timestamp, timestamp]
         );
         
-        const memberId = crypto.randomUUID();
+        const memberId = Crypto.randomUUID();
         await db.runAsync(
           `INSERT INTO wedding_members (id, user_id, wedding_id, role, created_at) VALUES (?, ?, ?, ?, ?)`,
           [memberId, session.id, weddingId, 'OWNER', timestamp]
@@ -78,7 +81,7 @@ export default function JoinWeddingScreen() {
 
   if (mode === 'create') {
     return (
-      <ScreenContainer edges={['top', 'bottom']} style={styles.container}>
+      <ScreenContainer edges={['top', 'bottom']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.header}>
             <Typography variant="screenTitle">Create Wedding</Typography>
@@ -97,7 +100,7 @@ export default function JoinWeddingScreen() {
 
   if (mode === 'join') {
     return (
-      <ScreenContainer edges={['top', 'bottom']} style={styles.container}>
+      <ScreenContainer edges={['top', 'bottom']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.header}>
             <Typography variant="screenTitle">Join Wedding</Typography>
@@ -151,32 +154,30 @@ export default function JoinWeddingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.background,
-  },
+  container: {},
   scroll: {
     flex: 1,
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xxxl,
+    marginBottom: spacing.xxxl,
   },
   subtitle: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
     textAlign: 'center',
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
   },
   card: {
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   optionCard: {
-    padding: theme.spacing.xl,
-    marginBottom: theme.spacing.xl,
+    padding: spacing.xl,
+    marginBottom: spacing.xl,
   },
   optionDesc: {
-    marginTop: theme.spacing.xs,
-    marginBottom: theme.spacing.xl,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xl,
   }
 });

@@ -3,7 +3,8 @@ import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, Card, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { BackupService, BackupData } from '../../../services/backupService';
@@ -11,6 +12,7 @@ import { router } from 'expo-router';
 
 export default function BackupScreen() {
   const db = useSQLiteContext();
+  const { theme } = useTheme();
   const [isExporting, setIsExporting] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
 
@@ -116,7 +118,7 @@ export default function BackupScreen() {
 
       <View style={styles.content}>
         <Card style={styles.card}>
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
             <Ionicons name="cloud-upload-outline" size={40} color={theme.colors.primary} />
           </View>
           <Typography variant="cardTitle" style={styles.title}>Export Backup</Typography>
@@ -156,32 +158,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   content: {
-    padding: theme.spacing.lg,
-    gap: theme.spacing.lg,
+    padding: spacing.lg,
+    gap: spacing.lg,
   },
   card: {
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
     alignItems: 'center',
   },
   iconContainer: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: theme.colors.primary + '15',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   title: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   description: {
     textAlign: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   }
 });
