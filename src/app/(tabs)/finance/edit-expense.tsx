@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicato
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { FinanceService, ExpenseDTO } from '../../../services/finance';
 
 const CATEGORIES = ['Decoration', 'Food', 'Travel', 'Clothing', 'Gifts', 'Venue', 'Miscellaneous', 'Custom'];
@@ -13,7 +14,8 @@ export default function EditExpenseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -168,7 +170,8 @@ export default function EditExpenseScreen() {
               key={cat}
               style={[
                 styles.chip,
-                categorySelection === cat && styles.chipActive
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                categorySelection === cat && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
               ]}
               onPress={() => {
                 setCategorySelection(cat);
@@ -198,7 +201,7 @@ export default function EditExpenseScreen() {
           />
         )}
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
 
         <Typography variant="body" color={theme.colors.textSecondary} style={styles.label}>
           Payment Method *
@@ -209,7 +212,8 @@ export default function EditExpenseScreen() {
               key={method}
               style={[
                 styles.chip,
-                paymentMethod === method && styles.chipActive
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                paymentMethod === method && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary }
               ]}
               onPress={() => setPaymentMethod(method)}
             >
@@ -232,20 +236,20 @@ export default function EditExpenseScreen() {
           numberOfLines={2}
         />
 
-        <Button 
+        <Button
           label="Delete Expense"
           variant="outline"
           onPress={handleDelete}
-          style={{marginTop: theme.spacing.lg, borderColor: theme.colors.error}}
+          style={{marginTop: spacing.lg, borderColor: theme.colors.error}}
         />
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Update Expense" 
-          onPress={handleSave} 
-          isLoading={isSubmitting} 
+      <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
+        <Button
+          label="Update Expense"
+          onPress={handleSave}
+          isLoading={isSubmitting}
         />
       </View>
     </ScreenContainer>
@@ -258,39 +262,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   label: {
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   chip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  chipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
-    marginVertical: theme.spacing.xl,
+    marginVertical: spacing.xl,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingTop: 0,
-    backgroundColor: theme.colors.background,
   }
 });

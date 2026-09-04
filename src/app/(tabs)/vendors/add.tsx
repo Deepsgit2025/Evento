@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-nat
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { VendorService, VendorDTO } from '../../../services/vendor';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
@@ -17,7 +18,8 @@ const PRESET_CATEGORIES = [
 export default function AddVendorScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [name, setName] = useState('');
   const [categorySelection, setCategorySelection] = useState(PRESET_CATEGORIES[0]);
   const [customCategory, setCustomCategory] = useState('');
@@ -102,7 +104,8 @@ export default function AddVendorScreen() {
               key={cat}
               style={[
                 styles.categoryChip,
-                categorySelection === cat && styles.categoryChipActive
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                categorySelection === cat && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
               ]}
               onPress={() => {
                 setCategorySelection(cat);
@@ -143,7 +146,7 @@ export default function AddVendorScreen() {
           keyboardType="numeric"
         />
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
         
         <Typography variant="sectionTitle" style={styles.sectionTitle}>Contact Information (Optional)</Typography>
 
@@ -188,7 +191,7 @@ export default function AddVendorScreen() {
           numberOfLines={2}
         />
 
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.colors.borderLight }]} />
         
         <Typography variant="sectionTitle" style={styles.sectionTitle}>Additional Details</Typography>
 
@@ -203,9 +206,9 @@ export default function AddVendorScreen() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Save Vendor" 
+      <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
+        <Button
+          label="Save Vendor"
           onPress={handleSave} 
           isLoading={isSubmitting} 
         />
@@ -216,42 +219,34 @@ export default function AddVendorScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   label: {
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   categoryChip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  categoryChipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.borderLight,
-    marginVertical: theme.spacing.xl,
+    marginVertical: spacing.xl,
   },
   footer: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingTop: 0,
-    backgroundColor: theme.colors.background,
   }
 });

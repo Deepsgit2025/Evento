@@ -4,7 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, EmptyState, Card } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
 import { AuthService } from '../../../../services/auth';
 import { getUserWedding } from '../../../../services/wedding';
@@ -13,7 +14,8 @@ import { InvitationCampaign } from '../../../../database/types';
 export default function CampaignsDashboard() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [campaigns, setCampaigns] = useState<InvitationCampaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -54,7 +56,7 @@ export default function CampaignsDashboard() {
 
   return (
     <ScreenContainer>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.borderLight }]}>
         <Pressable onPress={() => router.push('/(tabs)/patrika' as any)} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color={theme.colors.primary} />
           <Typography variant="body" color={theme.colors.primary}>Patrikas</Typography>
@@ -104,7 +106,7 @@ export default function CampaignsDashboard() {
                 <Card style={styles.card}>
                   <View style={styles.cardHeader}>
                     <Typography variant="body" weight="semibold">{camp.name}</Typography>
-                    <View style={[styles.badge, camp.status === 'COMPLETED' ? styles.badgeComplete : styles.badgePending]}>
+                    <View style={[styles.badge, { backgroundColor: camp.status === 'COMPLETED' ? theme.colors.success : theme.colors.border }]}>
                       <Typography variant="caption" color={camp.status === 'COMPLETED' ? '#fff' : '#333'}>{camp.status}</Typography>
                     </View>
                   </View>
@@ -127,12 +129,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.md,
-    backgroundColor: theme.colors.background,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   backButton: {
     flexDirection: 'row',
@@ -143,26 +143,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FEF3C7',
-    padding: theme.spacing.md,
+    padding: spacing.md,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   list: {
-    gap: theme.spacing.md,
+    gap: spacing.md,
   },
   card: {
-    padding: theme.spacing.md,
+    padding: spacing.md,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -170,17 +170,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statsRow: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  badgeComplete: {
-    backgroundColor: theme.colors.success,
-  },
-  badgePending: {
-    backgroundColor: theme.colors.border,
-  }
 });

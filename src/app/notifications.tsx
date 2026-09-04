@@ -4,7 +4,8 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, EmptyState, Card } from '../components/ui';
-import { theme } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { spacing, radii, shadows } from '../theme';
 import { AuthService } from '../services/auth';
 import { getUserWedding } from '../services/wedding';
 import { NotificationService, AppNotification } from '../services/notification';
@@ -12,6 +13,7 @@ import { NotificationService, AppNotification } from '../services/notification';
 export default function NotificationsScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,10 +106,11 @@ export default function NotificationsScreen() {
     const iconConfig = getIconForType(item.type);
     
     return (
-      <Pressable 
+      <Pressable
         style={({ pressed }) => [
           styles.card,
-          isUnread && styles.cardUnread,
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight },
+          isUnread && { backgroundColor: theme.colors.primary + '0A', borderColor: theme.colors.primary + '33' },
           pressed && styles.pressed
         ]}
         onPress={() => handlePress(item)}
@@ -126,7 +129,7 @@ export default function NotificationsScreen() {
               }) : ''}
             </Typography>
           </View>
-          {isUnread && <View style={styles.unreadDot} />}
+          {isUnread && <View style={[styles.unreadDot, { backgroundColor: theme.colors.primary }]} />}
         </View>
         {item.body && (
           <Typography variant="bodySecondary" color={theme.colors.textSecondary} style={styles.bodyText}>
@@ -183,33 +186,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
   },
   backBtn: {
-    padding: theme.spacing.xs,
+    padding: spacing.xs,
   },
   title: {
     flex: 1,
     textAlign: 'center',
   },
   listContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   card: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.lg,
-    padding: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
-    ...theme.shadows.sm,
-  },
-  cardUnread: {
-    backgroundColor: theme.colors.primary + '0A', // very light tint
-    borderColor: theme.colors.primary + '33', // 20% opacity
+    ...shadows.sm,
   },
   pressed: {
     opacity: 0.7,
@@ -219,7 +216,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   iconContainer: {
-    marginRight: theme.spacing.md,
+    marginRight: spacing.md,
     marginTop: 2,
   },
   cardHeaderText: {
@@ -229,12 +226,11 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: theme.colors.primary,
     marginTop: 6,
-    marginLeft: theme.spacing.sm,
+    marginLeft: spacing.sm,
   },
   bodyText: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
     marginLeft: 40, // align with text, account for icon
   },
 });

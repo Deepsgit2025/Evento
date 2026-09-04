@@ -4,7 +4,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Button, Typography, ListItem } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { TEMPLATES, PatrikaProps } from '../../../components/patrika/Templates';
 import { PatrikaService, PatrikaCustomization } from '../../../services/patrika';
 import { AuthService } from '../../../services/auth';
@@ -17,6 +18,7 @@ export default function PreviewScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [templateComponent, setTemplateComponent] = useState<any>(null);
   const [previewProps, setPreviewProps] = useState<PatrikaProps | null>(null);
@@ -123,8 +125,8 @@ export default function PreviewScreen() {
           </View>
         </View>
 
-        <View style={styles.recipientsSection}>
-          <Typography variant="sectionTitle" style={styles.recipientsTitle}>Recent Recipients ({recipients.length})</Typography>
+        <View style={[styles.recipientsSection, { backgroundColor: theme.colors.background }]}>
+          <Typography variant="sectionTitle" style={[styles.recipientsTitle, { borderBottomColor: theme.colors.borderLight }]}>Recent Recipients ({recipients.length})</Typography>
           <Typography variant="caption" color={theme.colors.textSecondary} style={{paddingHorizontal: 20}}>
             Use Bulk Campaigns to view grouped analytics and dispatch invitations.
           </Typography>
@@ -139,7 +141,7 @@ export default function PreviewScreen() {
                 title={r.guest_name}
                 subtitle={r.event_name ? `Event: ${r.event_name}` : 'Main Wedding'}
                 rightElement={
-                  <View style={[styles.badge, r.status === 'SENT' ? styles.badgeSent : styles.badgeQueued]}>
+                  <View style={[styles.badge, { backgroundColor: r.status === 'SENT' ? theme.colors.success : theme.colors.border }]}>
                     <Typography variant="caption" color={r.status === 'SENT' ? '#fff' : '#333'}>{r.status}</Typography>
                   </View>
                 }
@@ -165,23 +167,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   recipientsSection: {
-    backgroundColor: theme.colors.background,
     minHeight: 300,
   },
   recipientsTitle: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.borderLight,
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  badgeSent: {
-    backgroundColor: theme.colors.success,
-  },
-  badgeQueued: {
-    backgroundColor: theme.colors.border,
-  }
 });

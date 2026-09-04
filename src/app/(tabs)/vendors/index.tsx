@@ -4,7 +4,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, EmptyState, SearchInput, Button, ListItem, Badge } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { VendorService } from '../../../services/vendor';
@@ -13,7 +14,8 @@ import { Vendor, Wedding } from '../../../database/types';
 export default function VendorsScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [wedding, setWedding] = useState<Wedding | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -57,8 +59,12 @@ export default function VendorsScreen() {
     return (
       <View style={styles.filterContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-          <TouchableOpacity 
-            style={[styles.filterChip, selectedCategory === 'All' && styles.filterChipActive]}
+          <TouchableOpacity
+            style={[
+              styles.filterChip,
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+              selectedCategory === 'All' && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+            ]}
             onPress={() => setSelectedCategory('All')}
           >
             <Typography 
@@ -71,9 +77,13 @@ export default function VendorsScreen() {
           </TouchableOpacity>
           
           {categories.map(cat => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={cat}
-              style={[styles.filterChip, selectedCategory === cat && styles.filterChipActive]}
+              style={[
+                styles.filterChip,
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                selectedCategory === cat && { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+              ]}
               onPress={() => setSelectedCategory(cat)}
             >
               <Typography 
@@ -91,7 +101,7 @@ export default function VendorsScreen() {
   };
 
   const renderHeader = () => (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
       <Typography variant="screenTitle">Vendors</Typography>
       <View style={styles.searchRow}>
         <View style={styles.searchWrapper}>
@@ -151,7 +161,7 @@ export default function VendorsScreen() {
             title={item.name}
             subtitle={item.contact_person || item.category}
             leftElement={
-              <View style={styles.iconContainer}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '15' }]}>
                 <Ionicons name="briefcase" size={20} color={theme.colors.primary} />
               </View>
             }
@@ -179,15 +189,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
     paddingBottom: 0,
-    backgroundColor: theme.colors.background,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: theme.spacing.md,
-    gap: theme.spacing.sm,
+    marginTop: spacing.md,
+    gap: spacing.sm,
   },
   searchWrapper: {
     flex: 1,
@@ -200,40 +209,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filterContainer: {
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   filterScroll: {
-    gap: theme.spacing.sm,
-    paddingRight: theme.spacing.lg,
+    gap: spacing.sm,
+    paddingRight: spacing.lg,
   },
   filterChip: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  filterChipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   listContent: {
-    padding: theme.spacing.lg,
-    paddingTop: theme.spacing.sm,
+    padding: spacing.lg,
+    paddingTop: spacing.sm,
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.colors.primary + '15', // 15% opacity primary
     justifyContent: 'center',
     alignItems: 'center',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   }
 });

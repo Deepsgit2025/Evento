@@ -3,13 +3,15 @@ import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, TextInput, Button, Card } from '../../components/ui';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing } from '../../theme';
 import { AuthService } from '../../services/auth';
 
 export default function LoginScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,7 +35,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScreenContainer edges={['top', 'bottom']} style={styles.container}>
+    <ScreenContainer edges={['top', 'bottom']} style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         
         <View style={styles.header}>
@@ -76,34 +78,32 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: theme.colors.background,
-  },
+  container: {},
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: theme.spacing.xxxl,
+    marginBottom: spacing.xxxl,
   },
   subtitle: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
   },
   card: {
-    padding: theme.spacing.xl,
+    padding: spacing.xl,
   },
   cardTitle: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
     textAlign: 'center',
   },
   loginBtn: {
-    marginTop: theme.spacing.lg,
+    marginTop: spacing.lg,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: theme.spacing.xxl,
+    marginTop: spacing.xxl,
   }
 });

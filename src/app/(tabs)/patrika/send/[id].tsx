@@ -4,7 +4,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Button, ListItem } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../../theme';
+import { useTheme } from '../../../../theme/ThemeContext';
+import { spacing, radii } from '../../../../theme';
 import { PatrikaService } from '../../../../services/patrika';
 import { GuestService } from '../../../../services/guest';
 import { GroupService } from '../../../../services/group';
@@ -17,6 +18,7 @@ export default function SendPatrikaScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -100,7 +102,7 @@ export default function SendPatrikaScreen() {
   return (
     <ScreenContainer>
       <ScrollView>
-        <View style={styles.section}>
+        <View style={[styles.section, { borderBottomColor: theme.colors.borderLight }]}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>1. Which Event is this for?</Typography>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.eventSelection}>
             <Button 
@@ -121,7 +123,7 @@ export default function SendPatrikaScreen() {
           </ScrollView>
         </View>
 
-        <View style={styles.section}>
+        <View style={[styles.section, { borderBottomColor: theme.colors.borderLight }]}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>2. Select Recipients</Typography>
           
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickFilters}>
@@ -134,19 +136,20 @@ export default function SendPatrikaScreen() {
             ))}
           </ScrollView>
 
-          <View style={styles.guestList}>
+          <View style={[styles.guestList, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
             {guests.map(guest => {
               const eventDbId = selectedEventId === 'MAIN' ? null : selectedEventId;
               const alreadyHas = existingRecipients.some(r => r.guest_id === guest.id && r.event_id === eventDbId);
               const isSelected = selectedGuestIds.has(guest.id);
 
               return (
-                <Pressable 
-                  key={guest.id} 
+                <Pressable
+                  key={guest.id}
                   style={[
-                    styles.guestItem, 
-                    isSelected && styles.guestItemSelected,
-                    alreadyHas && styles.guestItemDisabled
+                    styles.guestItem,
+                    { borderBottomColor: theme.colors.borderLight },
+                    isSelected && { backgroundColor: theme.colors.primary + '10' },
+                    alreadyHas && { backgroundColor: theme.colors.background, opacity: 0.6 }
                   ]}
                   onPress={() => {
                     if (alreadyHas) {
@@ -156,7 +159,7 @@ export default function SendPatrikaScreen() {
                     toggleGuest(guest.id);
                   }}
                 >
-                  <View style={styles.checkbox}>
+                  <View style={[styles.checkbox, { borderColor: theme.colors.border }]}>
                     {isSelected && <Ionicons name="checkmark" size={16} color="#fff" />}
                     {alreadyHas && <Ionicons name="checkmark-circle" size={16} color={theme.colors.border} />}
                   </View>

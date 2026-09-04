@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, EmptyState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing, radii } from '../../../theme';
 import { RoomService } from '../../../services/room';
 import { HotelService } from '../../../services/hotel';
 import { RoomAssignmentService } from '../../../services/roomAssignment';
@@ -14,6 +15,7 @@ export default function RoomDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
+  const { theme } = useTheme();
 
   const [room, setRoom] = useState<Room | null>(null);
   const [hotel, setHotel] = useState<Hotel | null>(null);
@@ -96,15 +98,15 @@ export default function RoomDetailsScreen() {
         </View>
 
         <View style={styles.statsRow}>
-          <View style={styles.statBox}>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
             <Typography variant="caption" color={theme.colors.textSecondary}>Capacity</Typography>
             <Typography variant="cardTitle">{occupancy} / {room.capacity}</Typography>
           </View>
-          <View style={styles.statBox}>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
             <Typography variant="caption" color={theme.colors.textSecondary}>Type</Typography>
             <Typography variant="cardTitle">{room.room_type || 'Standard'}</Typography>
           </View>
-          <View style={styles.statBox}>
+          <View style={[styles.statBox, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }]}>
             <Typography variant="caption" color={theme.colors.textSecondary}>Status</Typography>
             <View style={[styles.badge, isFull ? styles.badgeFull : styles.badgeAvailable]}>
               <Typography variant="caption" weight="medium" style={isFull ? styles.badgeTextFull : styles.badgeTextAvailable}>
@@ -168,14 +170,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    paddingTop: theme.spacing.sm,
+    marginBottom: spacing.xl,
+    paddingTop: spacing.sm,
   },
   backButton: {
     flexDirection: 'row',
@@ -183,30 +185,28 @@ const styles = StyleSheet.create({
     marginLeft: -8,
   },
   titleSection: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   subtitle: {
-    marginTop: theme.spacing.xs,
+    marginTop: spacing.xs,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.xxl,
-    gap: theme.spacing.md,
+    marginBottom: spacing.xxl,
+    gap: spacing.md,
   },
   statBox: {
     flex: 1,
-    backgroundColor: theme.colors.surface,
-    padding: theme.spacing.md,
-    borderRadius: theme.radii.md,
+    padding: spacing.md,
+    borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: theme.colors.borderLight,
     alignItems: 'center',
   },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: theme.radii.sm,
+    borderRadius: radii.sm,
     marginTop: 4,
   },
   badgeAvailable: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   assignBtn: {
     paddingVertical: 6,
@@ -235,8 +235,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
   },
   guestInfo: {
     flex: 1,
@@ -246,6 +246,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   removeBtn: {
-    padding: theme.spacing.sm,
+    padding: spacing.sm,
   },
 });

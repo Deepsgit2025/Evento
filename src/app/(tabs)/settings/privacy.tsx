@@ -3,12 +3,14 @@ import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button } from '../../../components/ui';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { spacing } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 
 export default function PrivacyScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
+  const { theme } = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteData = () => {
@@ -76,12 +78,12 @@ export default function PrivacyScreen() {
           <Typography variant="body" color={theme.colors.textSecondary} style={styles.paragraph}>
             Permanently delete your account and all associated local data. If you are a wedding owner, this action is destructive.
           </Typography>
-          <Button 
-            label="Delete Account & Data" 
-            variant="outline" 
-            onPress={handleDeleteData} 
+          <Button
+            label="Delete Account & Data"
+            variant="outline"
+            onPress={handleDeleteData}
             isLoading={isDeleting}
-            style={{ marginTop: theme.spacing.md, borderColor: theme.colors.error }}
+            style={{ marginTop: spacing.md, borderColor: theme.colors.error }}
           />
         </Card>
       </ScrollView>
@@ -91,21 +93,21 @@ export default function PrivacyScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   content: {
-    padding: theme.spacing.lg,
+    padding: spacing.lg,
   },
   card: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   paragraph: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
     lineHeight: 22,
   }
 });

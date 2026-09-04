@@ -4,7 +4,8 @@ import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography, Card, Button } from '../../components/ui';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
+import { spacing, radii } from '../../theme';
 import { AuthService } from '../../services/auth';
 import { getUserWedding } from '../../services/wedding';
 import { ReportGenerators } from '../../services/reportGenerators';
@@ -20,7 +21,8 @@ const { width } = Dimensions.get('window');
 
 export default function ReportsScreen() {
   const db = useSQLiteContext();
-  
+  const { theme } = useTheme();
+
   const [refreshing, setRefreshing] = useState(false);
   const [financial, setFinancial] = useState<FinancialReport | null>(null);
   const [guest, setGuest] = useState<GuestReport | null>(null);
@@ -89,7 +91,7 @@ export default function ReportsScreen() {
             {renderKPI('Overall Spent', `₹${financial.overall_spending.toLocaleString()}`, 'card', theme.colors.error)}
             {renderKPI('Pending Payments', `₹${financial.total_pending.toLocaleString()}`, 'alert-circle', theme.colors.warning)}
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           <View style={styles.rowBetween}>
             <Typography variant="body" color={theme.colors.textSecondary}>Vendor Agreements</Typography>
             <Typography variant="body" weight="medium">₹{financial.total_agreed.toLocaleString()}</Typography>
@@ -118,13 +120,13 @@ export default function ReportsScreen() {
             {renderKPI('Needs Room', guest.guests_without_rooms.toString(), 'bed-outline', guest.guests_without_rooms > 0 ? theme.colors.warning : theme.colors.success)}
             {renderKPI('No Invite', guest.guests_without_invitations.toString(), 'mail-outline', guest.guests_without_invitations > 0 ? theme.colors.warning : theme.colors.success)}
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           <View style={styles.progressContainer}>
             <View style={styles.rowBetween}>
               <Typography variant="caption" color={theme.colors.textSecondary}>Bride Side ({guest.bride_side})</Typography>
               <Typography variant="caption" color={theme.colors.textSecondary}>Groom Side ({guest.groom_side})</Typography>
             </View>
-            <View style={styles.barBackground}>
+            <View style={[styles.barBackground, { backgroundColor: theme.colors.surfaceElevated }]}>
               <View style={[
                 styles.barFill, 
                 { width: guest.total_guests ? `${(guest.bride_side / guest.total_guests) * 100}%` : '50%', backgroundColor: '#EC4899' } // Pink
@@ -137,7 +139,7 @@ export default function ReportsScreen() {
           </View>
           
           <Typography variant="caption" weight="medium" style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.sm }}>RSVP Status</Typography>
-          <View style={styles.rsvpGrid}>
+          <View style={[styles.rsvpGrid, { backgroundColor: theme.colors.surfaceElevated }]}>
             <View style={styles.rsvpItem}>
               <Typography variant="caption" color={theme.colors.success}>Attending</Typography>
               <Typography variant="body" weight="bold">{guest.rsvp_states.ATTENDING}</Typography>
@@ -171,7 +173,7 @@ export default function ReportsScreen() {
             {renderKPI('Occupied', room.occupied_rooms.toString(), 'lock-closed', theme.colors.success)}
             {renderKPI('Available', room.available_rooms.toString(), 'lock-open', theme.colors.warning)}
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           <View style={styles.rowBetween}>
             <Typography variant="body" color={theme.colors.textSecondary}>Guests Assigned to Rooms</Typography>
             <Typography variant="body" weight="medium">{room.guests_assigned}</Typography>
@@ -194,7 +196,7 @@ export default function ReportsScreen() {
           
           {event.guests_per_event.length > 0 && (
             <>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
               <Typography variant="caption" weight="medium" style={{ marginBottom: theme.spacing.sm }}>Guests per Event</Typography>
               {event.guests_per_event.map((e, idx) => (
                 <View key={e.event_id} style={[styles.rowBetween, { marginTop: idx === 0 ? 0 : 8 }]}>
@@ -207,7 +209,7 @@ export default function ReportsScreen() {
 
           {event.assigned_vendors.length > 0 && (
             <>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
               <Typography variant="caption" weight="medium" style={{ marginBottom: theme.spacing.sm }}>Vendors per Event</Typography>
               {event.assigned_vendors.map((e, idx) => (
                 <View key={e.event_id} style={[styles.rowBetween, { marginTop: idx === 0 ? 0 : 8 }]}>
@@ -319,19 +321,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
   },
   content: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   section: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    marginBottom: theme.spacing.md,
+    marginBottom: spacing.md,
   },
   kpiGrid: {
     flexDirection: 'row',
@@ -349,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: spacing.sm,
   },
   kpiValue: {
     fontSize: 18,
@@ -357,8 +359,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: theme.colors.border,
-    marginVertical: theme.spacing.lg,
+    marginVertical: spacing.lg,
   },
   rowBetween: {
     flexDirection: 'row',
@@ -366,12 +367,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   progressContainer: {
-    marginTop: theme.spacing.sm,
+    marginTop: spacing.sm,
   },
   barBackground: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: theme.colors.surfaceElevated,
     flexDirection: 'row',
     overflow: 'hidden',
     marginTop: 8,
@@ -382,9 +382,8 @@ const styles = StyleSheet.create({
   rsvpGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: theme.colors.surfaceElevated,
-    borderRadius: theme.radii.md,
-    padding: theme.spacing.md,
+    borderRadius: radii.md,
+    padding: spacing.md,
   },
   rsvpItem: {
     alignItems: 'center',

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme/ThemeContext';
+import { typography } from '../../../theme';
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 
 export default function VendorsLayout() {
   const router = useRouter();
+  const { theme } = useTheme();
 
   return (
     <Stack
@@ -15,8 +17,8 @@ export default function VendorsLayout() {
           backgroundColor: theme.colors.surface,
         },
         headerTitleStyle: {
-          fontFamily: theme.typography.fontFamily,
-          fontSize: theme.typography.sizes.lg,
+          fontFamily: typography.fontFamily,
+          fontSize: typography.sizes.lg,
           fontWeight: '600',
           color: theme.colors.text,
         },
