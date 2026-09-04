@@ -107,11 +107,10 @@ export default function CreateCampaignScreen() {
     try {
       // 1. Create Campaign Shell
       const campaign = await WhatsAppService.createCampaign(
-        db, 
-        weddingId, 
-        campaignName.trim(), 
-        selectedPatrikaId, 
-        eventIdForDb
+        db,
+        weddingId,
+        selectedPatrikaId,
+        campaignName.trim()
       );
 
       // 2. Queue Recipients to normal Patrika System (handles unique constraints)

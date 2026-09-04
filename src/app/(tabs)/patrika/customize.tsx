@@ -157,7 +157,7 @@ export default function CustomizeScreen() {
           />
 
           <View style={{ marginTop: 20 }}>
-            <Typography variant="label" color={theme.colors.textSecondary}>Font Scale</Typography>
+            <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>Font Scale</Typography>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
               <Button label="A-" variant="outline" onPress={() => setFontScale(prev => Math.max(0.5, prev - 0.1))} style={{ flex: 1, marginRight: 10 }} />
               <Typography variant="body" style={{ width: 40, textAlign: 'center' }}>{fontScale.toFixed(1)}x</Typography>

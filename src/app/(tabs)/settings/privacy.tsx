@@ -5,7 +5,6 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
-import { supabase } from '../../../services/supabase';
 
 export default function PrivacyScreen() {
   const db = useSQLiteContext();
@@ -24,17 +23,9 @@ export default function PrivacyScreen() {
           onPress: async () => {
             setIsDeleting(true);
             try {
-              // Note: For full cloud deletion, an edge function should handle cascading deletes.
-              // Here, we delete the Supabase Auth user (which can trigger cascading deletes if setup in Supabase)
-              // and wipe local SQLite tables via AuthService.signOut().
-              if (supabase) {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                  // RPC call to a hypothetical delete_user function, or simply signing out and dropping local
-                  // Supabase JS client cannot delete the user directly without service role, 
-                  // but we can call an edge function or just clear local data for now as per offline-first rules.
-                }
-              }
+              // Cloud sync now goes through Google Drive backup/restore, so there is no
+              // remote auth user to delete here — wiping the local SQLite tables via
+              // AuthService.signOut() removes everything this device holds.
               await AuthService.signOut(db);
               router.replace('/auth/login');
             } catch (e: any) {
