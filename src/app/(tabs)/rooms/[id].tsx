@@ -128,7 +128,7 @@ export default function RoomDetailsScreen() {
 
         {assignments.length === 0 ? (
           <EmptyState
-            icon={<Ionicons name="person-crop-circle-badge-questionmark" size={48} color={theme.colors.textMuted} />}
+            icon={<Ionicons name="person-circle-outline" size={48} color={theme.colors.textMuted} />}
             title="Room is empty"
             description="Assign guests to this room."
           />
@@ -151,7 +151,7 @@ export default function RoomDetailsScreen() {
                   onPress={() => handleRemoveGuest(assignment.guest_id, assignment.guest_name)}
                   style={styles.removeBtn}
                 >
-                  <Ionicons name="minus-circle" size={24} color={theme.colors.error} />
+                  <Ionicons name="remove-circle-outline" size={24} color={theme.colors.error} />
                 </Pressable>
               </Card>
             </Pressable>

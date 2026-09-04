@@ -158,7 +158,7 @@ export default function NotificationsScreen() {
 
       {notifications.length === 0 && !isLoading ? (
         <EmptyState
-          icon={<Ionicons name="bell-slash" size={48} color={theme.colors.textMuted} />}
+          icon={<Ionicons name="notifications-off-outline" size={48} color={theme.colors.textMuted} />}
           title="No new notifications"
           description="You're all caught up! Important reminders and alerts will appear here."
         />

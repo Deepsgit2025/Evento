@@ -159,7 +159,7 @@ export default function EventsTimelineScreen() {
               <View style={styles.detailGrid}>
                 {item.location && (
                   <View style={styles.detailRow}>
-                    <Ionicons name="mappin-and-ellipse" size={14} color={theme.colors.textSecondary} />
+                    <Ionicons name="location-outline" size={14} color={theme.colors.textSecondary} />
                     <Typography variant="caption" color={theme.colors.textSecondary} style={styles.detailText} numberOfLines={1}>
                       {item.location}
                     </Typography>
@@ -193,14 +193,14 @@ export default function EventsTimelineScreen() {
           <Card style={styles.heroCard}>
             <Typography variant="sectionTitle" style={styles.heroTitle}>{nextEvent.name}</Typography>
             <View style={styles.heroDetailRow}>
-              <Ionicons name="clock" size={16} color={theme.colors.textSecondary} />
+              <Ionicons name="time-outline" size={16} color={theme.colors.textSecondary} />
               <Typography variant="bodySecondary" color={theme.colors.textSecondary} style={styles.heroDetailText}>
                 {formatTime(nextEvent.start_time)}
               </Typography>
             </View>
             {nextEvent.location && (
               <View style={styles.heroDetailRow}>
-                <Ionicons name="mappin-and-ellipse" size={16} color={theme.colors.textSecondary} />
+                <Ionicons name="location-outline" size={16} color={theme.colors.textSecondary} />
                 <Typography variant="bodySecondary" color={theme.colors.textSecondary} style={styles.heroDetailText}>
                   {nextEvent.location}
                 </Typography>

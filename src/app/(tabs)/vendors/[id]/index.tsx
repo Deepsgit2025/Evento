@@ -221,7 +221,7 @@ export default function VendorDetailScreen() {
                   key={payment.id}
                   title={`₹${payment.amount.toLocaleString()} - ${payment.payment_method}`}
                   subtitle={`${payment.payment_date} ${payment.notes ? `· ${payment.notes}` : ''}`}
-                  leftElement={<Ionicons name="banknote" size={20} color={theme.colors.success} />}
+                  leftElement={<Ionicons name="cash-outline" size={20} color={theme.colors.success} />}
                   rightElement={
                     <View style={styles.actionRow}>
                       <TouchableOpacity style={styles.smallAction} onPress={() => router.push(`/(tabs)/vendors/${vendor.id}/edit-payment?paymentId=${payment.id}` as any)}>
@@ -258,7 +258,7 @@ export default function VendorDetailScreen() {
                   leftElement={<Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />}
                   rightElement={
                     <TouchableOpacity onPress={() => handleUnassignEvent(event.id)}>
-                      <Ionicons name="minus-circle" size={20} color={theme.colors.error} />
+                      <Ionicons name="remove-circle-outline" size={20} color={theme.colors.error} />
                     </TouchableOpacity>
                   }
                 />
@@ -282,7 +282,7 @@ export default function VendorDetailScreen() {
                   subtitle={event.date || ''}
                   rightElement={
                     <TouchableOpacity onPress={() => handleAssignEvent(event.id)}>
-                      <Ionicons name="plus-circle" size={20} color={theme.colors.primary} />
+                      <Ionicons name="add-circle-outline" size={20} color={theme.colors.primary} />
                     </TouchableOpacity>
                   }
                 />
@@ -307,7 +307,7 @@ export default function VendorDetailScreen() {
                 <ListItem 
                   title={vendor.phone}
                   subtitle="Phone"
-                  leftElement={<Ionicons name="phone" size={20} color={theme.colors.textSecondary} />}
+                  leftElement={<Ionicons name="call-outline" size={20} color={theme.colors.textSecondary} />}
                   onPress={() => handlePhonePress(vendor.phone!)}
                 />
               )}
@@ -315,7 +315,7 @@ export default function VendorDetailScreen() {
                 <ListItem 
                   title={vendor.alternate_phone}
                   subtitle="Alt Phone"
-                  leftElement={<Ionicons name="phone-circle" size={20} color={theme.colors.textSecondary} />}
+                  leftElement={<Ionicons name="call-outline" size={20} color={theme.colors.textSecondary} />}
                   onPress={() => handlePhonePress(vendor.alternate_phone!)}
                 />
               )}
@@ -331,7 +331,7 @@ export default function VendorDetailScreen() {
                 <ListItem 
                   title={vendor.address}
                   subtitle="Address"
-                  leftElement={<Ionicons name="mappin-and-ellipse" size={20} color={theme.colors.textSecondary} />}
+                  leftElement={<Ionicons name="location-outline" size={20} color={theme.colors.textSecondary} />}
                 />
               )}
             </Card>

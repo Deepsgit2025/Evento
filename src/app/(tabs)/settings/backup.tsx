@@ -117,7 +117,7 @@ export default function BackupScreen() {
       <View style={styles.content}>
         <Card style={styles.card}>
           <View style={styles.iconContainer}>
-            <Ionicons name="icloud-and-arrow-up" size={40} color={theme.colors.primary} />
+            <Ionicons name="cloud-upload-outline" size={40} color={theme.colors.primary} />
           </View>
           <Typography variant="cardTitle" style={styles.title}>Export Backup</Typography>
           <Typography variant="body" color={theme.colors.textSecondary} style={styles.description}>

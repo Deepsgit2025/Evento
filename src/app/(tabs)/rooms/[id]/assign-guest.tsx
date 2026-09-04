@@ -133,7 +133,7 @@ export default function AssignGuestModal() {
       {unassignedGuests.length === 0 ? (
         <View style={styles.emptyContainer}>
           <EmptyState
-            icon={<Ionicons name="person-crop-circle-badge-xmark" size={48} color={theme.colors.textMuted} />}
+            icon={<Ionicons name="person-remove-outline" size={48} color={theme.colors.textMuted} />}
             title="No unassigned guests"
             description="All your guests have been assigned to rooms."
           />

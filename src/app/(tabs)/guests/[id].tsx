@@ -233,7 +233,7 @@ export default function GuestProfileScreen() {
 
           {guest.phone && (
             <View style={[styles.listRow, {borderBottomWidth: guest.notes ? 1 : 0}]}>
-              <Ionicons name="phone" size={20} color={theme.colors.primary} style={styles.rowIcon} />
+              <Ionicons name="call-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <Typography variant="body" style={styles.rowLabel}>Phone</Typography>
               <Typography variant="body" color={theme.colors.textSecondary}>{guest.phone}</Typography>
             </View>
@@ -241,7 +241,7 @@ export default function GuestProfileScreen() {
 
           {guest.notes && (
             <View style={styles.listRow}>
-              <Ionicons name="note-text" size={20} color={theme.colors.primary} style={styles.rowIcon} />
+              <Ionicons name="document-text-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <View style={{flex: 1}}>
                 <Typography variant="body" style={styles.rowLabel}>Notes</Typography>
                 <Typography variant="body" color={theme.colors.textSecondary}>{guest.notes}</Typography>
@@ -303,7 +303,7 @@ export default function GuestProfileScreen() {
             <View style={styles.sectionBlock}>
               {invitations.map((inv, idx) => (
                 <View key={inv.id} style={[styles.listRow, {borderBottomWidth: idx < invitations.length - 1 ? 1 : 0}]}>
-                  <Ionicons name="envelope-open" size={20} color={theme.colors.primary} style={styles.rowIcon} />
+                  <Ionicons name="mail-open-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
                   <View style={{flex: 1}}>
                     <Typography variant="body">{inv.invitation_title}</Typography>
                     <Typography variant="caption" color={theme.colors.textSecondary}>

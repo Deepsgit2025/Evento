@@ -190,7 +190,7 @@ export default function GuestsListScreen() {
               
               {item.phone && (
                 <View style={styles.guestDetailRow}>
-                  <Ionicons name="phone" size={14} color={theme.colors.textMuted} />
+                  <Ionicons name="call-outline" size={14} color={theme.colors.textMuted} />
                   <Typography variant="caption" color={theme.colors.textSecondary} style={styles.detailText}>
                     {item.phone}
                   </Typography>
@@ -232,7 +232,7 @@ export default function GuestsListScreen() {
       return <EmptyState icon={<Ionicons name="people-outline" size={48} color={theme.colors.textMuted} />} title="No matching guests" />;
     }
     if (filteredGuests.length === 0 && mainFilter !== 'All') {
-      return <EmptyState icon={<Ionicons name="line-3-horizontal-decrease-circle" size={48} color={theme.colors.textMuted} />} title="No guests match this filter" />;
+      return <EmptyState icon={<Ionicons name="funnel-outline" size={48} color={theme.colors.textMuted} />} title="No guests match this filter" />;
     }
     return (
       <EmptyState

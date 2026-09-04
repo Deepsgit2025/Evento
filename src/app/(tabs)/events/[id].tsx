@@ -207,7 +207,7 @@ export default function EventProfileScreen() {
 
           {(event.start_time || event.end_time) && (
             <View style={styles.detailRow}>
-              <Ionicons name="clock" size={20} color={theme.colors.textSecondary} style={styles.detailIcon} />
+              <Ionicons name="time-outline" size={20} color={theme.colors.textSecondary} style={styles.detailIcon} />
               <View>
                 <Typography variant="caption" color={theme.colors.textSecondary}>Time</Typography>
                 <Typography variant="body" weight="medium">
@@ -221,7 +221,7 @@ export default function EventProfileScreen() {
 
           {event.location && (
             <View style={styles.detailRow}>
-              <Ionicons name="mappin-and-ellipse" size={20} color={theme.colors.textSecondary} style={styles.detailIcon} />
+              <Ionicons name="location-outline" size={20} color={theme.colors.textSecondary} style={styles.detailIcon} />
               <View>
                 <Typography variant="caption" color={theme.colors.textSecondary}>Location / Venue</Typography>
                 <Typography variant="body" weight="medium">{event.location}</Typography>
@@ -231,7 +231,7 @@ export default function EventProfileScreen() {
 
           {event.description && (
             <View style={styles.detailRow}>
-              <Ionicons name="note-text" size={20} color={theme.colors.textSecondary} style={styles.detailIcon} />
+              <Ionicons name="document-text-outline" size={20} color={theme.colors.textSecondary} style={styles.detailIcon} />
               <View>
                 <Typography variant="caption" color={theme.colors.textSecondary}>Description / Notes</Typography>
                 <Typography variant="body" weight="medium">{event.description}</Typography>
@@ -268,7 +268,7 @@ export default function EventProfileScreen() {
                   leftElement={<Ionicons name="person" size={20} color={theme.colors.primary} />}
                   rightElement={
                     <TouchableOpacity onPress={() => handleRemoveGuest(guest.id)}>
-                      <Ionicons name="minus-circle" size={20} color={theme.colors.error} />
+                      <Ionicons name="remove-circle-outline" size={20} color={theme.colors.error} />
                     </TouchableOpacity>
                   }
                 />
@@ -301,7 +301,7 @@ export default function EventProfileScreen() {
                   leftElement={<Ionicons name="briefcase-outline" size={20} color={theme.colors.primary} />}
                   rightElement={
                     <TouchableOpacity onPress={() => handleUnassignVendor(vendor.id)}>
-                      <Ionicons name="minus-circle" size={20} color={theme.colors.error} />
+                      <Ionicons name="remove-circle-outline" size={20} color={theme.colors.error} />
                     </TouchableOpacity>
                   }
                 />
@@ -325,7 +325,7 @@ export default function EventProfileScreen() {
                   subtitle={vendor.category}
                   rightElement={
                     <TouchableOpacity onPress={() => handleAssignVendor(vendor.id)}>
-                      <Ionicons name="plus-circle" size={20} color={theme.colors.primary} />
+                      <Ionicons name="add-circle-outline" size={20} color={theme.colors.primary} />
                     </TouchableOpacity>
                   }
                 />

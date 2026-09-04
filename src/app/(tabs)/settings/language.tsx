@@ -24,7 +24,7 @@ export default function LanguageScreen() {
         <Typography variant="caption" color={theme.colors.textSecondary}>{subtitle}</Typography>
       </View>
       <Ionicons 
-        name={language === id ? "checkmark.circle.fill" : "circle"} 
+        name={language === id ? "checkmark-circle" : "ellipse-outline"}
         size={24} 
         color={language === id ? theme.colors.primary : theme.colors.border} 
       />
