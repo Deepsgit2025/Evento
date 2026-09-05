@@ -1,12 +1,15 @@
 import * as SQLite from 'expo-sqlite';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { SyncEngine } from './syncEngine';
 import { SettingsService, NotificationPrefKey } from './settings';
+
+const ALARM_CHANNEL_ID = 'task-alarms';
 
 export interface Reminder {
   id: string;
   wedding_id: string;
-  type: 'EVENT' | 'PAYMENT' | 'ROOM' | 'INVITATION' | 'RSVP' | 'CUSTOM';
+  type: 'EVENT' | 'PAYMENT' | 'ROOM' | 'INVITATION' | 'RSVP' | 'CUSTOM' | 'TASK' | 'DANCE';
   reference_id: string | null;
   title: string;
   notes: string | null;
@@ -43,15 +46,34 @@ export const ReminderService = {
   },
 
   /**
+   * Registers a high-importance Android channel (sound + strong vibration,
+   * shown on lock screen) so "Alarm" style reminders feel more urgent than a
+   * regular "Message" notification. No-op on iOS (handled via interruptionLevel).
+   */
+  async ensureAlarmChannel() {
+    if (Platform.OS !== 'android') return;
+    await Notifications.setNotificationChannelAsync(ALARM_CHANNEL_ID, {
+      name: 'Task & Dance Alarms',
+      importance: Notifications.AndroidImportance.MAX,
+      sound: 'default',
+      vibrationPattern: [0, 500, 250, 500],
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    });
+  },
+
+  /**
    * Schedule a new reminder locally and save it to SQLite.
+   * `style` only affects TASK/DANCE reminders: 'ALARM' uses a louder, more
+   * urgent notification channel/priority than the default 'MESSAGE' style.
    */
   async createReminder(
     db: SQLite.SQLiteDatabase,
-    reminderData: Omit<Reminder, 'id' | 'status' | 'notification_id' | 'created_at' | 'updated_at'>
+    reminderData: Omit<Reminder, 'id' | 'status' | 'notification_id' | 'created_at' | 'updated_at'>,
+    style?: 'ALARM' | 'MESSAGE'
   ): Promise<string | null> {
     const id = crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
-    
+
     // Determine the pref key
     let prefKey: NotificationPrefKey = 'pref_notify_general';
     switch (reminderData.type) {
@@ -60,20 +82,26 @@ export const ReminderService = {
       case 'INVITATION':
       case 'RSVP': prefKey = 'pref_notify_invitation'; break;
     }
-    
+
     const isEnabled = await SettingsService.getBoolean(db, reminderData.wedding_id, prefKey);
-    
+
     // Only schedule OS notification if time is in the future AND the user has this type enabled
     let notificationId = null;
     if (reminderData.reminder_time > now && isEnabled) {
       const hasPermission = await this.requestPermissions();
       if (hasPermission) {
+        const isAlarm = style === 'ALARM';
+        if (isAlarm) await this.ensureAlarmChannel();
+
         notificationId = await Notifications.scheduleNotificationAsync({
           content: {
-            title: reminderData.title,
+            title: (isAlarm ? '⏰ ' : '') + reminderData.title,
             body: reminderData.notes || 'You have a new wedding reminder.',
-            data: { 
-              reminderId: id, 
+            sound: true,
+            ...(isAlarm ? { interruptionLevel: 'timeSensitive' as const } : {}),
+            ...(isAlarm && Platform.OS === 'android' ? { channelId: ALARM_CHANNEL_ID } : {}),
+            data: {
+              reminderId: id,
               weddingId: reminderData.wedding_id,
               type: reminderData.type,
               referenceId: reminderData.reference_id

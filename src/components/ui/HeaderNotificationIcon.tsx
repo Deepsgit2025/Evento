@@ -39,7 +39,11 @@ export function HeaderNotificationIcon({ tintColor }: { tintColor?: string } = {
   );
 
   return (
-    <Pressable onPress={() => router.push('/notifications' as any)} style={styles.container}>
+    <Pressable
+      onPress={() => router.push('/notifications' as any)}
+      style={styles.container}
+      hitSlop={8}
+    >
       <Ionicons name="notifications-outline" size={24} color={tintColor || theme.colors.text} />
       {unreadCount > 0 && (
         <View style={styles.badge}>
@@ -53,7 +57,7 @@ export function HeaderNotificationIcon({ tintColor }: { tintColor?: string } = {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 8, position: 'relative' },
+  container: { padding: 10, marginRight: 4, position: 'relative' },
   badge: {
     position: 'absolute', top: 4, right: 4,
     backgroundColor: theme.colors.error,

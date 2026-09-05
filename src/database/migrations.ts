@@ -546,6 +546,92 @@ export const setupMigrations = async (db: SQLite.SQLiteDatabase) => {
           await database.execAsync(`ALTER TABLE weddings ADD COLUMN city TEXT`);
         } catch(e) {}
       }
+    },
+    {
+      name: '022_task_reminders',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        // Checklist items gain a schedulable reminder (date/time + delivery style).
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN reminder_time INTEGER`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN reminder_style TEXT`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN reminder_id TEXT`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN updated_at INTEGER`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN sync_status TEXT DEFAULT 'pending'`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN last_synced_at INTEGER`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN deleted_at INTEGER`);
+        } catch(e) {}
+
+        // reminders.type's CHECK constraint needs TASK/DANCE added; SQLite can't
+        // ALTER a CHECK constraint, so recreate the table and copy existing rows.
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS reminders_new (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            type TEXT NOT NULL CHECK(type IN ('EVENT', 'PAYMENT', 'ROOM', 'INVITATION', 'RSVP', 'CUSTOM', 'TASK', 'DANCE')),
+            reference_id TEXT,
+            title TEXT NOT NULL,
+            notes TEXT,
+            reminder_time INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'SCHEDULED' CHECK(status IN ('SCHEDULED', 'DELIVERED', 'CANCELLED')),
+            notification_id TEXT,
+
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            sync_status TEXT DEFAULT 'pending',
+            last_synced_at INTEGER DEFAULT NULL,
+            deleted_at INTEGER DEFAULT NULL,
+
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          INSERT INTO reminders_new SELECT * FROM reminders;
+          DROP TABLE reminders;
+          ALTER TABLE reminders_new RENAME TO reminders;
+          CREATE INDEX IF NOT EXISTS idx_reminders_wedding ON reminders(wedding_id);
+          CREATE INDEX IF NOT EXISTS idx_reminders_time ON reminders(reminder_time);
+        `);
+      }
+    },
+    {
+      name: '023_dances',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS dances (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            performers TEXT,
+            song_title TEXT,
+            song_artist TEXT,
+            choreographer TEXT,
+            practice_time INTEGER,
+            reminder_style TEXT,
+            reminder_id TEXT,
+            notes TEXT,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            sync_status TEXT DEFAULT 'pending',
+            last_synced_at INTEGER DEFAULT NULL,
+            deleted_at INTEGER DEFAULT NULL,
+
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE INDEX IF NOT EXISTS idx_dances_wedding ON dances(wedding_id);
+        `);
+      }
     }
   ];
 

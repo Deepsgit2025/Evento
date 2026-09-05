@@ -10,6 +10,12 @@ export interface TextInputProps extends RNTextInputProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
+  /**
+   * Strips the default bordered/padded pill chrome so a caller can fully
+   * control the visual container via `style` (e.g. chat composers) without
+   * ending up with two nested boxes with mismatched padding/radius.
+   */
+  bare?: boolean;
 }
 
 export function TextInput({
@@ -19,6 +25,7 @@ export function TextInput({
   rightIcon,
   style,
   containerStyle,
+  bare,
   onFocus,
   onBlur,
   ...props
@@ -27,7 +34,7 @@ export function TextInput({
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[bare ? styles.containerBare : styles.container, containerStyle]}>
       {label && (
         <Typography
           variant="caption"
@@ -40,10 +47,14 @@ export function TextInput({
       )}
       <View
         style={[
-          styles.inputContainer,
-          { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-          isFocused && { borderColor: theme.colors.primary },
-          error && { borderColor: theme.colors.error },
+          bare
+            ? styles.inputContainerBare
+            : [
+                styles.inputContainer,
+                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                isFocused && { borderColor: theme.colors.primary },
+                error && { borderColor: theme.colors.error },
+              ],
         ]}
       >
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
@@ -74,6 +85,11 @@ export function TextInput({
 const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.lg,
+  },
+  containerBare: {},
+  inputContainerBare: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   label: {
     marginBottom: spacing.sm,

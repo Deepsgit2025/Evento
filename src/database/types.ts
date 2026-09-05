@@ -202,5 +202,27 @@ export interface Task {
   description: string | null;
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   due_date: string | null;
+  /** Unix seconds combining due_date + due_time; used to schedule the reminder. */
+  reminder_time: number | null;
+  reminder_style: 'ALARM' | 'MESSAGE' | null;
+  reminder_id: string | null;
   created_at: number;
+  updated_at?: number;
+}
+
+export interface Dance {
+  id: string;
+  wedding_id: string;
+  title: string;
+  performers: string | null;
+  song_title: string | null;
+  song_artist: string | null;
+  choreographer: string | null;
+  practice_time: number | null;
+  reminder_style: 'ALARM' | 'MESSAGE' | null;
+  reminder_id: string | null;
+  notes: string | null;
+  sort_order: number;
+  created_at: number;
+  updated_at?: number;
 }

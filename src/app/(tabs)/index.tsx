@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Pressable, ScrollView, Dimensions } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ScreenContainer, Typography, EmptyState, Card } from '../../components/ui';
+import { ScreenContainer, Typography, EmptyState, Card, WeddingCountdown } from '../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { AuthService } from '../../services/auth';
 import { getUserWedding } from '../../services/wedding';
 import { Wedding } from '../../database/types';
-import { getDaysUntil } from '../../utils/date';
 import { SyncStatusBadge } from '../../components/ui/SyncStatusBadge';
 import { useSync } from '../../context/SyncContext';
 import { HeaderNotificationIcon } from '../../components/ui/HeaderNotificationIcon';
@@ -146,7 +145,6 @@ export default function HomeTab() {
     );
   }
 
-  const daysUntil = getDaysUntil(wedding.date);
   const totalCount = stats.guestCount + stats.roomCount + stats.eventCount + stats.vendorCount;
   const isBrandNew = totalCount === 0;
   const s = getDynamicStyles(theme);
@@ -184,9 +182,10 @@ export default function HomeTab() {
         <View style={s.countdownInner}>
           <View style={s.countdownBox}>
              <Ionicons name="calendar" size={20} color={theme.colors.primary} />
-             <Typography variant="body" weight="semibold" style={s.countdownLabel}>
-               {daysUntil !== null && daysUntil >= 0 ? `${daysUntil} Days Left` : 'Happily Ever After'}
-             </Typography>
+             <WeddingCountdown
+               date={wedding.date}
+               textProps={{ variant: 'body', weight: 'semibold', style: s.countdownLabel }}
+             />
           </View>
           <View style={s.venueBox}>
             <Ionicons name="location" size={20} color={theme.colors.accent} />

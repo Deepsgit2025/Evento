@@ -1,4 +1,18 @@
 /**
+ * Formats an ISO "YYYY-MM-DD" date as a friendly local string
+ * (e.g. "24 October 2026"). Non-ISO input (legacy free-text dates) is
+ * returned unchanged.
+ */
+export function formatIsoDateFriendly(value: string | null | undefined): string {
+  if (!value) return '';
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  if (isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/**
  * Calculates the number of days until the given date string.
  * @param dateString The target date string (e.g., "October 15, 2026")
  * @returns The number of days remaining, or null if the date is invalid.

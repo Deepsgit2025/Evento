@@ -1,22 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { TEMPLATES } from '../../../components/patrika/Templates';
+import { AuthService } from '../../../services/auth';
+import { getUserWedding } from '../../../services/wedding';
+import { formatIsoDateFriendly } from '../../../utils/date';
 
 export default function TemplateGalleryScreen() {
   const router = useRouter();
+  const db = useSQLiteContext();
 
-  // Mock data for previewing templates in the gallery
-  const previewData = {
-    brideName: 'Aarti',
-    groomName: 'Rohan',
-    date: 'December 15, 2024',
-    venue: 'Taj Palace, Mumbai',
+  // Preview data mirrors the couple's actual wedding details so templates
+  // show what the invitation will really look like, not a stranger's names.
+  const [previewData, setPreviewData] = useState({
+    brideName: 'Bride Name',
+    groomName: 'Groom Name',
+    date: 'Wedding Date',
+    venue: 'Venue',
     message: 'Join us to celebrate our new beginning',
-    width: 150 // Small width for grid thumbnails
-  };
+    width: 150, // Small width for grid thumbnails
+  });
+
+  useEffect(() => {
+    let isActive = true;
+    (async () => {
+      try {
+        const session = await AuthService.getCurrentSession(db);
+        if (!session) return;
+        const wedding = await getUserWedding(db, session.id);
+        if (!wedding || !isActive) return;
+        setPreviewData(prev => ({
+          ...prev,
+          brideName: wedding.bride_name || prev.brideName,
+          groomName: wedding.groom_name || prev.groomName,
+          date: formatIsoDateFriendly(wedding.date) || prev.date,
+          venue: wedding.venue || prev.venue,
+        }));
+      } catch (e) {
+        console.error(e instanceof Error ? e.message : String(e));
+      }
+    })();
+    return () => { isActive = false; };
+  }, [db]);
 
   return (
     <ScreenContainer scrollable>

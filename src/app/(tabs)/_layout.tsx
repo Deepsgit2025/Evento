@@ -49,7 +49,11 @@ export default function TabLayout() {
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom + 4,
           paddingTop: 6,
-          position: Platform.OS === 'ios' ? 'absolute' : 'relative',
+          // Always reserve real layout space for the tab bar instead of floating
+          // it over content (position: 'absolute' on iOS made bottom-pinned
+          // footers/buttons on individual screens sit underneath it and become
+          // unreachable).
+          position: 'relative',
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textMuted,
@@ -107,6 +111,8 @@ export default function TabLayout() {
       <Tabs.Screen name="settings" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="patrika" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="finance" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="tasks" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="dances" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
 }

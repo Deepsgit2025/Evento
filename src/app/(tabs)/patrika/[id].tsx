@@ -10,6 +10,7 @@ import { PatrikaService, PatrikaCustomization } from '../../../services/patrika'
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { InvitationRecipient } from '../../../database/types';
+import { formatIsoDateFriendly } from '../../../utils/date';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -19,6 +20,7 @@ export default function PreviewScreen() {
   const db = useSQLiteContext();
 
   const [templateComponent, setTemplateComponent] = useState<any>(null);
+  const [templateId, setTemplateId] = useState<string>('');
   const [previewProps, setPreviewProps] = useState<PatrikaProps | null>(null);
   const [recipients, setRecipients] = useState<(InvitationRecipient & { guest_name: string, event_name: string | null })[]>([]);
 
@@ -30,6 +32,7 @@ export default function PreviewScreen() {
 
         const template = TEMPLATES.find((t: any) => t.id === inv.template_id);
         if (template) setTemplateComponent(() => template.component);
+        setTemplateId(inv.template_id);
 
         const session = await AuthService.getCurrentSession(db);
         if (!session) return;
@@ -42,9 +45,11 @@ export default function PreviewScreen() {
         setPreviewProps({
           brideName: wedding.bride_name,
           groomName: wedding.groom_name,
-          date: cust.custom_date || wedding.date || 'TBD',
+          date: cust.custom_date || formatIsoDateFriendly(wedding.date) || 'TBD',
           venue: cust.custom_venue || wedding.venue || 'TBD',
           message: cust.message,
+          photoUri: cust.cover_photo_uri,
+          accentColor: cust.accent_color,
           width: SCREEN_WIDTH // Full width
         });
 
@@ -104,19 +109,25 @@ export default function PreviewScreen() {
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={[styles.canvas, { width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5 }]}>
+        <View style={[styles.canvas, { width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5, borderColor: previewProps.accentColor || 'transparent', borderWidth: previewProps.accentColor ? 4 : 0 }]}>
           <Template {...previewProps} />
         </View>
         <View style={styles.actions}>
-          <Button 
-            label="Create Bulk Campaign" 
-            onPress={() => router.push(`/(tabs)/patrika/campaigns` as any)} 
+          <Button
+            label="Create Bulk Campaign"
+            onPress={() => router.push(`/(tabs)/patrika/campaigns` as any)}
             style={{ marginBottom: 12 }}
           />
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Button 
-              label="Delete Patrika" 
-              variant="outline" 
+          <View style={{flexDirection: 'row', gap: 12}}>
+            <Button
+              label="Edit Design"
+              variant="outline"
+              onPress={() => router.push(`/(tabs)/patrika/customize?templateId=${templateId}&editId=${id}` as any)}
+              style={{ flex: 1 }}
+            />
+            <Button
+              label="Delete Patrika"
+              variant="outline"
               onPress={handleDelete}
               style={{ flex: 1, borderColor: 'red' }}
             />
