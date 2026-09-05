@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextInput as RNTextInput, TextInputProps as RNTextInputProps, StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { spacing } from '../../theme';
+import { spacing, typography } from '../../theme';
 import { Typography } from './Typography';
 
 export interface TextInputProps extends RNTextInputProps {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontFamily: 'Outfit-Regular',
+    fontFamily: typography.fontFamily,
     fontSize: 16,
     paddingVertical: 8,
   },

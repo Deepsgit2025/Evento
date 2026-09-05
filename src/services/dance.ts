@@ -6,6 +6,8 @@ import { SyncEngine } from './syncEngine';
 
 export interface DanceDTO {
   title: string;
+  group_name?: string | null;
+  member_count?: number | null;
   performers?: string | null;
   song_title?: string | null;
   song_artist?: string | null;
@@ -50,9 +52,10 @@ export const DanceService = {
     }
 
     await db.runAsync(
-      `INSERT INTO dances (id, wedding_id, title, performers, song_title, song_artist, choreographer, practice_time, reminder_style, reminder_id, notes, sort_order, created_at, updated_at, sync_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
-      [id, weddingId, data.title, data.performers || null, data.song_title || null, data.song_artist || null,
+      `INSERT INTO dances (id, wedding_id, title, group_name, member_count, performers, song_title, song_artist, choreographer, practice_time, reminder_style, reminder_id, notes, sort_order, created_at, updated_at, sync_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [id, weddingId, data.title, data.group_name || null, data.member_count ?? null, data.performers || null,
+        data.song_title || null, data.song_artist || null,
         data.choreographer || null, data.practice_time || null, data.reminder_style || null, reminderId,
         data.notes || null, sortOrder, now, now]
     );
@@ -81,9 +84,10 @@ export const DanceService = {
     }
 
     await db.runAsync(
-      `UPDATE dances SET title = ?, performers = ?, song_title = ?, song_artist = ?, choreographer = ?,
+      `UPDATE dances SET title = ?, group_name = ?, member_count = ?, performers = ?, song_title = ?, song_artist = ?, choreographer = ?,
         practice_time = ?, reminder_style = ?, reminder_id = ?, notes = ?, updated_at = ? WHERE id = ?`,
-      [data.title, data.performers || null, data.song_title || null, data.song_artist || null,
+      [data.title, data.group_name || null, data.member_count ?? null, data.performers || null,
+        data.song_title || null, data.song_artist || null,
         data.choreographer || null, data.practice_time || null, data.reminder_style || null, reminderId,
         data.notes || null, now, id]
     );

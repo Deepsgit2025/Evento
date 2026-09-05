@@ -106,6 +106,7 @@ export default function TasksScreen() {
               />
               <Typography variant="caption" color={theme.colors.textSecondary} style={{ marginLeft: 4 }}>
                 {dueLabel}
+                {task.reminder_lead_minutes ? ` · alerts ${task.reminder_lead_minutes} min early` : ''}
               </Typography>
             </View>
           )}

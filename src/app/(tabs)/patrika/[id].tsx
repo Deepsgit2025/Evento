@@ -43,8 +43,8 @@ export default function PreviewScreen() {
         try { cust = JSON.parse(inv.customization_data); } catch(e) {}
 
         setPreviewProps({
-          brideName: wedding.bride_name,
-          groomName: wedding.groom_name,
+          brideName: cust.custom_bride_name || wedding.bride_name,
+          groomName: cust.custom_groom_name || wedding.groom_name,
           date: cust.custom_date || formatIsoDateFriendly(wedding.date) || 'TBD',
           venue: cust.custom_venue || wedding.venue || 'TBD',
           message: cust.message,
@@ -62,32 +62,6 @@ export default function PreviewScreen() {
     }
     loadData();
   }, [db, id]);
-
-  const handleSimulateSend = async () => {
-    const queued = recipients.filter(r => r.status === 'QUEUED');
-    if (queued.length === 0) {
-      Alert.alert('No Queued Guests', 'All guests have already been sent this invitation.');
-      return;
-    }
-    
-    // Simulate sending process
-    Alert.alert('Sending...', `Sending to ${queued.length} guests. This might take a moment.`, [], { cancelable: false });
-    
-    for (const r of queued) {
-      await PatrikaService.updateRecipientStatus(db, r.id, 'SENDING');
-    }
-    const sendingRecs = await PatrikaService.getRecipientsForInvitation(db, id);
-    setRecipients(sendingRecs);
-    
-    setTimeout(async () => {
-      for (const r of queued) {
-        await PatrikaService.updateRecipientStatus(db, r.id, 'SENT');
-      }
-      const sentRecs = await PatrikaService.getRecipientsForInvitation(db, id);
-      setRecipients(sentRecs);
-      Alert.alert('Success', `Successfully sent ${queued.length} invitations.`);
-    }, 2000);
-  };
 
   const handleDelete = () => {
     Alert.alert("Delete Design", "Are you sure you want to delete this Patrika design?", [

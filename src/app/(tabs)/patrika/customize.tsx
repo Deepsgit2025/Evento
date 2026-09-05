@@ -63,6 +63,8 @@ export default function CustomizeScreen() {
             setTitle(existing.title);
             try {
               const cust: PatrikaCustomization = JSON.parse(existing.customization_data);
+              if (cust.custom_bride_name) setBrideName(cust.custom_bride_name);
+              if (cust.custom_groom_name) setGroomName(cust.custom_groom_name);
               if (cust.custom_date) setDate(cust.custom_date);
               if (cust.custom_venue) setVenue(cust.custom_venue);
               if (cust.message) setMessage(cust.message);
@@ -126,6 +128,8 @@ export default function CustomizeScreen() {
         template_id: template.id,
         title: title.trim(),
         customization_data: {
+          custom_bride_name: brideName,
+          custom_groom_name: groomName,
           custom_date: date,
           custom_venue: venue,
           message: message,
@@ -204,15 +208,31 @@ export default function CustomizeScreen() {
             value={title}
             onChangeText={setTitle}
           />
-          
+
           <TextInput
-            label="Date text"
+            label="Bride Name"
+            placeholder="e.g. Priya"
+            value={brideName}
+            onChangeText={setBrideName}
+          />
+
+          <TextInput
+            label="Groom Name"
+            placeholder="e.g. Rahul"
+            value={groomName}
+            onChangeText={setGroomName}
+          />
+
+          <TextInput
+            label="Date"
+            placeholder="e.g. 24 October 2026"
             value={date}
             onChangeText={setDate}
           />
 
           <TextInput
-            label="Venue text"
+            label="Venue / Destination"
+            placeholder="e.g. Taj Palace, Mumbai"
             value={venue}
             onChangeText={setVenue}
           />

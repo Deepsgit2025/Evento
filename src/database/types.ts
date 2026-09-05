@@ -202,8 +202,9 @@ export interface Task {
   description: string | null;
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   due_date: string | null;
-  /** Unix seconds combining due_date + due_time; used to schedule the reminder. */
+  /** Unix seconds combining due_date + due_time; the alarm fires this many minutes earlier. */
   reminder_time: number | null;
+  reminder_lead_minutes: number | null;
   reminder_style: 'ALARM' | 'MESSAGE' | null;
   reminder_id: string | null;
   created_at: number;
@@ -214,6 +215,9 @@ export interface Dance {
   id: string;
   wedding_id: string;
   title: string;
+  /** Whose dance it is, e.g. "Bride's cousins" or "Sharma family". */
+  group_name: string | null;
+  member_count: number | null;
   performers: string | null;
   song_title: string | null;
   song_artist: string | null;

@@ -632,6 +632,26 @@ export const setupMigrations = async (db: SQLite.SQLiteDatabase) => {
           CREATE INDEX IF NOT EXISTS idx_dances_wedding ON dances(wedding_id);
         `);
       }
+    },
+    {
+      name: '024_dance_groups',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        try {
+          await database.execAsync(`ALTER TABLE dances ADD COLUMN group_name TEXT`);
+        } catch(e) {}
+        try {
+          await database.execAsync(`ALTER TABLE dances ADD COLUMN member_count INTEGER`);
+        } catch(e) {}
+      }
+    },
+    {
+      name: '025_task_reminder_lead',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        // How many minutes before the task time the alarm should go off.
+        try {
+          await database.execAsync(`ALTER TABLE tasks ADD COLUMN reminder_lead_minutes INTEGER DEFAULT 5`);
+        } catch(e) {}
+      }
     }
   ];
 

@@ -7,7 +7,15 @@ import { ScreenContainer, Typography, TextInput, Button, DateField } from '../..
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
-import { TaskService } from '../../../services/task';
+import { TaskService, DEFAULT_REMINDER_LEAD_MINUTES } from '../../../services/task';
+
+const LEAD_OPTIONS = [
+  { minutes: 0, label: 'At time' },
+  { minutes: 5, label: '5 min before' },
+  { minutes: 30, label: '30 min before' },
+  { minutes: 60, label: '1 hour before' },
+  { minutes: 1440, label: '1 day before' },
+];
 
 export default function AddTaskScreen() {
   const router = useRouter();
@@ -20,7 +28,8 @@ export default function AddTaskScreen() {
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(false);
-  const [reminderStyle, setReminderStyle] = useState<'ALARM' | 'MESSAGE'>('MESSAGE');
+  const [reminderStyle, setReminderStyle] = useState<'ALARM' | 'MESSAGE'>('ALARM');
+  const [leadMinutes, setLeadMinutes] = useState<number>(DEFAULT_REMINDER_LEAD_MINUTES);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,6 +54,7 @@ export default function AddTaskScreen() {
               setReminderEnabled(true);
             }
             if (existing.reminder_style) setReminderStyle(existing.reminder_style);
+            if (existing.reminder_lead_minutes != null) setLeadMinutes(existing.reminder_lead_minutes);
           }
         }
       } finally {
@@ -77,6 +87,7 @@ export default function AddTaskScreen() {
         description: description.trim() || null,
         due_date: dueDate || null,
         reminder_time: reminderTime,
+        reminder_lead_minutes: leadMinutes,
         reminder_style: reminderEnabled ? reminderStyle : null,
       };
       if (editId) {
@@ -129,6 +140,27 @@ export default function AddTaskScreen() {
           <>
             <DateField label="Due Date" value={dueDate} onChange={setDueDate} minimumDate={new Date()} />
             <DateField label="Due Time" value={dueTime} onChange={setDueTime} mode="time" />
+
+            <Typography variant="caption" weight="medium" color={theme.colors.textSecondary} style={{ marginBottom: 8, marginLeft: 4 }}>
+              Alert me
+            </Typography>
+            <View style={styles.leadRow}>
+              {LEAD_OPTIONS.map(option => (
+                <Pressable
+                  key={option.minutes}
+                  style={[styles.leadChip, leadMinutes === option.minutes && styles.leadChipSelected]}
+                  onPress={() => setLeadMinutes(option.minutes)}
+                >
+                  <Typography
+                    variant="caption"
+                    weight={leadMinutes === option.minutes ? 'semibold' : 'regular'}
+                    color={leadMinutes === option.minutes ? theme.colors.primary : theme.colors.textSecondary}
+                  >
+                    {option.label}
+                  </Typography>
+                </Pressable>
+              ))}
+            </View>
 
             <Typography variant="caption" weight="medium" color={theme.colors.textSecondary} style={{ marginBottom: 8, marginLeft: 4 }}>
               Remind me with
@@ -201,6 +233,24 @@ const styles = StyleSheet.create({
   },
   switchThumbOn: {
     transform: [{ translateX: 20 }],
+  },
+  leadRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.lg,
+  },
+  leadChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: theme.radii.full,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+  },
+  leadChipSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary + '10',
   },
   styleRow: {
     flexDirection: 'row',

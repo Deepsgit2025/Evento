@@ -4,6 +4,8 @@ import { Invitation, InvitationRecipient, InvitationRecipientStatus, Guest, Even
 
 export interface PatrikaCustomization {
   event_id?: string;
+  custom_bride_name?: string;
+  custom_groom_name?: string;
   custom_date?: string;
   custom_venue?: string;
   message: string;

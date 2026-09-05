@@ -111,6 +111,16 @@ export default function DancesScreen() {
 
               <View style={styles.cardBody}>
                 <Typography variant="body" weight="semibold">{item.title}</Typography>
+                {(item.group_name || item.member_count != null) && (
+                  <View style={styles.songRow}>
+                    <Ionicons name="people-outline" size={13} color={theme.colors.textSecondary} />
+                    <Typography variant="caption" color={theme.colors.textSecondary} style={{ marginLeft: 4 }}>
+                      {[item.group_name, item.member_count != null ? `${item.member_count} members` : null]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </Typography>
+                  </View>
+                )}
                 {item.performers && (
                   <Typography variant="caption" color={theme.colors.textSecondary}>{item.performers}</Typography>
                 )}

@@ -321,8 +321,8 @@ export default function HomeTab() {
           <View style={s.quickActionsContainer}>
             {renderQuickAction("person-add", "Add Guest", "/(tabs)/guests", [theme.colors.cardRose, theme.colors.primary])}
             {renderQuickAction("mail-open", "Patrika", "/(tabs)/patrika", [theme.colors.cardPurple, theme.colors.gradientEnd])}
-            {renderQuickAction("bed", "Rooms", "/(tabs)/rooms", [theme.colors.cardGold, theme.colors.accent])}
-            {renderQuickAction("calendar", "Events", "/(tabs)/events", [theme.colors.cardGreen, theme.colors.success])}
+            {renderQuickAction("checkbox", "Checklist", "/(tabs)/tasks", [theme.colors.cardGreen, theme.colors.success])}
+            {renderQuickAction("musical-notes", "Dances", "/(tabs)/dances", [theme.colors.cardGold, theme.colors.accent])}
           </View>
 
           {/* AI Assistant Banner */}

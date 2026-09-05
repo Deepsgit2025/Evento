@@ -6,6 +6,8 @@ import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../..
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
+import { getWedding } from '../../../../services/wedding';
+import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails } from '../../../../services/invitationDocument';
 import { InvitationCampaign, InvitationRecipient } from '../../../../database/types';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -65,73 +67,56 @@ export default function CampaignDetailsScreen() {
 
       const inv = await db.getFirstAsync<any>(`SELECT * FROM invitations WHERE id = ?`, [campaign.invitation_id]);
       const custData = inv && inv.customization_data ? JSON.parse(inv.customization_data) : {};
-      
-      const messageRaw = custData.message || 'We invite you to share our joy';
-      let formattedMessage = messageRaw.replace(/{guest name}/gi, guest.full_name).replace(/\n/g, '<br/>');
-      
-      const html = `
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-          <style>
-            body {
-              font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-              background-color: #fdfbf7;
-              color: #4a4a4a;
-              text-align: center;
-              padding: 40px;
-              margin: 20px;
-              border: 8px solid #d4af37;
-              border-radius: 12px;
-            }
-            .header { color: #800020; font-size: 32px; font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
-            .subheader { color: #d4af37; font-size: 20px; font-weight: normal; margin-bottom: 30px; letter-spacing: 1px; }
-            .content { font-size: 18px; line-height: 1.8; margin-bottom: 20px; }
-            .guest-name { font-size: 26px; font-weight: bold; margin: 25px 0; color: #222; border-bottom: 2px solid #d4af37; display: inline-block; padding-bottom: 5px; font-style: italic; }
-            .footer { margin-top: 50px; font-size: 16px; font-style: italic; color: #888; }
-            .flourish { font-size: 30px; color: #d4af37; margin: 15px 0; }
-          </style>
-        </head>
-        <body>
-          <div class="header">Wedding Invitation</div>
-          <div class="subheader">Join Us In Our Joy</div>
-          <div class="content">Dear</div>
-          <div class="guest-name">${guest.full_name}</div>
-          <div class="flourish">❧</div>
-          <div class="content">${formattedMessage}</div>
-          <div class="flourish">❧</div>
-          <div class="footer">Please let us know if you will be attending.</div>
-        </body>
-      </html>
-      `;
-      
+      const wedding = await getWedding(db, campaign.wedding_id);
+      const details = resolveInvitationDetails(wedding, custData);
+
+      const confirmStatus = () => {
+        setTimeout(() => {
+          Alert.alert('Confirm Status', `Did you successfully send the invitation to ${guest.full_name}?`, [
+            { text: 'No (Failed)', onPress: async () => { await WhatsAppService.markRecipientFailed(db, nextRecipient.id); loadData(); } },
+            { text: 'Yes (Sent)', onPress: async () => { await WhatsAppService.markRecipientSent(db, nextRecipient.id); loadData(); } }
+          ]);
+        }, 1000);
+      };
+
       Alert.alert(
-        'Generate Invitation',
-        `Ready to generate a beautiful PDF invitation for ${guest.full_name}.`,
+        'Send Invitation',
+        `How do you want to send this to ${guest.full_name}?`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
-            text: 'Generate & Share',
+            text: 'WhatsApp',
+            onPress: async () => {
+              if (!guest.phone) {
+                Alert.alert('No Phone Number', `${guest.full_name} has no phone number saved, so WhatsApp can't be opened for them.`);
+                return;
+              }
+              setIsDispatching(true);
+              const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name));
+              setIsDispatching(false);
+              if (opened) {
+                confirmStatus();
+              } else {
+                Alert.alert('Could not open WhatsApp', 'Make sure WhatsApp is installed on this device.');
+              }
+            }
+          },
+          {
+            text: 'PDF',
             onPress: async () => {
               try {
                 setIsDispatching(true);
+                const html = buildInvitationHtml(details, guest.full_name);
                 const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 }); // Standard Letter size
-                
+
                 await Sharing.shareAsync(uri, {
                   UTI: '.pdf',
                   mimeType: 'application/pdf',
                   dialogTitle: `Share Invitation with ${guest.full_name}`
                 });
-                
-                setIsDispatching(false);
 
-                // Ask if successful
-                setTimeout(() => {
-                  Alert.alert('Confirm Status', `Did you successfully share the invitation with ${guest.full_name}?`, [
-                    { text: 'No (Failed)', onPress: async () => { await WhatsAppService.markRecipientFailed(db, nextRecipient.id); loadData(); } },
-                    { text: 'Yes (Sent)', onPress: async () => { await WhatsAppService.markRecipientSent(db, nextRecipient.id); loadData(); } }
-                  ]);
-                }, 1000);
+                setIsDispatching(false);
+                confirmStatus();
               } catch (err: any) {
                 setIsDispatching(false);
                 Alert.alert('Error', err.message || 'Failed to share PDF');

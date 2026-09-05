@@ -18,6 +18,8 @@ export default function AddDanceScreen() {
 
   const [weddingId, setWeddingId] = useState('');
   const [title, setTitle] = useState('');
+  const [groupName, setGroupName] = useState('');
+  const [memberCount, setMemberCount] = useState('');
   const [performers, setPerformers] = useState('');
   const [songTitle, setSongTitle] = useState('');
   const [songArtist, setSongArtist] = useState('');
@@ -45,6 +47,8 @@ export default function AddDanceScreen() {
           const existing = await DanceService.getDanceById(db, editId);
           if (existing) {
             setTitle(existing.title);
+            setGroupName(existing.group_name || '');
+            setMemberCount(existing.member_count != null ? String(existing.member_count) : '');
             setPerformers(existing.performers || '');
             setSongTitle(existing.song_title || '');
             setSongArtist(existing.song_artist || '');
@@ -85,8 +89,11 @@ export default function AddDanceScreen() {
 
     setIsSaving(true);
     try {
+      const parsedMemberCount = parseInt(memberCount, 10);
       const dto = {
         title: title.trim(),
+        group_name: groupName.trim() || null,
+        member_count: Number.isFinite(parsedMemberCount) ? parsedMemberCount : null,
         performers: performers.trim() || null,
         song_title: songTitle.trim() || null,
         song_artist: songArtist.trim() || null,
@@ -133,7 +140,20 @@ export default function AddDanceScreen() {
           </View>
         )}
 
-        <TextInput label="Performers" placeholder="e.g. Bride & Father" value={performers} onChangeText={setPerformers} />
+        <TextInput
+          label="Whose Dance / Group"
+          placeholder="e.g. Bride's cousins, Sharma family"
+          value={groupName}
+          onChangeText={setGroupName}
+        />
+        <TextInput
+          label="Number of Members"
+          placeholder="e.g. 8"
+          value={memberCount}
+          onChangeText={(text) => setMemberCount(text.replace(/[^0-9]/g, ''))}
+          keyboardType="number-pad"
+        />
+        <TextInput label="Performer Names" placeholder="e.g. Priya, Anjali, Rohan" value={performers} onChangeText={setPerformers} />
         <TextInput label="Song Title" placeholder="e.g. Perfect" value={songTitle} onChangeText={setSongTitle} />
         <TextInput label="Artist" placeholder="e.g. Ed Sheeran" value={songArtist} onChangeText={setSongArtist} />
         <TextInput label="Choreographer / Instructor" placeholder="Optional" value={choreographer} onChangeText={setChoreographer} />
