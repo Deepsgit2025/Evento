@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
 import { getWedding } from '../../../../services/wedding';
+import { EventService } from '../../../../services/event';
 import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails } from '../../../../services/invitationDocument';
 import { InvitationCampaign, InvitationRecipient } from '../../../../database/types';
 import * as Print from 'expo-print';
@@ -69,6 +70,7 @@ export default function CampaignDetailsScreen() {
       const custData = inv && inv.customization_data ? JSON.parse(inv.customization_data) : {};
       const wedding = await getWedding(db, campaign.wedding_id);
       const details = resolveInvitationDetails(wedding, custData);
+      const weddingEvents = await EventService.getEvents(db, campaign.wedding_id);
 
       const confirmStatus = () => {
         setTimeout(() => {
@@ -92,7 +94,7 @@ export default function CampaignDetailsScreen() {
                 return;
               }
               setIsDispatching(true);
-              const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name));
+              const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name, weddingEvents));
               setIsDispatching(false);
               if (opened) {
                 confirmStatus();
@@ -106,7 +108,7 @@ export default function CampaignDetailsScreen() {
             onPress: async () => {
               try {
                 setIsDispatching(true);
-                const html = buildInvitationHtml(details, guest.full_name);
+                const html = buildInvitationHtml(details, guest.full_name, weddingEvents);
                 const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 }); // Standard Letter size
 
                 await Sharing.shareAsync(uri, {

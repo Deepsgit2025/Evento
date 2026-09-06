@@ -53,7 +53,7 @@ export default function CustomizeScreen() {
         setGroomName(wedding.groom_name);
         setDate(formatIsoDateFriendly(wedding.date) || 'To be decided');
         setVenue(wedding.venue || 'To be decided');
-        setMessage('We invite you to share our joy');
+        setMessage('दोनों परिवारों के स्नेह आशीर्वाद सहित, हम आपको हमारे विवाह में सादर आमंत्रित करते हैं।');
         setTitle(`${template?.name} Design`);
         if (wedding.cover_photo_uri) setPhotoUri(wedding.cover_photo_uri);
 

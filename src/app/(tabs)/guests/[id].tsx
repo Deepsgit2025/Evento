@@ -10,6 +10,7 @@ import { GroupService } from '../../../services/group';
 import { RoomAssignmentService } from '../../../services/roomAssignment';
 import { PatrikaService } from '../../../services/patrika';
 import { EventGuestService } from '../../../services/eventGuest';
+import { EventService } from '../../../services/event';
 import { WhatsAppService } from '../../../services/whatsapp';
 import { getWedding } from '../../../services/wedding';
 import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails } from '../../../services/invitationDocument';
@@ -97,11 +98,12 @@ export default function GuestProfileScreen() {
     try {
       const custData = patrika.customization_data ? JSON.parse(patrika.customization_data) : {};
       const details = resolveInvitationDetails(wedding, custData);
+      const weddingEvents = await EventService.getEvents(db, guest.wedding_id);
 
       const sharePdf = async () => {
         try {
           setIsDispatching(true);
-          const html = buildInvitationHtml(details, guest.full_name);
+          const html = buildInvitationHtml(details, guest.full_name, weddingEvents);
           const Print = await import('expo-print');
           const Sharing = await import('expo-sharing');
           const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 });
@@ -119,7 +121,7 @@ export default function GuestProfileScreen() {
           return;
         }
         setIsDispatching(true);
-        const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name));
+        const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name, weddingEvents));
         setIsDispatching(false);
         if (!opened) {
           Alert.alert('Could not open WhatsApp', 'Make sure WhatsApp is installed on this device.');
