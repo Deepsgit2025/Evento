@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, TextInput, Button, Card } from '../../components/ui';
+import * as Crypto from 'expo-crypto';
+import { ScreenContainer, Typography, TextInput, Button, Card, DateField } from '../../components/ui';
 import { theme } from '../../theme';
 import { setupAccountAndWedding } from '../../services/wedding';
 import { AuthService } from '../../services/auth';
@@ -36,7 +37,7 @@ export default function JoinWeddingScreen() {
       // We pass the session data back into setup to create the wedding
       // Since they are already signed up, we can modify setupAccountAndWedding or just create it directly here.
       // Let's create it directly here for simplicity since they are already a user.
-      const weddingId = crypto.randomUUID();
+      const weddingId = Crypto.randomUUID();
       const timestamp = Math.floor(Date.now() / 1000);
       
       await db.withTransactionAsync(async () => {
@@ -46,7 +47,7 @@ export default function JoinWeddingScreen() {
           [weddingId, brideName, groomName, weddingDate || null, timestamp, timestamp]
         );
         
-        const memberId = crypto.randomUUID();
+        const memberId = Crypto.randomUUID();
         await db.runAsync(
           `INSERT INTO wedding_members (id, user_id, wedding_id, role, created_at) VALUES (?, ?, ?, ?, ?)`,
           [memberId, session.id, weddingId, 'OWNER', timestamp]
@@ -86,7 +87,7 @@ export default function JoinWeddingScreen() {
           <Card style={styles.card}>
             <TextInput label="Bride Name" placeholder="e.g. Priya" value={brideName} onChangeText={setBrideName} />
             <TextInput label="Groom Name" placeholder="e.g. Rahul" value={groomName} onChangeText={setGroomName} />
-            <TextInput label="Wedding Date" placeholder="e.g. 24 Oct 2026" value={weddingDate} onChangeText={setWeddingDate} />
+            <DateField label="Wedding Date" value={weddingDate} onChange={setWeddingDate} minimumDate={new Date()} />
             <Button label="Create & Continue" onPress={handleCreate} isLoading={isLoading} style={{ marginTop: theme.spacing.lg }} />
             <Button label="Back" variant="ghost" onPress={() => setMode('options')} disabled={isLoading} style={{ marginTop: theme.spacing.md }} />
           </Card>

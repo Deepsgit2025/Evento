@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Switch, ScrollView } from 'react-native';
+import { View, StyleSheet, Switch, ScrollView, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { SettingsService, NotificationPrefKey } from '../../../services/settings';
+import { ReminderService } from '../../../services/reminder';
 
 export default function NotificationSettingsScreen() {
   const router = useRouter();
@@ -97,44 +98,68 @@ export default function NotificationSettingsScreen() {
           Control which types of alerts you receive. These settings sync across all your devices.
         </Typography>
 
+        {Platform.OS === 'android' && (
+          <Card style={styles.fixCard}>
+            <View style={styles.toggleRow}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '1A' }]}>
+                <Ionicons name="alarm-outline" size={24} color={theme.colors.primary} />
+              </View>
+              <View style={styles.toggleText}>
+                <Typography variant="body" weight="medium">Alarms not ringing on time?</Typography>
+                <Typography variant="caption" color={theme.colors.textSecondary}>
+                  Android needs a separate "Alarms & reminders" permission for checklist and dance
+                  alerts to ring exactly when scheduled, not just whenever the system gets to it.
+                </Typography>
+              </View>
+            </View>
+            <Button
+              label="Open Alarm Settings"
+              variant="outline"
+              icon="settings-outline"
+              onPress={() => ReminderService.openExactAlarmSettings()}
+              style={{ marginHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg }}
+            />
+          </Card>
+        )}
+
         <Card style={styles.card}>
           {renderToggle(
-            'pref_notify_event', 
-            'Event Reminders', 
-            'Alerts before your events begin', 
-            'calendar.badge.clock', 
+            'pref_notify_event',
+            'Event Reminders',
+            'Alerts before your events begin',
+            'calendar-outline',
             theme.colors.primary
           )}
           <View style={styles.divider} />
           {renderToggle(
-            'pref_notify_payment', 
-            'Payment Reminders', 
-            'Alerts for pending vendor payments', 
-            'creditcard.trianglebadge.exclamationmark', 
+            'pref_notify_payment',
+            'Payment Reminders',
+            'Alerts for pending vendor payments',
+            'card-outline',
             theme.colors.error
           )}
           <View style={styles.divider} />
           {renderToggle(
-            'pref_notify_invitation', 
-            'Invitation Alerts', 
-            'Updates on WhatsApp sending status', 
-            'envelope.badge', 
+            'pref_notify_invitation',
+            'Invitation Alerts',
+            'Updates on WhatsApp sending status',
+            'mail-outline',
             theme.colors.warning
           )}
           <View style={styles.divider} />
           {renderToggle(
-            'pref_notify_sync', 
-            'Sync Issues', 
-            'Alerts when offline changes fail to sync', 
-            'arrow.triangle.2.circlepath.circle', 
+            'pref_notify_sync',
+            'Sync Issues',
+            'Alerts when offline changes fail to sync',
+            'sync-outline',
             theme.colors.textSecondary
           )}
           <View style={styles.divider} />
           {renderToggle(
-            'pref_notify_general', 
-            'General Reminders', 
-            'Custom alerts you set manually', 
-            'bell.fill', 
+            'pref_notify_general',
+            'General Reminders',
+            'Custom alerts you set manually',
+            'notifications-outline',
             theme.colors.primary
           )}
         </Card>
@@ -169,6 +194,13 @@ const styles = StyleSheet.create({
   card: {
     padding: 0,
     overflow: 'hidden',
+  },
+  fixCard: {
+    padding: 0,
+    overflow: 'hidden',
+    marginBottom: theme.spacing.lg,
+    borderColor: theme.colors.primary + '40',
+    borderWidth: 1,
   },
   toggleRow: {
     flexDirection: 'row',
