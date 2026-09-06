@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Pressable, Linking } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { TaskService, DEFAULT_REMINDER_LEAD_MINUTES } from '../../../services/task';
+import { ReminderService } from '../../../services/reminder';
 
 const LEAD_OPTIONS = [
   { minutes: 0, label: 'At time' },
@@ -71,6 +72,21 @@ export default function AddTaskScreen() {
     if (reminderEnabled && (!dueDate || !dueTime)) {
       Alert.alert('Error', 'Please pick both a date and a time for the reminder.');
       return;
+    }
+
+    if (reminderEnabled) {
+      const hasPermission = await ReminderService.requestPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          'Notifications are turned off',
+          'Evento can\'t ring an alarm or send a message without notification permission. Enable it in your phone\'s Settings > Apps > Evento > Notifications, then try again.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
     }
 
     let reminderTime: number | null = null;

@@ -218,20 +218,20 @@ export default function GuestProfileScreen() {
           <View style={styles.listRow}>
             <Ionicons name="people-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
             <Typography variant="body" style={styles.rowLabel}>Party Size</Typography>
-            <Typography variant="body" color={theme.colors.textSecondary}>{guest.party_size} {guest.party_size === 1 ? 'person' : 'people'}</Typography>
+            <Typography variant="body" color={theme.colors.textSecondary} style={styles.rowValue}>{guest.party_size} {guest.party_size === 1 ? 'person' : 'people'}</Typography>
           </View>
 
           <View style={[styles.listRow, {borderBottomWidth: guest.phone || guest.notes ? 1 : 0}]}>
             <Ionicons name="mail-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
             <Typography variant="body" style={styles.rowLabel}>Wedding RSVP</Typography>
-            <Typography variant="body" color={theme.colors.textSecondary}>{rsvpDisplay}</Typography>
+            <Typography variant="body" color={theme.colors.textSecondary} style={styles.rowValue}>{rsvpDisplay}</Typography>
           </View>
 
           {guest.phone && (
             <View style={[styles.listRow, {borderBottomWidth: guest.notes ? 1 : 0}]}>
               <Ionicons name="call-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <Typography variant="body" style={styles.rowLabel}>Phone</Typography>
-              <Typography variant="body" color={theme.colors.textSecondary}>{guest.phone}</Typography>
+              <Typography variant="body" color={theme.colors.textSecondary} style={styles.rowValue}>{guest.phone}</Typography>
             </View>
           )}
 
@@ -424,7 +424,11 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   rowLabel: {
+    marginRight: 12,
+  },
+  rowValue: {
     flex: 1,
+    textAlign: 'right',
   },
   deleteButton: {
     marginTop: theme.spacing.xxl,

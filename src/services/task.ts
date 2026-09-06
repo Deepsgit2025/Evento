@@ -27,8 +27,15 @@ async function scheduleTaskReminder(
 ): Promise<string | null> {
   if (!data.reminder_time || !data.reminder_style) return null;
 
+  const now = Math.floor(Date.now() / 1000);
   const lead = data.reminder_lead_minutes ?? DEFAULT_REMINDER_LEAD_MINUTES;
-  const fireAt = data.reminder_time - lead * 60;
+  let fireAt = data.reminder_time - lead * 60;
+  // If the lead time pushes the alert before now but the task itself is
+  // still upcoming (e.g. due in 2 minutes with a 5-minute lead), fire
+  // almost immediately instead of silently never scheduling anything.
+  if (fireAt <= now && data.reminder_time > now) {
+    fireAt = now + 3;
+  }
   const notes = lead > 0
     ? `Starts in ${lead} minutes${data.description ? ` — ${data.description}` : ''}`
     : data.description || null;

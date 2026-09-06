@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Pressable, Linking } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { DanceService } from '../../../services/dance';
+import { ReminderService } from '../../../services/reminder';
 
 const SUGGESTIONS = ['First Dance', 'Father-Daughter Dance', 'Mother-Son Dance', 'Bridal Party Dance', 'Sangeet Performance'];
 
@@ -78,6 +79,21 @@ export default function AddDanceScreen() {
     if (reminderEnabled && (!practiceDate || !practiceTime)) {
       Alert.alert('Error', 'Please pick both a date and a time for the practice reminder.');
       return;
+    }
+
+    if (reminderEnabled) {
+      const hasPermission = await ReminderService.requestPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          'Notifications are turned off',
+          'Evento can\'t ring an alarm or send a message without notification permission. Enable it in your phone\'s Settings > Apps > Evento > Notifications, then try again.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
     }
 
     let practiceTimestamp: number | null = null;

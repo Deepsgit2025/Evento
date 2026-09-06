@@ -11,6 +11,8 @@ export interface PatrikaCustomization {
   message: string;
   cover_photo_uri?: string;
   accent_color?: string;
+  /** Theme id for the multi-page Hindi PDF invitation (see invitationThemes.ts). */
+  pdf_theme?: string;
   fontScale?: number;
 }
 

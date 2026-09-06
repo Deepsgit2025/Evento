@@ -11,6 +11,7 @@ import { PatrikaService, PatrikaDTO, PatrikaCustomization } from '../../../servi
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { formatIsoDateFriendly } from '../../../utils/date';
+import { INVITATION_THEMES, DEFAULT_INVITATION_THEME_ID } from '../../../services/invitationThemes';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -32,6 +33,7 @@ export default function CustomizeScreen() {
   const [fontScale, setFontScale] = useState(1.0);
   const [photoUri, setPhotoUri] = useState<string | undefined>(undefined);
   const [accentColor, setAccentColor] = useState<string>(ACCENT_COLORS[0]);
+  const [pdfTheme, setPdfTheme] = useState<string>(DEFAULT_INVITATION_THEME_ID);
   const supportsPhoto = templateId === 't7' || templateId === 't10';
 
   const [isLoading, setIsLoading] = useState(true);
@@ -71,6 +73,7 @@ export default function CustomizeScreen() {
               if (cust.fontScale) setFontScale(cust.fontScale);
               if (cust.cover_photo_uri) setPhotoUri(cust.cover_photo_uri);
               if (cust.accent_color) setAccentColor(cust.accent_color);
+              if (cust.pdf_theme) setPdfTheme(cust.pdf_theme);
             } catch (e) {}
           }
         }
@@ -136,6 +139,7 @@ export default function CustomizeScreen() {
           fontScale: fontScale,
           cover_photo_uri: photoUri,
           accent_color: accentColor,
+          pdf_theme: pdfTheme,
         }
       };
 
@@ -185,7 +189,7 @@ export default function CustomizeScreen() {
           )}
 
           <View style={{ marginBottom: 20 }}>
-            <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>Accent Color</Typography>
+            <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>Card Accent Color</Typography>
             <View style={styles.colorRow}>
               {ACCENT_COLORS.map(color => (
                 <TouchableOpacity
@@ -200,6 +204,37 @@ export default function CustomizeScreen() {
                   {accentColor === color && <Ionicons name="checkmark" size={16} color="#fff" />}
                 </TouchableOpacity>
               ))}
+            </View>
+          </View>
+
+          <View style={{ marginBottom: 20 }}>
+            <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>
+              PDF Invitation Theme (Hindi, 3-page card)
+            </Typography>
+            <View style={styles.themeGrid}>
+              {INVITATION_THEMES.map(t => {
+                const isSelected = pdfTheme === t.id;
+                return (
+                  <TouchableOpacity
+                    key={t.id}
+                    onPress={() => setPdfTheme(t.id)}
+                    style={[styles.themeCard, isSelected && styles.themeCardSelected]}
+                  >
+                    <View style={styles.themeSwatchRow}>
+                      <View style={[styles.themeSwatchHalf, { backgroundColor: t.gold }]} />
+                      <View style={[styles.themeSwatchHalf, { backgroundColor: t.lightBg, borderColor: t.gold, borderWidth: 1 }]} />
+                    </View>
+                    <Typography variant="caption" weight={isSelected ? 'semibold' : 'medium'} style={{ marginTop: 6 }}>
+                      {t.name}
+                    </Typography>
+                    {isSelected && (
+                      <View style={styles.themeCheckBadge}>
+                        <Ionicons name="checkmark" size={12} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
@@ -323,6 +358,46 @@ const styles = StyleSheet.create({
   },
   colorSwatchSelected: {
     borderColor: theme.colors.text,
+  },
+  themeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 12,
+  },
+  themeCard: {
+    width: 96,
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: theme.radii.md,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+    position: 'relative',
+  },
+  themeCardSelected: {
+    borderColor: theme.colors.primary,
+  },
+  themeSwatchRow: {
+    flexDirection: 'row',
+    width: 60,
+    height: 34,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  themeSwatchHalf: {
+    flex: 1,
+  },
+  themeCheckBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formSection: {
     padding: theme.spacing.lg,

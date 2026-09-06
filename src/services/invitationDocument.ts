@@ -1,5 +1,6 @@
 import { Event, Wedding } from '../database/types';
 import { PatrikaCustomization } from './patrika';
+import { InvitationTheme, getInvitationTheme, DEFAULT_INVITATION_THEME_ID } from './invitationThemes';
 
 /**
  * A traditional Indian wedding card is rarely a single page — it opens with
@@ -70,7 +71,7 @@ export interface InvitationDetails {
   date: string;
   venue: string;
   message: string;
-  accentColor: string;
+  theme: InvitationTheme;
 }
 
 /**
@@ -87,7 +88,7 @@ export function resolveInvitationDetails(
     date: customization.custom_date || formatIsoDateHindi(wedding?.date) || '',
     venue: customization.custom_venue || wedding?.venue || '',
     message: customization.message || '',
-    accentColor: customization.accent_color || '#C9A24B',
+    theme: getInvitationTheme(customization.pdf_theme || DEFAULT_INVITATION_THEME_ID),
   };
 }
 
@@ -135,7 +136,8 @@ const SHARED_STYLES = `
   .corner-br { bottom: 26px; right: 26px; }
 `;
 
-function pageChrome(accent: string, inner: string, background: string, extraCorners?: string): string {
+function pageChrome(theme: InvitationTheme, inner: string, background: string, extraCorners?: string): string {
+  const accent = escapeHtml(theme.gold);
   return `
     <div class="page" style="--accent: ${accent}; background: ${background};">
       <div class="frame"></div>
@@ -150,18 +152,19 @@ function pageChrome(accent: string, inner: string, background: string, extraCorn
 }
 
 /** Page 1: the auspicious opening — Shree Ganesh invocation, addressed to the guest by name. */
-function buildInvocationPage(accent: string, guestName: string): string {
+function buildInvocationPage(theme: InvitationTheme, guestName: string): string {
+  const goldMuted = escapeHtml(theme.goldMuted);
   const inner = `
     <style>
       .invocation-content {
         position: absolute; inset: 60px; display: flex; flex-direction: column;
         align-items: center; justify-content: center; text-align: center; color: #F5E9D3;
       }
-      .om { font-size: 64px; color: #F0CE7C; margin-bottom: 8px; }
-      .invocation-title { font-size: 22px; letter-spacing: 3px; color: #F0CE7C; margin-bottom: 28px; }
-      .shloka { font-size: 16px; line-height: 2; color: #EADFC6; max-width: 380px; margin-bottom: 40px; font-style: italic; }
-      .divider { width: 120px; height: 1px; background: #F0CE7C; margin: 24px 0; opacity: 0.7; }
-      .invite-label { font-size: 13px; letter-spacing: 4px; color: #D8C08E; margin-bottom: 10px; }
+      .om { font-size: 64px; color: var(--accent); margin-bottom: 8px; }
+      .invocation-title { font-size: 22px; letter-spacing: 3px; color: var(--accent); margin-bottom: 28px; }
+      .shloka { font-size: 16px; line-height: 2; color: ${goldMuted}; max-width: 380px; margin-bottom: 40px; font-style: italic; }
+      .divider { width: 120px; height: 1px; background: var(--accent); margin: 24px 0; opacity: 0.7; }
+      .invite-label { font-size: 13px; letter-spacing: 4px; color: ${goldMuted}; margin-bottom: 10px; }
       .guest-name { font-size: 32px; color: #FFF7E6; font-weight: 600; }
     </style>
     <div class="invocation-content">
@@ -176,11 +179,13 @@ function buildInvocationPage(accent: string, guestName: string): string {
       <div class="guest-name">${escapeHtml(guestName)} जी</div>
     </div>
   `;
-  return pageChrome(accent, inner, 'linear-gradient(160deg, #5C1220 0%, #7A1C29 55%, #5C1220 100%)');
+  return pageChrome(theme, inner, theme.darkBg);
 }
 
 /** Page 2: the couple, the date and the venue. */
-function buildMainInvitationPage(accent: string, details: InvitationDetails, guestName: string): string {
+function buildMainInvitationPage(theme: InvitationTheme, details: InvitationDetails, guestName: string): string {
+  const textDark = escapeHtml(theme.textDark);
+  const textMuted = escapeHtml(theme.textMuted);
   const coupleLine = details.brideName && details.groomName
     ? `<div class="couple">${escapeHtml(details.brideName)}<div class="amp">&#10086;</div>${escapeHtml(details.groomName)}</div>`
     : '';
@@ -200,19 +205,19 @@ function buildMainInvitationPage(accent: string, details: InvitationDetails, gue
     <style>
       .main-content {
         position: absolute; inset: 70px; display: flex; flex-direction: column;
-        align-items: center; text-align: center; color: #3B2C22;
+        align-items: center; text-align: center; color: ${textDark};
       }
       .eyebrow { font-size: 13px; letter-spacing: 4px; color: var(--accent); margin-bottom: 28px; }
-      .couple { font-size: 34px; font-weight: 700; color: #3B2C22; line-height: 1.5; }
+      .couple { font-size: 34px; font-weight: 700; color: ${textDark}; line-height: 1.5; }
       .amp { font-size: 16px; color: var(--accent); margin: 6px 0; }
-      .tagline { font-size: 15px; color: #6B584A; margin: 22px 0 26px; }
-      .message { font-size: 15px; line-height: 1.9; color: #4A3B30; max-width: 380px; margin-bottom: 26px; }
-      .guest-line { font-size: 14px; color: #6B584A; margin-bottom: 4px; }
-      .guest-name-main { font-size: 20px; font-weight: 600; color: #3B2C22; margin-bottom: 22px; }
+      .tagline { font-size: 15px; color: ${textMuted}; margin: 22px 0 26px; }
+      .message { font-size: 15px; line-height: 1.9; color: ${textDark}; max-width: 380px; margin-bottom: 26px; }
+      .guest-line { font-size: 14px; color: ${textMuted}; margin-bottom: 4px; }
+      .guest-name-main { font-size: 20px; font-weight: 600; color: ${textDark}; margin-bottom: 22px; }
       .info-row { display: flex; gap: 26px; margin-top: auto; }
       .info-card { border: 1px solid var(--accent); border-radius: 6px; padding: 14px 22px; min-width: 160px; }
       .info-label { font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; }
-      .info-value { font-size: 15px; color: #3B2C22; }
+      .info-value { font-size: 15px; color: ${textDark}; }
     </style>
     <div class="main-content">
       <div class="eyebrow">विवाह निमंत्रण</div>
@@ -227,11 +232,13 @@ function buildMainInvitationPage(accent: string, details: InvitationDetails, gue
       </div>
     </div>
   `;
-  return pageChrome(accent, inner, '#FFFBF3');
+  return pageChrome(theme, inner, theme.lightBg);
 }
 
 /** Page 3: the full programme of functions, in chronological order. */
-function buildProgrammePage(accent: string, events: Event[]): string {
+function buildProgrammePage(theme: InvitationTheme, events: Event[]): string {
+  const textDark = escapeHtml(theme.textDark);
+  const textMuted = escapeHtml(theme.textMuted);
   const rows = events.map(ev => {
     const label = ev.event_type && EVENT_TYPE_HINDI[ev.event_type] ? EVENT_TYPE_HINDI[ev.event_type] : escapeHtml(ev.name);
     const dateLine = ev.date ? formatIsoDateHindi(ev.date, true) : '';
@@ -260,19 +267,19 @@ function buildProgrammePage(accent: string, events: Event[]): string {
     <style>
       .programme-content {
         position: absolute; inset: 70px; display: flex; flex-direction: column;
-        align-items: center; color: #3B2C22;
+        align-items: center; color: ${textDark};
       }
       .programme-title { font-size: 22px; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; text-align: center; }
       .programme-subtitle { font-size: 13px; color: var(--accent); letter-spacing: 3px; margin-bottom: 30px; text-align: center; }
       .timeline { width: 100%; max-width: 420px; border-left: 2px solid var(--accent); padding-left: 22px; }
       .timeline-row { position: relative; margin-bottom: 26px; }
       .timeline-dot { position: absolute; left: -28px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
-      .event-name { font-size: 17px; font-weight: 700; color: #3B2C22; }
-      .event-meta { font-size: 13px; color: #6B584A; margin-top: 2px; }
-      .event-location { font-size: 13px; color: #6B584A; margin-top: 1px; }
-      .empty-note { font-size: 14px; color: #6B584A; margin-top: 60px; }
+      .event-name { font-size: 17px; font-weight: 700; color: ${textDark}; }
+      .event-meta { font-size: 13px; color: ${textMuted}; margin-top: 2px; }
+      .event-location { font-size: 13px; color: ${textMuted}; margin-top: 1px; }
+      .empty-note { font-size: 14px; color: ${textMuted}; margin-top: 60px; }
       .rsvp { margin-top: auto; text-align: center; }
-      .rsvp-line { font-size: 14px; color: #4A3B30; margin-bottom: 6px; }
+      .rsvp-line { font-size: 14px; color: ${textDark}; margin-bottom: 6px; }
       .rsvp-blessing { font-size: 13px; color: var(--accent); font-style: italic; }
     </style>
     <div class="programme-content">
@@ -285,7 +292,7 @@ function buildProgrammePage(accent: string, events: Event[]): string {
       </div>
     </div>
   `;
-  return pageChrome(accent, inner, '#FFFBF3');
+  return pageChrome(theme, inner, theme.lightBg);
 }
 
 /**
@@ -294,7 +301,7 @@ function buildProgrammePage(accent: string, events: Event[]): string {
  * lists the actual functions; it renders a placeholder line if omitted.
  */
 export function buildInvitationHtml(details: InvitationDetails, guestName: string, events: Event[] = []): string {
-  const accent = escapeHtml(details.accentColor);
+  const theme = details.theme;
 
   return `
   <html>
@@ -303,9 +310,9 @@ export function buildInvitationHtml(details: InvitationDetails, guestName: strin
       <style>${SHARED_STYLES}</style>
     </head>
     <body>
-      ${buildInvocationPage(accent, guestName)}
-      ${buildMainInvitationPage(accent, details, guestName)}
-      ${buildProgrammePage(accent, events)}
+      ${buildInvocationPage(theme, guestName)}
+      ${buildMainInvitationPage(theme, details, guestName)}
+      ${buildProgrammePage(theme, events)}
     </body>
   </html>
   `;
