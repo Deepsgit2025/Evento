@@ -1,11 +1,14 @@
 import * as SQLite from 'expo-sqlite';
 import * as Crypto from 'expo-crypto';
 import * as Notifications from 'expo-notifications';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { SyncEngine } from './syncEngine';
 import { SettingsService, NotificationPrefKey } from './settings';
 
 const ALARM_CHANNEL_ID = 'task-alarms';
+const EXACT_ALARM_PROMPTED_KEY = 'evento_exact_alarm_prompted';
 
 export interface Reminder {
   id: string;
@@ -43,7 +46,46 @@ export const ReminderService = {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    return finalStatus === 'granted';
+    const granted = finalStatus === 'granted';
+    if (granted) {
+      await this.ensureExactAlarmPermission();
+    }
+    return granted;
+  },
+
+  /**
+   * On Android 12+, posting a notification permission alone is not enough for
+   * it to ring on time: without the separate "exact alarm" permission, the OS
+   * silently downgrades scheduled alarms to inexact delivery, which it can
+   * batch and delay by many minutes — the reminder still gets "scheduled"
+   * with no error, it just doesn't ring when expected. That permission can't
+   * be requested via a runtime dialog; the user has to grant it from a
+   * specific system settings screen, so send them there once.
+   */
+  async ensureExactAlarmPermission() {
+    if (Platform.OS !== 'android' || typeof Platform.Version !== 'number' || Platform.Version < 31) return;
+    const alreadyPrompted = await SecureStore.getItemAsync(EXACT_ALARM_PROMPTED_KEY);
+    if (alreadyPrompted) return;
+    await SecureStore.setItemAsync(EXACT_ALARM_PROMPTED_KEY, '1');
+    await this.openExactAlarmSettings();
+  },
+
+  /**
+   * Always opens the "alarms & reminders" settings screen for this app,
+   * regardless of whether it's been shown before — used for the manual
+   * "Fix alarms not ringing" button in Settings, in case the one-time
+   * automatic prompt was dismissed or missed.
+   */
+  async openExactAlarmSettings() {
+    if (Platform.OS !== 'android' || typeof Platform.Version !== 'number' || Platform.Version < 31) return;
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.REQUEST_SCHEDULE_EXACT_ALARM,
+        { data: 'package:com.evento.app' }
+      );
+    } catch (e) {
+      // Some OEM ROMs don't support this action; nothing more we can do from JS.
+    }
   },
 
   /**

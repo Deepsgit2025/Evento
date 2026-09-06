@@ -19,7 +19,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.evento.app",
-      "permissions": ["VIBRATE"]
+      "permissions": ["VIBRATE", "SCHEDULE_EXACT_ALARM", "USE_EXACT_ALARM"]
     },
     "web": {
       "output": "single",

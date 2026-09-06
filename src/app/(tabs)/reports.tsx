@@ -189,7 +189,7 @@ export default function ReportsScreen() {
         <Card>
           <View style={styles.kpiGrid}>
             {renderKPI('Upcoming', event.upcoming_events.toString(), 'calendar', theme.colors.primary)}
-            {renderKPI('Completed', event.completed_events.toString(), 'checkmark.circle', theme.colors.success)}
+            {renderKPI('Completed', event.completed_events.toString(), 'checkmark-circle', theme.colors.success)}
           </View>
           
           {event.guests_per_event.length > 0 && (
