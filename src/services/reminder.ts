@@ -108,7 +108,10 @@ export const ReminderService = {
               referenceId: reminderData.reference_id
             },
           },
-          trigger: new Date(reminderData.reminder_time * 1000) as any,
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: new Date(reminderData.reminder_time * 1000),
+          },
         });
       }
     }
@@ -212,7 +215,10 @@ export const ReminderService = {
                 referenceId: remoteReminder.reference_id
               },
             },
-            trigger: new Date(remoteReminder.reminder_time * 1000) as any,
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DATE,
+              date: new Date(remoteReminder.reminder_time * 1000),
+            },
           });
         }
       } else {
