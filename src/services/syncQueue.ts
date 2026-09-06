@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 
 export interface SyncQueueItem {
   id: string;
@@ -22,7 +23,7 @@ export const SyncQueue = {
     entityId: string,
     operationType: 'CREATE' | 'UPDATE' | 'DELETE'
   ) {
-    const id = crypto.randomUUID();
+    const id = Crypto.randomUUID();
     
     // If there's an existing PENDING/FAILED operation for this exact entity, we can just let this new one run
     // Alternatively, we could coalesce updates (e.g. if UPDATE is queued and another UPDATE comes in, just keep one).

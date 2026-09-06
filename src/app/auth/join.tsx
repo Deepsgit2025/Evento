@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 import { ScreenContainer, Typography, TextInput, Button, Card, DateField } from '../../components/ui';
 import { theme } from '../../theme';
 import { setupAccountAndWedding } from '../../services/wedding';
@@ -36,7 +37,7 @@ export default function JoinWeddingScreen() {
       // We pass the session data back into setup to create the wedding
       // Since they are already signed up, we can modify setupAccountAndWedding or just create it directly here.
       // Let's create it directly here for simplicity since they are already a user.
-      const weddingId = crypto.randomUUID();
+      const weddingId = Crypto.randomUUID();
       const timestamp = Math.floor(Date.now() / 1000);
       
       await db.withTransactionAsync(async () => {
@@ -46,7 +47,7 @@ export default function JoinWeddingScreen() {
           [weddingId, brideName, groomName, weddingDate || null, timestamp, timestamp]
         );
         
-        const memberId = crypto.randomUUID();
+        const memberId = Crypto.randomUUID();
         await db.runAsync(
           `INSERT INTO wedding_members (id, user_id, wedding_id, role, created_at) VALUES (?, ?, ?, ?, ?)`,
           [memberId, session.id, weddingId, 'OWNER', timestamp]
