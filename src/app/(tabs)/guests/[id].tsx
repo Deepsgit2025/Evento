@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../components/ui';
@@ -13,7 +13,8 @@ import { EventGuestService } from '../../../services/eventGuest';
 import { EventService } from '../../../services/event';
 import { WhatsAppService } from '../../../services/whatsapp';
 import { getWedding } from '../../../services/wedding';
-import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails, resolveCoverPhotoDataUri } from '../../../services/invitationDocument';
+import { buildInvitationText, resolveInvitationDetails } from '../../../services/invitationDocument';
+import { buildLiveInviteUrl } from '../../../services/liveInvite';
 import { Guest, GuestGroup, RoomAssignment, InvitationRecipient, Event, Wedding } from '../../../database/types';
 
 export default function GuestProfileScreen() {
@@ -99,22 +100,7 @@ export default function GuestProfileScreen() {
       const custData = patrika.customization_data ? JSON.parse(patrika.customization_data) : {};
       const details = resolveInvitationDetails(wedding, custData);
       const weddingEvents = await EventService.getEvents(db, guest.wedding_id);
-
-      const sharePdf = async () => {
-        try {
-          setIsDispatching(true);
-          details.coverPhotoDataUri = await resolveCoverPhotoDataUri(custData.cover_photo_uri);
-          const html = buildInvitationHtml(details, guest.full_name, weddingEvents);
-          const Print = await import('expo-print');
-          const Sharing = await import('expo-sharing');
-          const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 });
-          await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: `Share Invitation with ${guest.full_name}` });
-        } catch (err: any) {
-          Alert.alert('Error', err.message || 'Failed to share PDF');
-        } finally {
-          setIsDispatching(false);
-        }
-      };
+      const liveLink = buildLiveInviteUrl(details, guest.full_name, weddingEvents);
 
       const sendOnWhatsApp = async () => {
         if (!guest.phone) {
@@ -122,17 +108,26 @@ export default function GuestProfileScreen() {
           return;
         }
         setIsDispatching(true);
-        const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name, weddingEvents));
+        const text = `${buildInvitationText(details, guest.full_name, weddingEvents)}\n\n${liveLink}`;
+        const opened = await WhatsAppService.openWhatsApp(guest.phone, text);
         setIsDispatching(false);
         if (!opened) {
           Alert.alert('Could not open WhatsApp', 'Make sure WhatsApp is installed on this device.');
         }
       };
 
+      const shareLink = async () => {
+        try {
+          await Share.share({ message: `${buildInvitationText(details, guest.full_name, weddingEvents)}\n\n${liveLink}` });
+        } catch (err: any) {
+          Alert.alert('Error', err.message || 'Failed to share the invitation link');
+        }
+      };
+
       Alert.alert('Send Invitation', `How do you want to send this to ${guest.full_name}?`, [
         { text: 'Cancel', style: 'cancel' },
         { text: 'WhatsApp', onPress: sendOnWhatsApp },
-        { text: 'PDF', onPress: sharePdf },
+        { text: 'Share Link', onPress: shareLink },
       ]);
     } catch (e: any) {
       Alert.alert('Error', e.message);

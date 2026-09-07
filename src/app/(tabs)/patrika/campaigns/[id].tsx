@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../../components/ui';
@@ -8,10 +8,9 @@ import { theme } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
 import { getWedding } from '../../../../services/wedding';
 import { EventService } from '../../../../services/event';
-import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails, resolveCoverPhotoDataUri } from '../../../../services/invitationDocument';
+import { buildInvitationText, resolveInvitationDetails } from '../../../../services/invitationDocument';
+import { buildLiveInviteUrl } from '../../../../services/liveInvite';
 import { InvitationCampaign, InvitationRecipient } from '../../../../database/types';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
 
 export default function CampaignDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -71,6 +70,7 @@ export default function CampaignDetailsScreen() {
       const wedding = await getWedding(db, campaign.wedding_id);
       const details = resolveInvitationDetails(wedding, custData);
       const weddingEvents = await EventService.getEvents(db, campaign.wedding_id);
+      const liveLink = buildLiveInviteUrl(details, guest.full_name, weddingEvents);
 
       const confirmStatus = () => {
         setTimeout(() => {
@@ -94,7 +94,8 @@ export default function CampaignDetailsScreen() {
                 return;
               }
               setIsDispatching(true);
-              const opened = await WhatsAppService.openWhatsApp(guest.phone, buildInvitationText(details, guest.full_name, weddingEvents));
+              const text = `${buildInvitationText(details, guest.full_name, weddingEvents)}\n\n${liveLink}`;
+              const opened = await WhatsAppService.openWhatsApp(guest.phone, text);
               setIsDispatching(false);
               if (opened) {
                 confirmStatus();
@@ -104,25 +105,13 @@ export default function CampaignDetailsScreen() {
             }
           },
           {
-            text: 'PDF',
+            text: 'Share Link',
             onPress: async () => {
               try {
-                setIsDispatching(true);
-                details.coverPhotoDataUri = await resolveCoverPhotoDataUri(custData.cover_photo_uri);
-                const html = buildInvitationHtml(details, guest.full_name, weddingEvents);
-                const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 }); // Standard Letter size
-
-                await Sharing.shareAsync(uri, {
-                  UTI: '.pdf',
-                  mimeType: 'application/pdf',
-                  dialogTitle: `Share Invitation with ${guest.full_name}`
-                });
-
-                setIsDispatching(false);
+                await Share.share({ message: `${buildInvitationText(details, guest.full_name, weddingEvents)}\n\n${liveLink}` });
                 confirmStatus();
               } catch (err: any) {
-                setIsDispatching(false);
-                Alert.alert('Error', err.message || 'Failed to share PDF');
+                Alert.alert('Error', err.message || 'Failed to share the invitation link');
               }
             }
           }
