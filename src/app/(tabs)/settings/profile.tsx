@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, TextInput, Button, Card } from '../../../components/ui';
+import { ScreenContainer, Typography, TextInput, Button, Card, DateField } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding, updateWedding } from '../../../services/wedding';
@@ -116,7 +116,7 @@ export default function WeddingProfileScreen() {
           <Typography variant="sectionTitle" style={styles.sectionHeader}>Couple Details</Typography>
           <TextInput label="Bride Name" value={brideName} onChangeText={setBrideName} />
           <TextInput label="Groom Name" value={groomName} onChangeText={setGroomName} />
-          <TextInput label="Wedding Date" value={date} onChangeText={setDate} placeholder="e.g. 24 Oct 2026" />
+          <DateField label="Wedding Date" value={date} onChange={setDate} />
           <TextInput label="Venue" value={venue} onChangeText={setVenue} />
           <TextInput label="Cover Photo URL" value={coverPhoto} onChangeText={setCoverPhoto} placeholder="https://..." />
           <TextInput label="Bride Photo URL" value={bridePhoto} onChangeText={setBridePhoto} placeholder="https://..." />

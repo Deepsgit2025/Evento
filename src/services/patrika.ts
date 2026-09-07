@@ -4,11 +4,15 @@ import { Invitation, InvitationRecipient, InvitationRecipientStatus, Guest, Even
 
 export interface PatrikaCustomization {
   event_id?: string;
+  custom_bride_name?: string;
+  custom_groom_name?: string;
   custom_date?: string;
   custom_venue?: string;
   message: string;
   cover_photo_uri?: string;
   accent_color?: string;
+  /** Theme id for the multi-page Hindi PDF invitation (see invitationThemes.ts). */
+  pdf_theme?: string;
   fontScale?: number;
 }
 

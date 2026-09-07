@@ -10,6 +10,7 @@ import { PatrikaService, PatrikaCustomization } from '../../../services/patrika'
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
 import { InvitationRecipient } from '../../../database/types';
+import { formatIsoDateFriendly } from '../../../utils/date';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -19,6 +20,7 @@ export default function PreviewScreen() {
   const db = useSQLiteContext();
 
   const [templateComponent, setTemplateComponent] = useState<any>(null);
+  const [templateId, setTemplateId] = useState<string>('');
   const [previewProps, setPreviewProps] = useState<PatrikaProps | null>(null);
   const [recipients, setRecipients] = useState<(InvitationRecipient & { guest_name: string, event_name: string | null })[]>([]);
 
@@ -30,6 +32,7 @@ export default function PreviewScreen() {
 
         const template = TEMPLATES.find((t: any) => t.id === inv.template_id);
         if (template) setTemplateComponent(() => template.component);
+        setTemplateId(inv.template_id);
 
         const session = await AuthService.getCurrentSession(db);
         if (!session) return;
@@ -40,11 +43,13 @@ export default function PreviewScreen() {
         try { cust = JSON.parse(inv.customization_data); } catch(e) {}
 
         setPreviewProps({
-          brideName: wedding.bride_name,
-          groomName: wedding.groom_name,
-          date: cust.custom_date || wedding.date || 'TBD',
+          brideName: cust.custom_bride_name || wedding.bride_name,
+          groomName: cust.custom_groom_name || wedding.groom_name,
+          date: cust.custom_date || formatIsoDateFriendly(wedding.date) || 'TBD',
           venue: cust.custom_venue || wedding.venue || 'TBD',
           message: cust.message,
+          photoUri: cust.cover_photo_uri,
+          accentColor: cust.accent_color,
           width: SCREEN_WIDTH // Full width
         });
 
@@ -57,32 +62,6 @@ export default function PreviewScreen() {
     }
     loadData();
   }, [db, id]);
-
-  const handleSimulateSend = async () => {
-    const queued = recipients.filter(r => r.status === 'QUEUED');
-    if (queued.length === 0) {
-      Alert.alert('No Queued Guests', 'All guests have already been sent this invitation.');
-      return;
-    }
-    
-    // Simulate sending process
-    Alert.alert('Sending...', `Sending to ${queued.length} guests. This might take a moment.`, [], { cancelable: false });
-    
-    for (const r of queued) {
-      await PatrikaService.updateRecipientStatus(db, r.id, 'SENDING');
-    }
-    const sendingRecs = await PatrikaService.getRecipientsForInvitation(db, id);
-    setRecipients(sendingRecs);
-    
-    setTimeout(async () => {
-      for (const r of queued) {
-        await PatrikaService.updateRecipientStatus(db, r.id, 'SENT');
-      }
-      const sentRecs = await PatrikaService.getRecipientsForInvitation(db, id);
-      setRecipients(sentRecs);
-      Alert.alert('Success', `Successfully sent ${queued.length} invitations.`);
-    }, 2000);
-  };
 
   const handleDelete = () => {
     Alert.alert("Delete Design", "Are you sure you want to delete this Patrika design?", [
@@ -104,19 +83,25 @@ export default function PreviewScreen() {
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={[styles.canvas, { width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5 }]}>
+        <View style={[styles.canvas, { width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.5, borderColor: previewProps.accentColor || 'transparent', borderWidth: previewProps.accentColor ? 4 : 0 }]}>
           <Template {...previewProps} />
         </View>
         <View style={styles.actions}>
-          <Button 
-            label="Create Bulk Campaign" 
-            onPress={() => router.push(`/(tabs)/patrika/campaigns` as any)} 
+          <Button
+            label="Create Bulk Campaign"
+            onPress={() => router.push(`/(tabs)/patrika/campaigns` as any)}
             style={{ marginBottom: 12 }}
           />
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Button 
-              label="Delete Patrika" 
-              variant="outline" 
+          <View style={{flexDirection: 'row', gap: 12}}>
+            <Button
+              label="Edit Design"
+              variant="outline"
+              onPress={() => router.push(`/(tabs)/patrika/customize?templateId=${templateId}&editId=${id}` as any)}
+              style={{ flex: 1 }}
+            />
+            <Button
+              label="Delete Patrika"
+              variant="outline"
               onPress={handleDelete}
               style={{ flex: 1, borderColor: 'red' }}
             />

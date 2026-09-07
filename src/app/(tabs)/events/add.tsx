@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
+import { ScreenContainer, Typography, TextInput, Button, DateField } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
@@ -46,16 +46,12 @@ export default function AddEventScreen() {
       setError("Event name is required.");
       return;
     }
-    if (!date.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setError("Date must be in YYYY-MM-DD format.");
+    if (!date.trim()) {
+      setError("Please select a date.");
       return;
     }
-    if (!startTime.trim() || !/^\d{2}:\d{2}$/.test(startTime)) {
-      setError("Start time must be in HH:MM (24-hour) format.");
-      return;
-    }
-    if (endTime.trim() && !/^\d{2}:\d{2}$/.test(endTime)) {
-      setError("End time must be in HH:MM (24-hour) format.");
+    if (!startTime.trim()) {
+      setError("Please select a start time.");
       return;
     }
 
@@ -168,29 +164,14 @@ export default function AddEventScreen() {
 
           <View style={styles.section}>
             <Typography variant="body" weight="semibold" style={styles.sectionTitle}>Date & Time</Typography>
-            <TextInput
-              label="Date (YYYY-MM-DD) *"
-              placeholder="e.g. 2026-12-14"
-              value={date}
-              onChangeText={setDate}
-            />
-            
+            <DateField label="Date *" value={date} onChange={setDate} />
+
             <View style={styles.row}>
               <View style={styles.flex1}>
-                <TextInput
-                  label="Start Time (HH:MM) *"
-                  placeholder="e.g. 10:00"
-                  value={startTime}
-                  onChangeText={setStartTime}
-                />
+                <DateField label="Start Time *" value={startTime} onChange={setStartTime} mode="time" />
               </View>
               <View style={styles.flex1}>
-                <TextInput
-                  label="End Time (HH:MM)"
-                  placeholder="e.g. 14:00"
-                  value={endTime}
-                  onChangeText={setEndTime}
-                />
+                <DateField label="End Time" value={endTime} onChange={setEndTime} mode="time" />
               </View>
             </View>
           </View>

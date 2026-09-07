@@ -19,7 +19,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.evento.app",
-      "permissions": []
+      "permissions": ["VIBRATE", "SCHEDULE_EXACT_ALARM", "USE_EXACT_ALARM"]
     },
     "web": {
       "output": "single",
@@ -37,7 +37,13 @@
       ],
       "expo-sqlite",
       "expo-secure-store",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "color": "#E11D48"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

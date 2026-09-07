@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Pressable, Keyboard } from 'react-native';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Pressable, Keyboard, Modal, SafeAreaView } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from 'expo-router';
-import { ScreenContainer, Typography, TextInput, EmptyState } from '../../../components/ui';
+import { ScreenContainer, Typography, TextInput, EmptyState, Button } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../theme/ThemeContext';
 import { AuthService } from '../../../services/auth';
@@ -40,7 +40,8 @@ export default function AssistantScreen() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  
+  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
+
   const scrollViewRef = useRef<ScrollView>(null);
 
   useFocusEffect(
@@ -71,6 +72,7 @@ export default function AssistantScreen() {
     if (!userMsg || isLoading) return;
     
     setInputText('');
+    setIsComposerExpanded(false);
     Keyboard.dismiss();
     
     const tempUserMessage: AIMessage = {
@@ -226,16 +228,22 @@ export default function AssistantScreen() {
         </ScrollView>
 
         <View style={s.inputArea}>
+          <Pressable style={s.expandButton} onPress={() => setIsComposerExpanded(true)}>
+            <Ionicons name="expand-outline" size={20} color={theme.colors.textSecondary} />
+          </Pressable>
           <TextInput
+            bare
+            containerStyle={s.textInputContainer}
             placeholder={t('assistant.placeholder')}
             value={inputText}
             onChangeText={setInputText}
             style={s.textInput}
             multiline
+            textAlignVertical="top"
             submitBehavior="blurAndSubmit"
           />
-          <Pressable 
-            style={[s.sendButton, !inputText.trim() && s.sendButtonDisabled]} 
+          <Pressable
+            style={[s.sendButton, !inputText.trim() && s.sendButtonDisabled]}
             onPress={() => handleSend()}
             disabled={!inputText.trim() || isLoading}
           >
@@ -243,6 +251,40 @@ export default function AssistantScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={isComposerExpanded}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setIsComposerExpanded(false)}
+      >
+        <SafeAreaView style={[s.expandedContainer, { backgroundColor: theme.colors.background }]}>
+          <View style={s.expandedHeader}>
+            <Typography variant="sectionTitle">{t('assistant.title')}</Typography>
+            <Pressable onPress={() => setIsComposerExpanded(false)} style={s.expandedCloseBtn}>
+              <Ionicons name="close" size={24} color={theme.colors.text} />
+            </Pressable>
+          </View>
+          <TextInput
+            bare
+            containerStyle={s.expandedInputContainer}
+            style={s.expandedTextInput}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder={t('assistant.placeholder')}
+            multiline
+            autoFocus
+            textAlignVertical="top"
+          />
+          <View style={s.expandedFooter}>
+            <Button
+              label="Send"
+              onPress={() => handleSend()}
+              disabled={!inputText.trim() || isLoading}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
     </ScreenContainer>
   );
 }
@@ -310,18 +352,26 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
     borderTopColor: theme.colors.borderLight, alignItems: 'flex-end',
     paddingBottom: Platform.OS === 'ios' ? theme.spacing.xl : theme.spacing.lg,
   },
-  textInput: { 
-    flex: 1, 
-    marginRight: 16, 
-    maxHeight: 150, 
-    minHeight: 60, 
-    borderRadius: 30, 
-    paddingTop: 18, 
-    paddingBottom: 18,
+  expandButton: {
+    width: 40, height: 40, borderRadius: 20,
+    justifyContent: 'center', alignItems: 'center',
+    marginRight: 8, alignSelf: 'flex-end', marginBottom: 4,
+  },
+  textInputContainer: {
+    flex: 1,
+    marginRight: 12,
+    marginBottom: 0,
+  },
+  textInput: {
+    maxHeight: 150,
+    minHeight: 48,
+    borderRadius: 24,
+    paddingTop: 14,
+    paddingBottom: 14,
     paddingHorizontal: 20,
     fontSize: 16,
     lineHeight: 22,
-    backgroundColor: theme.colors.background 
+    backgroundColor: theme.colors.background,
   },
   sendButton: {
     width: 56, height: 56, borderRadius: 28,
@@ -330,4 +380,23 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
     ...theme.shadows.sm,
   },
   sendButtonDisabled: { backgroundColor: theme.colors.border },
+
+  // Expanded full-screen composer
+  expandedContainer: { flex: 1 },
+  expandedHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md,
+  },
+  expandedCloseBtn: { padding: 8 },
+  expandedInputContainer: { flex: 1, marginHorizontal: theme.spacing.lg, marginBottom: 0 },
+  expandedTextInput: {
+    flex: 1,
+    fontSize: 18,
+    lineHeight: 26,
+    padding: theme.spacing.md,
+  },
+  expandedFooter: {
+    padding: theme.spacing.lg,
+    paddingBottom: Platform.OS === 'ios' ? theme.spacing.xl : theme.spacing.lg,
+  },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../components/ui';
@@ -10,7 +10,12 @@ import { GroupService } from '../../../services/group';
 import { RoomAssignmentService } from '../../../services/roomAssignment';
 import { PatrikaService } from '../../../services/patrika';
 import { EventGuestService } from '../../../services/eventGuest';
-import { Guest, GuestGroup, RoomAssignment, InvitationRecipient, Event } from '../../../database/types';
+import { EventService } from '../../../services/event';
+import { WhatsAppService } from '../../../services/whatsapp';
+import { getWedding } from '../../../services/wedding';
+import { buildInvitationText, resolveInvitationDetails } from '../../../services/invitationDocument';
+import { buildLiveInviteUrl } from '../../../services/liveInvite';
+import { Guest, GuestGroup, RoomAssignment, InvitationRecipient, Event, Wedding } from '../../../database/types';
 
 export default function GuestProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,6 +28,7 @@ export default function GuestProfileScreen() {
   const [invitations, setInvitations] = useState<(InvitationRecipient & { invitation_title: string; template_id: string; event_name: string | null })[]>([]);
   const [events, setEvents] = useState<(Event & { participation_id: string, event_rsvp_status: string })[]>([]);
   const [availablePatrikas, setAvailablePatrikas] = useState<any[]>([]);
+  const [wedding, setWedding] = useState<Wedding | null>(null);
   const [isDispatching, setIsDispatching] = useState(false);
 
   const fetchGuest = async () => {
@@ -48,6 +54,7 @@ export default function GuestProfileScreen() {
         setInvitations(invitationData);
         setEvents(eventsData);
         setAvailablePatrikas(allPatrikas);
+        setWedding(await getWedding(db, guestData.wedding_id));
       }
     } catch (e) {
       console.error("Failed to fetch guest", e instanceof Error ? e.message : String(e));
@@ -91,51 +98,36 @@ export default function GuestProfileScreen() {
   const handleSendPatrika = async (patrika: any) => {
     try {
       const custData = patrika.customization_data ? JSON.parse(patrika.customization_data) : {};
-      const messageRaw = custData.message || 'We invite you to share our joy';
-      let formattedMessage = messageRaw.replace(/{guest name}/gi, guest.full_name).replace(/\n/g, '<br/>');
-      
-      const html = `
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-          <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fdfbf7; color: #4a4a4a; text-align: center; padding: 40px; margin: 20px; border: 8px solid #d4af37; border-radius: 12px; }
-            .header { color: #800020; font-size: 32px; font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
-            .subheader { color: #d4af37; font-size: 20px; font-weight: normal; margin-bottom: 30px; letter-spacing: 1px; }
-            .content { font-size: 18px; line-height: 1.8; margin-bottom: 20px; }
-            .guest-name { font-size: 26px; font-weight: bold; margin: 25px 0; color: #222; border-bottom: 2px solid #d4af37; display: inline-block; padding-bottom: 5px; font-style: italic; }
-            .footer { margin-top: 50px; font-size: 16px; font-style: italic; color: #888; }
-            .flourish { font-size: 30px; color: #d4af37; margin: 15px 0; }
-          </style>
-        </head>
-        <body>
-          <div class="header">Wedding Invitation</div>
-          <div class="subheader">Join Us In Our Joy</div>
-          <div class="content">Dear</div>
-          <div class="guest-name">${guest.full_name}</div>
-          <div class="flourish">❧</div>
-          <div class="content">${formattedMessage}</div>
-          <div class="flourish">❧</div>
-          <div class="footer">Please let us know if you will be attending.</div>
-        </body>
-      </html>
-      `;
-      
-      Alert.alert('Generate Invitation', `Ready to generate a beautiful PDF invitation for ${guest.full_name}.`, [
+      const details = resolveInvitationDetails(wedding, custData);
+      const weddingEvents = await EventService.getEvents(db, guest.wedding_id);
+      const liveLink = buildLiveInviteUrl(details, guest.full_name, weddingEvents);
+
+      const sendOnWhatsApp = async () => {
+        if (!guest.phone) {
+          Alert.alert('No Phone Number', `${guest.full_name} has no phone number saved. Add one to their profile to send on WhatsApp.`);
+          return;
+        }
+        setIsDispatching(true);
+        const text = `${buildInvitationText(details, guest.full_name, weddingEvents)}\n\n${liveLink}`;
+        const opened = await WhatsAppService.openWhatsApp(guest.phone, text);
+        setIsDispatching(false);
+        if (!opened) {
+          Alert.alert('Could not open WhatsApp', 'Make sure WhatsApp is installed on this device.');
+        }
+      };
+
+      const shareLink = async () => {
+        try {
+          await Share.share({ message: `${buildInvitationText(details, guest.full_name, weddingEvents)}\n\n${liveLink}` });
+        } catch (err: any) {
+          Alert.alert('Error', err.message || 'Failed to share the invitation link');
+        }
+      };
+
+      Alert.alert('Send Invitation', `How do you want to send this to ${guest.full_name}?`, [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Generate & Share', onPress: async () => {
-            try {
-              setIsDispatching(true);
-              const Print = await import('expo-print');
-              const Sharing = await import('expo-sharing');
-              const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 });
-              await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: `Share Invitation with ${guest.full_name}` });
-              setIsDispatching(false);
-            } catch (err: any) {
-              setIsDispatching(false);
-              Alert.alert('Error', err.message || 'Failed to share PDF');
-            }
-        }}
+        { text: 'WhatsApp', onPress: sendOnWhatsApp },
+        { text: 'Share Link', onPress: shareLink },
       ]);
     } catch (e: any) {
       Alert.alert('Error', e.message);
@@ -222,20 +214,20 @@ export default function GuestProfileScreen() {
           <View style={styles.listRow}>
             <Ionicons name="people-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
             <Typography variant="body" style={styles.rowLabel}>Party Size</Typography>
-            <Typography variant="body" color={theme.colors.textSecondary}>{guest.party_size} {guest.party_size === 1 ? 'person' : 'people'}</Typography>
+            <Typography variant="body" color={theme.colors.textSecondary} style={styles.rowValue}>{guest.party_size} {guest.party_size === 1 ? 'person' : 'people'}</Typography>
           </View>
 
           <View style={[styles.listRow, {borderBottomWidth: guest.phone || guest.notes ? 1 : 0}]}>
             <Ionicons name="mail-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
             <Typography variant="body" style={styles.rowLabel}>Wedding RSVP</Typography>
-            <Typography variant="body" color={theme.colors.textSecondary}>{rsvpDisplay}</Typography>
+            <Typography variant="body" color={theme.colors.textSecondary} style={styles.rowValue}>{rsvpDisplay}</Typography>
           </View>
 
           {guest.phone && (
             <View style={[styles.listRow, {borderBottomWidth: guest.notes ? 1 : 0}]}>
               <Ionicons name="call-outline" size={20} color={theme.colors.primary} style={styles.rowIcon} />
               <Typography variant="body" style={styles.rowLabel}>Phone</Typography>
-              <Typography variant="body" color={theme.colors.textSecondary}>{guest.phone}</Typography>
+              <Typography variant="body" color={theme.colors.textSecondary} style={styles.rowValue}>{guest.phone}</Typography>
             </View>
           )}
 
@@ -428,7 +420,11 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   rowLabel: {
+    marginRight: 12,
+  },
+  rowValue: {
     flex: 1,
+    textAlign: 'right',
   },
   deleteButton: {
     marginTop: theme.spacing.xxl,

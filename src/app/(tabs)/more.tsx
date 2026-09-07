@@ -25,6 +25,8 @@ export default function MoreScreen() {
     { icon: 'bar-chart', label: t('more.reports'), route: '/(tabs)/reports', color: '#10B981', bgColor: theme.colors.cardGreen },
     { icon: 'mail-open', label: t('more.invitations'), route: '/(tabs)/patrika', color: '#EF4444', bgColor: theme.colors.cardRose },
     { icon: 'wallet', label: t('more.finance'), route: '/(tabs)/finance', color: '#F59E0B', bgColor: theme.colors.cardGold },
+    { icon: 'checkbox', label: t('more.checklist'), route: '/(tabs)/tasks', color: '#10B981', bgColor: theme.colors.cardGreen },
+    { icon: 'musical-notes', label: t('more.dances'), route: '/(tabs)/dances', color: '#C026D3', bgColor: theme.colors.cardPurple },
     { icon: 'settings', label: t('more.settings'), route: '/(tabs)/settings', color: '#6B6178', bgColor: theme.colors.borderLight },
   ];
 

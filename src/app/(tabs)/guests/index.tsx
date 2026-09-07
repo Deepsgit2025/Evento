@@ -165,29 +165,31 @@ export default function GuestsListScreen() {
               </View>
             )}
             <View style={{flex: 1}}>
-              <View style={styles.guestHeader}>
-                <View style={styles.guestNameContainer}>
-                  <Typography variant="body" weight="semibold">{item.full_name}</Typography>
-                  {item.side === 'Groom' ? (
-                    <View style={[styles.badge, styles.badgeGroom]}>
-                      <Typography variant="caption" weight="medium" style={styles.badgeTextGroom}>Groom Side</Typography>
-                    </View>
-                  ) : (
-                    <View style={[styles.badge, styles.badgeBride]}>
-                      <Typography variant="caption" weight="medium" style={styles.badgeTextBride}>Bride Side</Typography>
-                    </View>
-                  )}
-                  {group && (
-                    <View style={[styles.badge, styles.badgeGroup]}>
-                      <Typography variant="caption" weight="medium" style={styles.badgeTextGroup}>{group.name}</Typography>
-                    </View>
-                  )}
-                </View>
-                <Typography variant="caption" color={theme.colors.textSecondary}>
+              <View style={styles.guestNameContainer}>
+                <Typography variant="body" weight="semibold">{item.full_name}</Typography>
+                {item.side === 'Groom' ? (
+                  <View style={[styles.badge, styles.badgeGroom]}>
+                    <Typography variant="caption" weight="medium" style={styles.badgeTextGroom}>Groom Side</Typography>
+                  </View>
+                ) : (
+                  <View style={[styles.badge, styles.badgeBride]}>
+                    <Typography variant="caption" weight="medium" style={styles.badgeTextBride}>Bride Side</Typography>
+                  </View>
+                )}
+                {group && (
+                  <View style={[styles.badge, styles.badgeGroup]}>
+                    <Typography variant="caption" weight="medium" style={styles.badgeTextGroup}>{group.name}</Typography>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.guestDetailRow}>
+                <Ionicons name="people-outline" size={14} color={theme.colors.textMuted} />
+                <Typography variant="caption" color={theme.colors.textSecondary} style={styles.detailText}>
                   Party of {item.party_size}
                 </Typography>
               </View>
-              
+
               {item.phone && (
                 <View style={styles.guestDetailRow}>
                   <Ionicons name="call-outline" size={14} color={theme.colors.textMuted} />
@@ -196,12 +198,12 @@ export default function GuestsListScreen() {
                   </Typography>
                 </View>
               )}
-              
+
               <View style={styles.guestDetailRow}>
                  <Ionicons name="mail-outline" size={14} color={theme.colors.textMuted} />
                  <Typography variant="caption" color={theme.colors.textSecondary} style={styles.detailText}>
-                   {item.rsvp_status === 'PENDING' ? 'Not responded' : 
-                    item.rsvp_status === 'ATTENDING' ? 'Attending' : 
+                   {item.rsvp_status === 'PENDING' ? 'Not responded' :
+                    item.rsvp_status === 'ATTENDING' ? 'Attending' :
                     item.rsvp_status === 'MAYBE' ? 'Maybe' : 'Not attending'}
                  </Typography>
               </View>
@@ -425,6 +427,7 @@ const styles = StyleSheet.create({
   dashCard: {
     padding: theme.spacing.md,
     minWidth: 110,
+    minHeight: 92,
     justifyContent: 'center',
   },
   filterScrollContent: {
@@ -485,19 +488,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: theme.colors.primary,
   },
-  guestHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing.sm,
-  },
   guestNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: theme.spacing.xs,
-    flex: 1,
-    paddingRight: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
   },
   badge: {
     paddingHorizontal: 6,

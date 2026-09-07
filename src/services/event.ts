@@ -9,6 +9,7 @@ export class EventService {
     'Haldi',
     'Mehndi',
     'Sangeet',
+    'DJ Night',
     'Baraat',
     'Wedding',
     'Reception',

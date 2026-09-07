@@ -35,15 +35,11 @@ export default function AppearanceScreen() {
       
       <View style={styles.content}>
         <Card style={styles.card}>
-          {renderOption('system', 'System Default', 'settings-outline')}
-          <View style={styles.divider} />
           {renderOption('light', 'Light Mode', 'sunny-outline')}
-          <View style={styles.divider} />
-          {renderOption('dark', 'Dark Mode', 'moon-outline')}
         </Card>
 
         <Typography variant="caption" color={theme.colors.textSecondary} style={styles.note}>
-          Note: Dark mode support is currently experimental and may not apply to all screens immediately.
+          Evento is designed as a light-mode app, so it stays light regardless of your phone's system theme.
         </Typography>
       </View>
     </ScreenContainer>

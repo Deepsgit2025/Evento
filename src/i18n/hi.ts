@@ -212,6 +212,8 @@ export const hi: Record<string, string> = {
   'more.reports': 'रिपोर्ट',
   'more.invitations': 'निमंत्रण',
   'more.finance': 'वित्त',
+  'more.checklist': 'चेकलिस्ट',
+  'more.dances': 'डांस',
   'more.settings': 'सेटिंग्स',
 
   // Common

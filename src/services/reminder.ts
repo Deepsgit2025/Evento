@@ -1,12 +1,20 @@
 import * as SQLite from 'expo-sqlite';
+import * as Crypto from 'expo-crypto';
 import * as Notifications from 'expo-notifications';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { SyncEngine } from './syncEngine';
 import { SettingsService, NotificationPrefKey } from './settings';
+
+const ALARM_CHANNEL_ID = 'task-alarms';
+const EXACT_ALARM_PROMPTED_KEY = 'evento_exact_alarm_prompted';
+const BATTERY_OPT_PROMPTED_KEY = 'evento_battery_opt_prompted';
 
 export interface Reminder {
   id: string;
   wedding_id: string;
-  type: 'EVENT' | 'PAYMENT' | 'ROOM' | 'INVITATION' | 'RSVP' | 'CUSTOM';
+  type: 'EVENT' | 'PAYMENT' | 'ROOM' | 'INVITATION' | 'RSVP' | 'CUSTOM' | 'TASK' | 'DANCE';
   reference_id: string | null;
   title: string;
   notes: string | null;
@@ -39,19 +47,110 @@ export const ReminderService = {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    return finalStatus === 'granted';
+    const granted = finalStatus === 'granted';
+    if (granted) {
+      await this.ensureExactAlarmPermission();
+      await this.ensureBatteryOptimizationExemption();
+    }
+    return granted;
+  },
+
+  /**
+   * On Android 12+, posting a notification permission alone is not enough for
+   * it to ring on time: without the separate "exact alarm" permission, the OS
+   * silently downgrades scheduled alarms to inexact delivery, which it can
+   * batch and delay by many minutes — the reminder still gets "scheduled"
+   * with no error, it just doesn't ring when expected. That permission can't
+   * be requested via a runtime dialog; the user has to grant it from a
+   * specific system settings screen, so send them there once.
+   */
+  async ensureExactAlarmPermission() {
+    if (Platform.OS !== 'android' || typeof Platform.Version !== 'number' || Platform.Version < 31) return;
+    const alreadyPrompted = await SecureStore.getItemAsync(EXACT_ALARM_PROMPTED_KEY);
+    if (alreadyPrompted) return;
+    await SecureStore.setItemAsync(EXACT_ALARM_PROMPTED_KEY, '1');
+    await this.openExactAlarmSettings();
+  },
+
+  /**
+   * Always opens the "alarms & reminders" settings screen for this app,
+   * regardless of whether it's been shown before — used for the manual
+   * "Fix alarms not ringing" button in Settings, in case the one-time
+   * automatic prompt was dismissed or missed.
+   */
+  async openExactAlarmSettings() {
+    if (Platform.OS !== 'android' || typeof Platform.Version !== 'number' || Platform.Version < 31) return;
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.REQUEST_SCHEDULE_EXACT_ALARM,
+        { data: 'package:com.evento.app' }
+      );
+    } catch (e) {
+      // Some OEM ROMs don't support this action; nothing more we can do from JS.
+    }
+  },
+
+  /**
+   * Many Indian OEM Android skins (Xiaomi/MIUI, Vivo, Oppo/ColorOS, etc.) apply
+   * their own aggressive battery-management on top of stock Android, killing
+   * background work — including exact alarms — unless the app is explicitly
+   * exempted from battery optimization. This requests that stock-Android
+   * exemption once; it doesn't touch OEM-specific "autostart"/"battery saver"
+   * lists, which unfortunately still require the user to allow manually.
+   */
+  async ensureBatteryOptimizationExemption() {
+    if (Platform.OS !== 'android') return;
+    const alreadyPrompted = await SecureStore.getItemAsync(BATTERY_OPT_PROMPTED_KEY);
+    if (alreadyPrompted) return;
+    await SecureStore.setItemAsync(BATTERY_OPT_PROMPTED_KEY, '1');
+    await this.openBatteryOptimizationSettings();
+  },
+
+  /**
+   * Always opens the "ignore battery optimizations" request screen for this
+   * app — used for the manual "Fix alarms not ringing" button in Settings.
+   */
+  async openBatteryOptimizationSettings() {
+    if (Platform.OS !== 'android') return;
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+        { data: 'package:com.evento.app' }
+      );
+    } catch (e) {
+      // Some OEM ROMs don't support this action; nothing more we can do from JS.
+    }
+  },
+
+  /**
+   * Registers a high-importance Android channel (sound + strong vibration,
+   * shown on lock screen) so "Alarm" style reminders feel more urgent than a
+   * regular "Message" notification. No-op on iOS (handled via interruptionLevel).
+   */
+  async ensureAlarmChannel() {
+    if (Platform.OS !== 'android') return;
+    await Notifications.setNotificationChannelAsync(ALARM_CHANNEL_ID, {
+      name: 'Task & Dance Alarms',
+      importance: Notifications.AndroidImportance.MAX,
+      sound: 'default',
+      vibrationPattern: [0, 500, 250, 500],
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    });
   },
 
   /**
    * Schedule a new reminder locally and save it to SQLite.
+   * `style` only affects TASK/DANCE reminders: 'ALARM' uses a louder, more
+   * urgent notification channel/priority than the default 'MESSAGE' style.
    */
   async createReminder(
     db: SQLite.SQLiteDatabase,
-    reminderData: Omit<Reminder, 'id' | 'status' | 'notification_id' | 'created_at' | 'updated_at'>
+    reminderData: Omit<Reminder, 'id' | 'status' | 'notification_id' | 'created_at' | 'updated_at'>,
+    style?: 'ALARM' | 'MESSAGE'
   ): Promise<string | null> {
-    const id = crypto.randomUUID();
+    const id = Crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
-    
+
     // Determine the pref key
     let prefKey: NotificationPrefKey = 'pref_notify_general';
     switch (reminderData.type) {
@@ -60,26 +159,35 @@ export const ReminderService = {
       case 'INVITATION':
       case 'RSVP': prefKey = 'pref_notify_invitation'; break;
     }
-    
+
     const isEnabled = await SettingsService.getBoolean(db, reminderData.wedding_id, prefKey);
-    
+
     // Only schedule OS notification if time is in the future AND the user has this type enabled
     let notificationId = null;
     if (reminderData.reminder_time > now && isEnabled) {
       const hasPermission = await this.requestPermissions();
       if (hasPermission) {
+        const isAlarm = style === 'ALARM';
+        if (isAlarm) await this.ensureAlarmChannel();
+
         notificationId = await Notifications.scheduleNotificationAsync({
           content: {
-            title: reminderData.title,
+            title: (isAlarm ? '⏰ ' : '') + reminderData.title,
             body: reminderData.notes || 'You have a new wedding reminder.',
-            data: { 
-              reminderId: id, 
+            sound: true,
+            ...(isAlarm ? { interruptionLevel: 'timeSensitive' as const } : {}),
+            ...(isAlarm && Platform.OS === 'android' ? { channelId: ALARM_CHANNEL_ID } : {}),
+            data: {
+              reminderId: id,
               weddingId: reminderData.wedding_id,
               type: reminderData.type,
               referenceId: reminderData.reference_id
             },
           },
-          trigger: new Date(reminderData.reminder_time * 1000) as any,
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: new Date(reminderData.reminder_time * 1000),
+          },
         });
       }
     }
@@ -183,7 +291,10 @@ export const ReminderService = {
                 referenceId: remoteReminder.reference_id
               },
             },
-            trigger: new Date(remoteReminder.reminder_time * 1000) as any,
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DATE,
+              date: new Date(remoteReminder.reminder_time * 1000),
+            },
           });
         }
       } else {
