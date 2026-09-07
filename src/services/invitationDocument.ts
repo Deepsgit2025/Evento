@@ -4,17 +4,20 @@ import { InvitationTheme, getInvitationTheme, DEFAULT_INVITATION_THEME_ID } from
 
 /**
  * A traditional Indian wedding card is rarely a single page — it opens with
- * an auspicious invocation, then the couple/date/venue, then the full
- * programme of functions. This builds that as one printable, multi-page
- * document (page-break-after per section) instead of a single flat card.
+ * an auspicious invocation, then the couple/date/venue, then one page per
+ * function of the wedding (Haldi, Mehndi, Sangeet, Baraat...), each in its
+ * own festive colour, and closes with a blessing and a countdown. This
+ * builds that as one printable, multi-page document (page-break-after per
+ * section) instead of a single flat card.
  *
  * Note on design: this is an original layout built from the conventions
  * that appear across most well-regarded Indian wedding invitations (gold-on-
- * maroon invocation page, Devanagari typography, floral/paisley corner
- * motifs, a programme/timeline page) — not a copy of any specific designer's
- * artwork, since lifting someone else's copyrighted design isn't something
- * to do even on request. The visuals are drawn in CSS/SVG so no external
- * image assets are needed for the PDF to render correctly on any device.
+ * maroon invocation page, Devanagari typography, toran/mandala/paisley
+ * motifs, per-function colour theming, a mandap illustration) — not a copy
+ * of any specific designer's or website's artwork. The visuals are drawn in
+ * CSS/SVG so no external image assets are needed for the PDF to render
+ * correctly on any device, and a PDF page is static, so no scroll/audio/
+ * animation behaviour is (or can be) carried over from a web page.
  */
 
 function escapeHtml(value: string): string {
@@ -72,6 +75,10 @@ export interface InvitationDetails {
   venue: string;
   message: string;
   theme: InvitationTheme;
+  /** Raw "YYYY-MM-DD" wedding date, kept separately from the display `date` string so the closing page can compute a real countdown even when `date` has been freely edited by the couple. */
+  weddingDateIso?: string;
+  /** A `data:` URI for the couple's cover photo, resolved asynchronously by the caller (see `resolveCoverPhotoDataUri`) since a plain local file:// URI isn't reliably readable from the PDF renderer. */
+  coverPhotoDataUri?: string;
 }
 
 /**
@@ -89,7 +96,30 @@ export function resolveInvitationDetails(
     venue: customization.custom_venue || wedding?.venue || '',
     message: customization.message || '',
     theme: getInvitationTheme(customization.pdf_theme || DEFAULT_INVITATION_THEME_ID),
+    weddingDateIso: wedding?.date || undefined,
   };
+}
+
+/**
+ * Reads a local image (e.g. from expo-image-picker, which copies into the
+ * app's own cache) and returns it as a `data:` URI so it can be embedded
+ * directly in the invitation HTML — a plain file:// src isn't guaranteed to
+ * be reachable from the native PDF renderer's webview on every device.
+ * Returns undefined (silently) if the photo can't be read, so a broken
+ * photo never blocks sending the invitation.
+ */
+export async function resolveCoverPhotoDataUri(uri: string | undefined | null): Promise<string | undefined> {
+  if (!uri) return undefined;
+  if (uri.startsWith('data:')) return uri;
+  try {
+    const FileSystem = await import('expo-file-system');
+    const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+    const ext = (uri.split('.').pop() || 'jpg').toLowerCase();
+    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+    return `data:${mime};base64,${base64}`;
+  } catch (e) {
+    return undefined;
+  }
 }
 
 /** A gold paisley/floral corner flourish, drawn in SVG so no image asset is needed. */
@@ -102,6 +132,124 @@ function cornerMotif(accent: string, rotation: number): string {
       <path d="M2 2 Q 22 22 2 55" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.6" />
       <path d="M2 2 Q 22 22 55 2" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.6" />
     </svg>`;
+}
+
+/** A toran-style garland strip (mango leaves + hanging bells) across the top of a page. */
+function toranStrip(accent: string): string {
+  const count = 16;
+  const spacing = 612 / count;
+  let leaves = '';
+  for (let i = 0; i < count; i++) {
+    const cx = Math.round(spacing * i + spacing / 2);
+    leaves += `
+      <path d="M${cx} 3 C ${cx - 8} 13, ${cx - 8} 24, ${cx} 32 C ${cx + 8} 24, ${cx + 8} 13, ${cx} 3 Z" fill="${accent}" opacity="0.85" />
+      <circle cx="${cx}" cy="37" r="2.2" fill="${accent}" opacity="0.9" />
+    `;
+  }
+  return `
+    <svg class="toran" width="612" height="44" viewBox="0 0 612 44" preserveAspectRatio="none">
+      <line x1="0" y1="2" x2="612" y2="2" stroke="${accent}" stroke-width="1.5" opacity="0.55" />
+      ${leaves}
+    </svg>`;
+}
+
+/** A faint mandala watermark, centered behind a page's content, for texture without competing with the text. */
+function mandalaWatermark(accent: string, size = 400): string {
+  const petalCount = 12;
+  let petals = '';
+  for (let i = 0; i < petalCount; i++) {
+    const angle = (360 / petalCount) * i;
+    petals += `<path d="M100 100 C 100 46, 114 14, 100 2 C 86 14, 100 46, 100 100 Z" fill="none" stroke="${accent}" stroke-width="1" transform="rotate(${angle} 100 100)" />`;
+  }
+  return `
+    <svg class="mandala" width="${size}" height="${size}" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="96" fill="none" stroke="${accent}" stroke-width="1" />
+      <circle cx="100" cy="100" r="72" fill="none" stroke="${accent}" stroke-width="1" />
+      <circle cx="100" cy="100" r="6" fill="${accent}" />
+      ${petals}
+    </svg>`;
+}
+
+/** A simple mandap (four-pillar wedding canopy) illustration. */
+function mandapIcon(accent: string): string {
+  return `
+    <svg width="150" height="90" viewBox="0 0 150 90">
+      <path d="M14 86 V30 M136 86 V30 M14 30 Q75 4 136 30" fill="none" stroke="${accent}" stroke-width="2.5" />
+      <path d="M40 86 V40 M110 86 V40" fill="none" stroke="${accent}" stroke-width="1.6" opacity="0.7" />
+      <circle cx="75" cy="20" r="3.5" fill="${accent}" />
+      <path d="M75 20 V10" stroke="${accent}" stroke-width="1.6" />
+    </svg>`;
+}
+
+/** A kalash (sacred pot) with mango-leaf sprigs — used for Haldi. */
+function kalashIcon(accent: string): string {
+  return `
+    <svg width="56" height="56" viewBox="0 0 64 64">
+      <path d="M20 30 Q32 20 44 30 L40 52 Q32 58 24 52 Z" fill="${accent}" opacity="0.92" />
+      <circle cx="32" cy="19" r="6" fill="${accent}" />
+      <path d="M20 28 Q13 18 6 24" stroke="${accent}" stroke-width="2" fill="none" />
+      <path d="M44 28 Q51 18 58 24" stroke="${accent}" stroke-width="2" fill="none" />
+      <path d="M32 26 L32 8" stroke="${accent}" stroke-width="2" fill="none" />
+    </svg>`;
+}
+
+/** A henna-adorned palm outline — used for Mehndi. */
+function mehendiHandIcon(accent: string): string {
+  return `
+    <svg width="52" height="56" viewBox="0 0 64 64">
+      <path d="M22 58 L22 32 Q22 26 26 26 Q30 26 30 32 L30 16 Q30 10 34 10 Q38 10 38 16 L38 32 Q38 22 42 22 Q46 22 46 32 L46 42 Q50 42 50 48 L50 58 Z" fill="none" stroke="${accent}" stroke-width="2.2" />
+      <circle cx="30" cy="46" r="2" fill="${accent}" />
+      <circle cx="38" cy="49" r="2" fill="${accent}" />
+      <circle cx="34" cy="40" r="2" fill="${accent}" />
+    </svg>`;
+}
+
+/** A dhol (barrel drum) — used for Sangeet / DJ nights. */
+function dholIcon(accent: string): string {
+  return `
+    <svg width="56" height="52" viewBox="0 0 64 64">
+      <rect x="16" y="22" width="32" height="20" rx="4" fill="none" stroke="${accent}" stroke-width="2.2" />
+      <ellipse cx="32" cy="22" rx="16" ry="6" fill="none" stroke="${accent}" stroke-width="2.2" />
+      <ellipse cx="32" cy="42" rx="16" ry="6" fill="none" stroke="${accent}" stroke-width="2.2" />
+      <path d="M18 26 L13 40 M46 26 L51 40" stroke="${accent}" stroke-width="1.6" />
+    </svg>`;
+}
+
+/** A simplified horse silhouette — used for Baraat. */
+function horseIcon(accent: string): string {
+  return `
+    <svg width="54" height="54" viewBox="0 0 64 64">
+      <path d="M40 12 C48 14 51 24 46 30 L51 34 L44 37 L44 45 Q44 53 35 55 L25 55 Q29 47 25 41 Q17 39 17 28 Q17 15 29 13 Q34 9 40 12 Z" fill="none" stroke="${accent}" stroke-width="2.2" />
+      <circle cx="38" cy="22" r="1.7" fill="${accent}" />
+    </svg>`;
+}
+
+/** A lit diya (oil lamp) — used for Reception and the closing page. */
+function diyaIcon(accent: string): string {
+  return `
+    <svg width="48" height="56" viewBox="0 0 48 56">
+      <path d="M4 40 Q24 54 44 40 Q41 29 24 29 Q7 29 4 40 Z" fill="none" stroke="${accent}" stroke-width="2.2" />
+      <path d="M24 27 C19 20 24 15 24 8 C29 15 31 20 24 27 Z" fill="${accent}" />
+    </svg>`;
+}
+
+interface EventPageStyle {
+  bg: string;
+  accent: string;
+  text: string;
+  icon: (accent: string) => string;
+}
+
+const EVENT_TYPE_STYLE: Record<string, EventPageStyle> = {
+  Haldi: { bg: '#F4A522', accent: '#7A4B00', text: '#4A2E00', icon: kalashIcon },
+  Mehndi: { bg: '#2F6B3A', accent: '#F3E7C4', text: '#F3E7C4', icon: mehendiHandIcon },
+  Sangeet: { bg: '#181233', accent: '#D4AF37', text: '#F3E7C4', icon: dholIcon },
+  Baraat: { bg: '#5C1A24', accent: '#F1C77B', text: '#F6E4C1', icon: horseIcon },
+  Reception: { bg: '#0B132B', accent: '#D4AF37', text: '#F3E7C4', icon: diyaIcon },
+};
+
+function defaultEventStyle(theme: InvitationTheme): EventPageStyle {
+  return { bg: theme.lightBg, accent: theme.gold, text: theme.textDark, icon: mandapIcon };
 }
 
 const SHARED_STYLES = `
@@ -134,10 +282,25 @@ const SHARED_STYLES = `
   .corner-tr { top: 26px; right: 26px; }
   .corner-bl { bottom: 26px; left: 26px; }
   .corner-br { bottom: 26px; right: 26px; }
+  .toran { position: absolute; top: 24px; left: 0; }
+  .mandala {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    opacity: 0.07; z-index: 0;
+  }
+  .content { position: relative; height: 100%; z-index: 1; }
+  .event-content {
+    position: absolute; inset: 70px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+  }
+  .event-icon { margin-bottom: 18px; }
+  .event-label { font-size: 30px; font-weight: 700; letter-spacing: 1px; margin-bottom: 18px; }
+  .event-date { font-size: 16px; margin-bottom: 6px; opacity: 0.92; }
+  .event-time { font-size: 15px; margin-bottom: 6px; opacity: 0.85; }
+  .event-loc { font-size: 14px; opacity: 0.8; margin-top: 6px; }
 `;
 
-function pageChrome(theme: InvitationTheme, inner: string, background: string, extraCorners?: string): string {
-  const accent = escapeHtml(theme.gold);
+function pageChrome(theme: InvitationTheme, inner: string, background: string, opts?: { accent?: string }): string {
+  const accent = escapeHtml(opts?.accent || theme.gold);
   return `
     <div class="page" style="--accent: ${accent}; background: ${background};">
       <div class="frame"></div>
@@ -145,7 +308,8 @@ function pageChrome(theme: InvitationTheme, inner: string, background: string, e
       ${cornerMotif(accent, 90).replace('class="corner"', 'class="corner corner-tr"')}
       ${cornerMotif(accent, -90).replace('class="corner"', 'class="corner corner-bl"')}
       ${cornerMotif(accent, 180).replace('class="corner"', 'class="corner corner-br"')}
-      ${extraCorners || ''}
+      ${mandalaWatermark(accent)}
+      ${toranStrip(accent)}
       <div class="content">${inner}</div>
     </div>
   `;
@@ -160,12 +324,12 @@ function buildInvocationPage(theme: InvitationTheme, guestName: string): string 
         position: absolute; inset: 60px; display: flex; flex-direction: column;
         align-items: center; justify-content: center; text-align: center; color: #F5E9D3;
       }
-      .om { font-size: 64px; color: var(--accent); margin-bottom: 8px; }
-      .invocation-title { font-size: 22px; letter-spacing: 3px; color: var(--accent); margin-bottom: 28px; }
-      .shloka { font-size: 16px; line-height: 2; color: ${goldMuted}; max-width: 380px; margin-bottom: 40px; font-style: italic; }
-      .divider { width: 120px; height: 1px; background: var(--accent); margin: 24px 0; opacity: 0.7; }
+      .om { font-size: 60px; color: var(--accent); margin-bottom: 4px; }
+      .invocation-title { font-size: 22px; letter-spacing: 3px; color: var(--accent); margin-bottom: 24px; }
+      .shloka { font-size: 16px; line-height: 2; color: ${goldMuted}; max-width: 380px; margin-bottom: 30px; font-style: italic; }
+      .divider { width: 120px; height: 1px; background: var(--accent); margin: 20px 0; opacity: 0.7; }
       .invite-label { font-size: 13px; letter-spacing: 4px; color: ${goldMuted}; margin-bottom: 10px; }
-      .guest-name { font-size: 32px; color: #FFF7E6; font-weight: 600; }
+      .guest-name { font-size: 32px; color: #FFF7E6; font-weight: 600; margin-bottom: 26px; }
     </style>
     <div class="invocation-content">
       <div class="om">ॐ</div>
@@ -177,12 +341,13 @@ function buildInvocationPage(theme: InvitationTheme, guestName: string): string 
       <div class="divider"></div>
       <div class="invite-label">सादर आमंत्रण</div>
       <div class="guest-name">${escapeHtml(guestName)} जी</div>
+      ${diyaIcon(escapeHtml(theme.gold))}
     </div>
   `;
   return pageChrome(theme, inner, theme.darkBg);
 }
 
-/** Page 2: the couple, the date and the venue. */
+/** Page 2: the couple, the date, the venue, and — if provided — their photo. */
 function buildMainInvitationPage(theme: InvitationTheme, details: InvitationDetails, guestName: string): string {
   const textDark = escapeHtml(theme.textDark);
   const textMuted = escapeHtml(theme.textMuted);
@@ -201,19 +366,29 @@ function buildMainInvitationPage(theme: InvitationTheme, details: InvitationDeta
     ? `<div class="info-card"><div class="info-label">स्थान</div><div class="info-value">${escapeHtml(details.venue)}</div></div>`
     : '';
 
+  const photoBlock = details.coverPhotoDataUri
+    ? `<div class="couple-photo-wrap"><img class="couple-photo" src="${details.coverPhotoDataUri}" /></div>`
+    : `<div class="mandap-wrap">${mandapIcon(escapeHtml(theme.gold))}</div>`;
+
   const inner = `
     <style>
       .main-content {
-        position: absolute; inset: 70px; display: flex; flex-direction: column;
+        position: absolute; inset: 66px; display: flex; flex-direction: column;
         align-items: center; text-align: center; color: ${textDark};
       }
-      .eyebrow { font-size: 13px; letter-spacing: 4px; color: var(--accent); margin-bottom: 28px; }
-      .couple { font-size: 34px; font-weight: 700; color: ${textDark}; line-height: 1.5; }
-      .amp { font-size: 16px; color: var(--accent); margin: 6px 0; }
-      .tagline { font-size: 15px; color: ${textMuted}; margin: 22px 0 26px; }
-      .message { font-size: 15px; line-height: 1.9; color: ${textDark}; max-width: 380px; margin-bottom: 26px; }
+      .eyebrow { font-size: 13px; letter-spacing: 4px; color: var(--accent); margin-bottom: 16px; }
+      .couple-photo-wrap { margin-bottom: 16px; }
+      .couple-photo {
+        width: 130px; height: 130px; border-radius: 65px; object-fit: cover;
+        border: 3px solid var(--accent);
+      }
+      .mandap-wrap { margin-bottom: 8px; }
+      .couple { font-size: 32px; font-weight: 700; color: ${textDark}; line-height: 1.5; }
+      .amp { font-size: 15px; color: var(--accent); margin: 4px 0; }
+      .tagline { font-size: 15px; color: ${textMuted}; margin: 18px 0 22px; }
+      .message { font-size: 15px; line-height: 1.9; color: ${textDark}; max-width: 380px; margin-bottom: 22px; }
       .guest-line { font-size: 14px; color: ${textMuted}; margin-bottom: 4px; }
-      .guest-name-main { font-size: 20px; font-weight: 600; color: ${textDark}; margin-bottom: 22px; }
+      .guest-name-main { font-size: 20px; font-weight: 600; color: ${textDark}; margin-bottom: 18px; }
       .info-row { display: flex; gap: 26px; margin-top: auto; }
       .info-card { border: 1px solid var(--accent); border-radius: 6px; padding: 14px 22px; min-width: 160px; }
       .info-label { font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; }
@@ -221,6 +396,7 @@ function buildMainInvitationPage(theme: InvitationTheme, details: InvitationDeta
     </style>
     <div class="main-content">
       <div class="eyebrow">विवाह निमंत्रण</div>
+      ${photoBlock}
       ${coupleLine}
       <div class="tagline">विवाह बंधन में बंधने जा रहे हैं</div>
       <div class="guest-line">प्रिय</div>
@@ -235,73 +411,93 @@ function buildMainInvitationPage(theme: InvitationTheme, details: InvitationDeta
   return pageChrome(theme, inner, theme.lightBg);
 }
 
-/** Page 3: the full programme of functions, in chronological order. */
-function buildProgrammePage(theme: InvitationTheme, events: Event[]): string {
-  const textDark = escapeHtml(theme.textDark);
-  const textMuted = escapeHtml(theme.textMuted);
-  const rows = events.map(ev => {
-    const label = ev.event_type && EVENT_TYPE_HINDI[ev.event_type] ? EVENT_TYPE_HINDI[ev.event_type] : escapeHtml(ev.name);
-    const dateLine = ev.date ? formatIsoDateHindi(ev.date, true) : '';
-    const timeLine = ev.start_time
-      ? `${formatTimeHindi(ev.start_time)}${ev.end_time ? ' – ' + formatTimeHindi(ev.end_time) : ''}`
-      : '';
-    const locationLine = ev.location ? escapeHtml(ev.location) : '';
+/** One page per wedding function (Haldi, Mehndi, Sangeet...), each in its own festive colour. */
+function buildEventPage(theme: InvitationTheme, event: Event): string {
+  const style = (event.event_type && EVENT_TYPE_STYLE[event.event_type]) || defaultEventStyle(theme);
+  const label = event.event_type && EVENT_TYPE_HINDI[event.event_type] ? EVENT_TYPE_HINDI[event.event_type] : escapeHtml(event.name);
+  const dateLine = event.date ? formatIsoDateHindi(event.date, true) : '';
+  const timeLine = event.start_time
+    ? `${formatTimeHindi(event.start_time)}${event.end_time ? ' – ' + formatTimeHindi(event.end_time) : ''}`
+    : '';
+  const locationLine = event.location ? escapeHtml(event.location) : '';
+  const text = escapeHtml(style.text);
 
-    return `
-      <div class="timeline-row">
-        <div class="timeline-dot"></div>
-        <div class="timeline-body">
-          <div class="event-name">${label}</div>
-          ${dateLine ? `<div class="event-meta">${dateLine}${timeLine ? ' · ' + timeLine : ''}</div>` : ''}
-          ${locationLine ? `<div class="event-location">${locationLine}</div>` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
+  const inner = `
+    <div class="event-content" style="color: ${text};">
+      <div class="event-icon">${style.icon(escapeHtml(style.accent))}</div>
+      <div class="event-label">${label}</div>
+      ${dateLine ? `<div class="event-date">${dateLine}</div>` : ''}
+      ${timeLine ? `<div class="event-time">${timeLine}</div>` : ''}
+      ${locationLine ? `<div class="event-loc">${locationLine}</div>` : ''}
+    </div>
+  `;
+  return pageChrome(theme, inner, style.bg, { accent: style.accent });
+}
 
-  const body = events.length > 0
-    ? `<div class="timeline">${rows}</div>`
-    : `<div class="empty-note">कार्यक्रम की जानकारी शीघ्र साझा की जाएगी।</div>`;
+/** Closing page: blessing, RSVP request, and — when the wedding date is known — a real countdown. */
+function buildClosingPage(theme: InvitationTheme): string {
+  const gold = escapeHtml(theme.gold);
+  const goldMuted = escapeHtml(theme.goldMuted);
 
   const inner = `
     <style>
-      .programme-content {
+      .closing-content {
         position: absolute; inset: 70px; display: flex; flex-direction: column;
-        align-items: center; color: ${textDark};
+        align-items: center; justify-content: center; text-align: center; color: #F5E9D3;
       }
-      .programme-title { font-size: 22px; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; text-align: center; }
-      .programme-subtitle { font-size: 13px; color: var(--accent); letter-spacing: 3px; margin-bottom: 30px; text-align: center; }
-      .timeline { width: 100%; max-width: 420px; border-left: 2px solid var(--accent); padding-left: 22px; }
-      .timeline-row { position: relative; margin-bottom: 26px; }
-      .timeline-dot { position: absolute; left: -28px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
-      .event-name { font-size: 17px; font-weight: 700; color: ${textDark}; }
-      .event-meta { font-size: 13px; color: ${textMuted}; margin-top: 2px; }
-      .event-location { font-size: 13px; color: ${textMuted}; margin-top: 1px; }
-      .empty-note { font-size: 14px; color: ${textMuted}; margin-top: 60px; }
-      .rsvp { margin-top: auto; text-align: center; }
-      .rsvp-line { font-size: 14px; color: ${textDark}; margin-bottom: 6px; }
-      .rsvp-blessing { font-size: 13px; color: var(--accent); font-style: italic; }
+      .closing-icon { margin-bottom: 18px; }
+      .closing-title { font-size: 22px; font-weight: 700; letter-spacing: 1px; color: #FFF7E6; margin-bottom: 22px; }
+      .countdown { margin-bottom: 26px; }
+      .countdown-num { font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1; }
+      .countdown-label { font-size: 14px; letter-spacing: 3px; color: ${goldMuted}; margin-top: 6px; }
+      .divider-line { width: 120px; height: 1px; background: var(--accent); margin: 22px 0; opacity: 0.7; }
+      .rsvp-line { font-size: 16px; color: #F5E9D3; margin-bottom: 8px; }
+      .blessing { font-size: 14px; color: ${goldMuted}; font-style: italic; }
+      .countdown-slot { min-height: 96px; }
     </style>
-    <div class="programme-content">
-      <div class="programme-title">विवाह के कार्यक्रम</div>
-      <div class="programme-subtitle">WEDDING PROGRAMME</div>
-      ${body}
-      <div class="rsvp">
-        <div class="rsvp-line">कृपया अपनी उपस्थिति की पुष्टि करें</div>
-        <div class="rsvp-blessing">आपकी उपस्थिति हमारे लिए मंगलकारी होगी</div>
-      </div>
+    <div class="closing-content" data-countdown-slot>
+      <div class="closing-icon">${diyaIcon(gold)}</div>
+      <div class="closing-title">आपकी शुभकामनाएं और उपस्थिति</div>
+      <div class="countdown-slot"></div>
+      <div class="rsvp-line">कृपया अपनी उपस्थिति की पुष्टि करें</div>
+      <div class="divider-line"></div>
+      <div class="blessing">सपरिवार पधारने की कृपा करें</div>
     </div>
   `;
-  return pageChrome(theme, inner, theme.lightBg);
+  return pageChrome(theme, inner, theme.darkBg);
+}
+
+/** Fills the closing page's countdown slot with a real days-remaining count, computed at build time (not live JS, since a PDF page is static). */
+function withCountdown(html: string, weddingDateIso?: string): string {
+  if (!weddingDateIso) return html;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(weddingDateIso);
+  if (!match) return html;
+  const [, y, m, d] = match;
+  const target = new Date(Number(y), Number(m) - 1, Number(d));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
+
+  let block = '';
+  if (diffDays > 0) {
+    block = `<div class="countdown"><div class="countdown-num">${diffDays}</div><div class="countdown-label">दिन शेष</div></div>`;
+  } else if (diffDays === 0) {
+    block = `<div class="countdown"><div class="countdown-num">आज</div><div class="countdown-label">है शुभ दिन</div></div>`;
+  }
+  if (!block) return html;
+  return html.replace('<div class="countdown-slot"></div>', block);
 }
 
 /**
- * Builds the full multi-page invitation (invocation → couple/date/venue →
- * programme). `events` is optional — pass the wedding's events so page 3
- * lists the actual functions; it renders a placeholder line if omitted.
+ * Builds the full multi-page invitation: invocation → couple/date/venue →
+ * one page per wedding function → closing blessing/countdown. `events` is
+ * optional — pass the wedding's events so each function gets its own themed
+ * page; the closing page still renders (without event pages) if omitted.
  */
 export function buildInvitationHtml(details: InvitationDetails, guestName: string, events: Event[] = []): string {
   const theme = details.theme;
+  const eventPages = events.map(ev => buildEventPage(theme, ev)).join('');
+  const closingPage = withCountdown(buildClosingPage(theme), details.weddingDateIso);
 
   return `
   <html>
@@ -312,7 +508,8 @@ export function buildInvitationHtml(details: InvitationDetails, guestName: strin
     <body>
       ${buildInvocationPage(theme, guestName)}
       ${buildMainInvitationPage(theme, details, guestName)}
-      ${buildProgrammePage(theme, events)}
+      ${eventPages}
+      ${closingPage}
     </body>
   </html>
   `;

@@ -209,7 +209,7 @@ export default function CustomizeScreen() {
 
           <View style={{ marginBottom: 20 }}>
             <Typography variant="caption" weight="medium" color={theme.colors.textSecondary}>
-              PDF Invitation Theme (Hindi, 3-page card)
+              PDF Invitation Theme (Hindi, multi-page card with one page per function)
             </Typography>
             <View style={styles.themeGrid}>
               {INVITATION_THEMES.map(t => {

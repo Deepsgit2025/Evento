@@ -9,6 +9,7 @@ import { SettingsService, NotificationPrefKey } from './settings';
 
 const ALARM_CHANNEL_ID = 'task-alarms';
 const EXACT_ALARM_PROMPTED_KEY = 'evento_exact_alarm_prompted';
+const BATTERY_OPT_PROMPTED_KEY = 'evento_battery_opt_prompted';
 
 export interface Reminder {
   id: string;
@@ -49,6 +50,7 @@ export const ReminderService = {
     const granted = finalStatus === 'granted';
     if (granted) {
       await this.ensureExactAlarmPermission();
+      await this.ensureBatteryOptimizationExemption();
     }
     return granted;
   },
@@ -81,6 +83,38 @@ export const ReminderService = {
     try {
       await IntentLauncher.startActivityAsync(
         IntentLauncher.ActivityAction.REQUEST_SCHEDULE_EXACT_ALARM,
+        { data: 'package:com.evento.app' }
+      );
+    } catch (e) {
+      // Some OEM ROMs don't support this action; nothing more we can do from JS.
+    }
+  },
+
+  /**
+   * Many Indian OEM Android skins (Xiaomi/MIUI, Vivo, Oppo/ColorOS, etc.) apply
+   * their own aggressive battery-management on top of stock Android, killing
+   * background work — including exact alarms — unless the app is explicitly
+   * exempted from battery optimization. This requests that stock-Android
+   * exemption once; it doesn't touch OEM-specific "autostart"/"battery saver"
+   * lists, which unfortunately still require the user to allow manually.
+   */
+  async ensureBatteryOptimizationExemption() {
+    if (Platform.OS !== 'android') return;
+    const alreadyPrompted = await SecureStore.getItemAsync(BATTERY_OPT_PROMPTED_KEY);
+    if (alreadyPrompted) return;
+    await SecureStore.setItemAsync(BATTERY_OPT_PROMPTED_KEY, '1');
+    await this.openBatteryOptimizationSettings();
+  },
+
+  /**
+   * Always opens the "ignore battery optimizations" request screen for this
+   * app — used for the manual "Fix alarms not ringing" button in Settings.
+   */
+  async openBatteryOptimizationSettings() {
+    if (Platform.OS !== 'android') return;
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
         { data: 'package:com.evento.app' }
       );
     } catch (e) {

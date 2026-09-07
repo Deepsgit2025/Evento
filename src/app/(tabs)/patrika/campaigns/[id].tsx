@@ -8,7 +8,7 @@ import { theme } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
 import { getWedding } from '../../../../services/wedding';
 import { EventService } from '../../../../services/event';
-import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails } from '../../../../services/invitationDocument';
+import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails, resolveCoverPhotoDataUri } from '../../../../services/invitationDocument';
 import { InvitationCampaign, InvitationRecipient } from '../../../../database/types';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -108,6 +108,7 @@ export default function CampaignDetailsScreen() {
             onPress: async () => {
               try {
                 setIsDispatching(true);
+                details.coverPhotoDataUri = await resolveCoverPhotoDataUri(custData.cover_photo_uri);
                 const html = buildInvitationHtml(details, guest.full_name, weddingEvents);
                 const { uri } = await Print.printToFileAsync({ html, width: 612, height: 792 }); // Standard Letter size
 

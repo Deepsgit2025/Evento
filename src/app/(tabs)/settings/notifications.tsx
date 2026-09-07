@@ -117,6 +117,27 @@ export default function NotificationSettingsScreen() {
               variant="outline"
               icon="settings-outline"
               onPress={() => ReminderService.openExactAlarmSettings()}
+              style={{ marginHorizontal: theme.spacing.lg, marginBottom: theme.spacing.md }}
+            />
+            <View style={styles.toggleRow}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary + '1A' }]}>
+                <Ionicons name="battery-charging-outline" size={24} color={theme.colors.primary} />
+              </View>
+              <View style={styles.toggleText}>
+                <Typography variant="body" weight="medium">Still not ringing?</Typography>
+                <Typography variant="caption" color={theme.colors.textSecondary}>
+                  Many phones (Xiaomi, Vivo, Oppo, Realme, OnePlus) also kill alarms in the
+                  background to save battery. Allow Evento to ignore battery optimization, and if
+                  your phone has an "Autostart" or "Battery saver" list under its own Settings app,
+                  turn Evento on there too.
+                </Typography>
+              </View>
+            </View>
+            <Button
+              label="Open Battery Settings"
+              variant="outline"
+              icon="battery-charging-outline"
+              onPress={() => ReminderService.openBatteryOptimizationSettings()}
               style={{ marginHorizontal: theme.spacing.lg, marginBottom: theme.spacing.lg }}
             />
           </Card>

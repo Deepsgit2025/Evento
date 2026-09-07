@@ -13,7 +13,7 @@ import { EventGuestService } from '../../../services/eventGuest';
 import { EventService } from '../../../services/event';
 import { WhatsAppService } from '../../../services/whatsapp';
 import { getWedding } from '../../../services/wedding';
-import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails } from '../../../services/invitationDocument';
+import { buildInvitationHtml, buildInvitationText, resolveInvitationDetails, resolveCoverPhotoDataUri } from '../../../services/invitationDocument';
 import { Guest, GuestGroup, RoomAssignment, InvitationRecipient, Event, Wedding } from '../../../database/types';
 
 export default function GuestProfileScreen() {
@@ -103,6 +103,7 @@ export default function GuestProfileScreen() {
       const sharePdf = async () => {
         try {
           setIsDispatching(true);
+          details.coverPhotoDataUri = await resolveCoverPhotoDataUri(custData.cover_photo_uri);
           const html = buildInvitationHtml(details, guest.full_name, weddingEvents);
           const Print = await import('expo-print');
           const Sharing = await import('expo-sharing');
