@@ -101,9 +101,9 @@ export default function PreviewScreen() {
             />
             <Button
               label="Delete Patrika"
-              variant="outline"
+              variant="destructive"
               onPress={handleDelete}
-              style={{ flex: 1, borderColor: 'red' }}
+              style={{ flex: 1 }}
             />
           </View>
         </View>
@@ -125,7 +125,7 @@ export default function PreviewScreen() {
                 subtitle={r.event_name ? `Event: ${r.event_name}` : 'Main Wedding'}
                 rightElement={
                   <View style={[styles.badge, r.status === 'SENT' ? styles.badgeSent : styles.badgeQueued]}>
-                    <Typography variant="caption" color={r.status === 'SENT' ? '#fff' : '#333'}>{r.status}</Typography>
+                    <Typography variant="caption" color={r.status === 'SENT' ? '#FFFFFF' : theme.colors.text}>{r.status}</Typography>
                   </View>
                 }
               />

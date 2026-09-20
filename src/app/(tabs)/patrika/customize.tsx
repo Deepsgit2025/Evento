@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
+import { ScreenContainer, Typography, TextInput, Button, LoadingState } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { TEMPLATES, PatrikaProps } from '../../../components/patrika/Templates';
 import { PatrikaService, PatrikaDTO, PatrikaCustomization } from '../../../services/patrika';
@@ -86,7 +86,7 @@ export default function CustomizeScreen() {
     loadInitialData();
   }, [db, editId]);
 
-  if (!template || isLoading) return null;
+  if (!template || isLoading) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   const TemplateComponent = template.component;
   const previewWidth = SCREEN_WIDTH - 40; // full width minus padding

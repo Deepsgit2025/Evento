@@ -76,6 +76,7 @@ export default function DancesScreen() {
           leftIcon={<Ionicons name="add" size={20} color="#fff" />}
           onPress={() => router.push('/(tabs)/dances/add' as any)}
           style={styles.addButton}
+          accessibilityLabel="Add dance"
         />
       </View>
 
@@ -100,11 +101,11 @@ export default function DancesScreen() {
               onPress={() => router.push(`/(tabs)/dances/add?editId=${item.id}` as any)}
             >
               <View style={styles.orderControls}>
-                <Pressable onPress={() => handleMove(index, -1)} disabled={index === 0} hitSlop={6}>
+                <Pressable onPress={() => handleMove(index, -1)} disabled={index === 0} hitSlop={6} accessibilityLabel={`Move ${item.title} up`}>
                   <Ionicons name="chevron-up" size={18} color={index === 0 ? theme.colors.border : theme.colors.textSecondary} />
                 </Pressable>
                 <Typography variant="caption" weight="bold" color={theme.colors.textMuted}>{index + 1}</Typography>
-                <Pressable onPress={() => handleMove(index, 1)} disabled={index === dances.length - 1} hitSlop={6}>
+                <Pressable onPress={() => handleMove(index, 1)} disabled={index === dances.length - 1} hitSlop={6} accessibilityLabel={`Move ${item.title} down`}>
                   <Ionicons name="chevron-down" size={18} color={index === dances.length - 1 ? theme.colors.border : theme.colors.textSecondary} />
                 </Pressable>
               </View>
@@ -142,7 +143,7 @@ export default function DancesScreen() {
                 )}
               </View>
 
-              <Pressable onPress={() => handleDelete(item)} hitSlop={8} style={styles.deleteBtn}>
+              <Pressable onPress={() => handleDelete(item)} hitSlop={8} style={styles.deleteBtn} accessibilityLabel={`Delete ${item.title}`}>
                 <Ionicons name="trash-outline" size={18} color={theme.colors.textMuted} />
               </Pressable>
             </Pressable>

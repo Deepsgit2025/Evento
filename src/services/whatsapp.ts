@@ -35,17 +35,6 @@ export const WhatsAppService = {
     }
   },
 
-  // Dummy config to bypass API requirements
-  async getConfig(db: SQLite.SQLiteDatabase, weddingId: string): Promise<any> {
-    return {
-      id: 'dummy',
-      wedding_id: weddingId,
-      phone_number_id: 'dummy',
-      access_token: 'dummy',
-      is_active: 1
-    };
-  },
-
   async getCampaigns(db: SQLite.SQLiteDatabase, weddingId: string): Promise<InvitationCampaign[]> {
     return db.getAllAsync<InvitationCampaign>(
       `SELECT * FROM invitation_campaigns WHERE wedding_id = ? ORDER BY created_at DESC`,

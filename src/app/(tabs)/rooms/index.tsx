@@ -151,7 +151,7 @@ export default function RoomsDashboard() {
             <Pressable onPress={() => router.push({ pathname: '/(tabs)/rooms/add-room', params: { hotel_id: hotel.id } })}>
                <Typography variant="bodySecondary" weight="medium" color={theme.colors.primary}>+ Add Room</Typography>
             </Pressable>
-            <Pressable onPress={() => handleDeleteHotel(hotel)} style={styles.deleteIcon}>
+            <Pressable onPress={() => handleDeleteHotel(hotel)} style={styles.deleteIcon} accessibilityLabel={`Delete ${hotel.name}`}>
                <Ionicons name="trash-outline" size={16} color={theme.colors.error} />
             </Pressable>
           </View>
@@ -329,16 +329,16 @@ const styles = StyleSheet.create({
     borderRadius: theme.radii.sm,
   },
   badgeAvailable: {
-    backgroundColor: '#DCFCE7', // Light green
+    backgroundColor: theme.colors.cardGreen,
   },
   badgeTextAvailable: {
-    color: '#166534', // Dark green
+    color: theme.colors.success,
   },
   badgeFull: {
-    backgroundColor: '#FEE2E2', // Light red
+    backgroundColor: '#FEF2F2',
   },
   badgeTextFull: {
-    color: '#991B1B', // Dark red
+    color: theme.colors.error,
   },
   filterWrapper: {
     paddingHorizontal: theme.spacing.lg,

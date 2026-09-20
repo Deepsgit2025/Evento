@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, EmptyState, Card } from '../../../components/ui';
+import { ScreenContainer, Typography, EmptyState, Card, LoadingState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme';
 import { PatrikaService } from '../../../services/patrika';
@@ -47,7 +47,7 @@ export default function MyPatrikasScreen() {
     setIsRefreshing(false);
   };
 
-  if (isLoading) return null;
+  if (isLoading) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer>
@@ -76,7 +76,7 @@ export default function MyPatrikasScreen() {
         >
           <View style={styles.topRow}>
             <Typography variant="sectionTitle">My Designs</Typography>
-            <Pressable onPress={() => router.push('/(tabs)/patrika/gallery')}>
+            <Pressable onPress={() => router.push('/(tabs)/patrika/gallery')} accessibilityLabel="Create new invitation">
               <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
             </Pressable>
           </View>

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { Typography } from './Typography';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
 
 export interface ButtonProps extends PressableProps {
   label: string;
@@ -33,11 +33,12 @@ export function Button({
   const isPrimary = variant === 'primary';
   const isOutline = variant === 'outline';
   const isGhost = variant === 'ghost';
-  
+  const isDestructive = variant === 'destructive';
+
   const isDisabled = disabled || isLoading;
 
   const getBackgroundColor = (pressed: boolean) => {
-    if (isGhost || isOutline) return pressed ? theme.colors.borderLight : 'transparent';
+    if (isGhost || isOutline || isDestructive) return pressed ? theme.colors.borderLight : 'transparent';
     if (isDisabled) return theme.colors.disabled;
     if (isPrimary) return pressed ? theme.colors.primaryPressed : theme.colors.primary;
     return pressed ? theme.colors.border : theme.colors.surface;
@@ -45,6 +46,7 @@ export function Button({
 
   const getBorderColor = () => {
     if (isOutline) return isDisabled ? theme.colors.disabled : theme.colors.primary;
+    if (isDestructive) return isDisabled ? theme.colors.disabled : theme.colors.error;
     return 'transparent';
   };
 
@@ -53,6 +55,7 @@ export function Button({
     if (isDisabled && isPrimary) return theme.colors.textMuted;
     if (isPrimary) return '#FFFFFF';
     if (isOutline) return theme.colors.primary;
+    if (isDestructive) return theme.colors.error;
     return theme.colors.text;
   };
 
@@ -63,7 +66,7 @@ export function Button({
         {
           backgroundColor: getBackgroundColor(pressed),
           borderColor: getBorderColor(),
-          borderWidth: isOutline ? 1.5 : 0,
+          borderWidth: (isOutline || isDestructive) ? 1.5 : 0,
           opacity: isDisabled ? 0.5 : 1,
           transform: [{ scale: pressed && !isDisabled ? 0.98 : 1 }],
         },

@@ -166,10 +166,10 @@ export default function VendorDetailScreen() {
               <Ionicons name="briefcase" size={32} color={theme.colors.primary} />
             </View>
             <View style={styles.headerActions}>
-              <TouchableOpacity style={styles.actionIcon} onPress={() => router.push(`/(tabs)/vendors/${vendor.id}/edit` as any)}>
+              <TouchableOpacity style={styles.actionIcon} onPress={() => router.push(`/(tabs)/vendors/${vendor.id}/edit` as any)} accessibilityLabel="Edit vendor">
                 <Ionicons name="pencil" size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionIcon} onPress={handleDelete}>
+              <TouchableOpacity style={styles.actionIcon} onPress={handleDelete} accessibilityLabel="Delete vendor">
                 <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
               </TouchableOpacity>
             </View>
@@ -224,10 +224,10 @@ export default function VendorDetailScreen() {
                   leftElement={<Ionicons name="cash-outline" size={20} color={theme.colors.success} />}
                   rightElement={
                     <View style={styles.actionRow}>
-                      <TouchableOpacity style={styles.smallAction} onPress={() => router.push(`/(tabs)/vendors/${vendor.id}/edit-payment?paymentId=${payment.id}` as any)}>
+                      <TouchableOpacity style={styles.smallAction} onPress={() => router.push(`/(tabs)/vendors/${vendor.id}/edit-payment?paymentId=${payment.id}` as any)} accessibilityLabel="Edit payment">
                         <Ionicons name="pencil" size={16} color={theme.colors.textSecondary} />
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.smallAction} onPress={() => handleDeletePayment(payment.id)}>
+                      <TouchableOpacity style={styles.smallAction} onPress={() => handleDeletePayment(payment.id)} accessibilityLabel="Delete payment">
                         <Ionicons name="trash-outline" size={16} color={theme.colors.error} />
                       </TouchableOpacity>
                     </View>

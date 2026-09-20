@@ -365,10 +365,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: theme.radii.sm,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: theme.colors.cardPurple,
   },
   badgeText: {
-    color: '#7E22CE',
+    color: theme.colors.gradientEnd,
   },
   detailGrid: {
     gap: 4,

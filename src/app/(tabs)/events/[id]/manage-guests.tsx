@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet, FlatList, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -34,6 +34,10 @@ export default function EventManageGuestsScreen() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  // Tracks whether the guest selection has been seeded from the DB yet, without
+  // making fetchData's identity depend on `isLoading` (which caused a redundant
+  // extra fetch on every screen load — see fetchData below).
+  const hasInitializedSelection = useRef(false);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -63,18 +67,19 @@ export default function EventManageGuestsScreen() {
       setGuests(fetchedGuests);
       setGroups(fetchedGroups);
       setInitialAttendingIds(attendingIds);
-      
+
       // Initialize selected set from DB only on first load
-      if (isLoading) {
+      if (!hasInitializedSelection.current) {
+        hasInitializedSelection.current = true;
         setSelectedGuestIds(attendingIds);
       }
-      
+
     } catch (error) {
       console.error("Failed to fetch data", error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoading(false);
     }
-  }, [db, eventId, debouncedSearch, isLoading]);
+  }, [db, eventId, debouncedSearch]);
 
   useEffect(() => {
     fetchData();
@@ -168,12 +173,12 @@ export default function EventManageGuestsScreen() {
               </View>
               <View style={{flexDirection: 'row', gap: 6, marginTop: 4}}>
                 {item.side === 'Groom' ? (
-                  <View style={[styles.badge, {backgroundColor: '#E0F2FE'}]}>
-                    <Typography variant="caption" weight="medium" style={{color: '#0369A1'}}>Groom Side</Typography>
+                  <View style={[styles.badge, {backgroundColor: theme.colors.cardPurple}]}>
+                    <Typography variant="caption" weight="medium" style={{color: theme.colors.gradientEnd}}>Groom Side</Typography>
                   </View>
                 ) : (
-                  <View style={[styles.badge, {backgroundColor: '#FCE7F3'}]}>
-                    <Typography variant="caption" weight="medium" style={{color: '#BE185D'}}>Bride Side</Typography>
+                  <View style={[styles.badge, {backgroundColor: theme.colors.cardRose}]}>
+                    <Typography variant="caption" weight="medium" style={{color: theme.colors.primary}}>Bride Side</Typography>
                   </View>
                 )}
                 {group && (

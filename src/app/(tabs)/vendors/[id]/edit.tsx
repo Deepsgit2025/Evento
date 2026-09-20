@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../../components/ui';
 import { theme } from '../../../../theme';
 import { VendorService, VendorDTO } from '../../../../services/vendor';
@@ -16,7 +17,8 @@ export default function EditVendorScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [name, setName] = useState('');
   const [categorySelection, setCategorySelection] = useState('');
   const [customCategory, setCustomCategory] = useState('');
@@ -113,6 +115,7 @@ export default function EditVendorScreen() {
   }
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         
@@ -170,7 +173,7 @@ export default function EditVendorScreen() {
         )}
 
         <TextInput
-          label="Agreed Amount (₹) *"
+          label="Agreed Amount (₹)"
           placeholder="e.g. 50000"
           value={agreedAmount}
           onChangeText={(text) => {
@@ -239,14 +242,15 @@ export default function EditVendorScreen() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Update Vendor" 
-          onPress={handleSave} 
-          isLoading={isSubmitting} 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Update Vendor"
+          onPress={handleSave}
+          isLoading={isSubmitting}
         />
       </View>
     </ScreenContainer>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -111,7 +111,7 @@ export default function TasksScreen() {
             </View>
           )}
         </View>
-        <Pressable onPress={() => handleDelete(task)} hitSlop={8} style={styles.deleteBtn}>
+        <Pressable onPress={() => handleDelete(task)} hitSlop={8} style={styles.deleteBtn} accessibilityLabel={`Delete ${task.title}`}>
           <Ionicons name="trash-outline" size={18} color={theme.colors.textMuted} />
         </Pressable>
       </Pressable>
@@ -127,6 +127,7 @@ export default function TasksScreen() {
           leftIcon={<Ionicons name="add" size={20} color="#fff" />}
           onPress={() => router.push('/(tabs)/tasks/add' as any)}
           style={styles.addButton}
+          accessibilityLabel="Add task"
         />
       </View>
 

@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, RefreshControl, Dimensions, Alert, Activi
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer, Typography, Card, Button } from '../../components/ui';
+import { ScreenContainer, Typography, Card, Button, LoadingState } from '../../components/ui';
 import { theme } from '../../theme';
 import { AuthService } from '../../services/auth';
 import { getUserWedding } from '../../services/wedding';
@@ -21,6 +21,7 @@ const { width } = Dimensions.get('window');
 export default function ReportsScreen() {
   const db = useSQLiteContext();
   
+  const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [financial, setFinancial] = useState<FinancialReport | null>(null);
   const [guest, setGuest] = useState<GuestReport | null>(null);
@@ -54,6 +55,8 @@ export default function ReportsScreen() {
       setEvent(evt);
     } catch (e) {
       console.error("Failed to fetch reports:", e instanceof Error ? e.message : String(e));
+    } finally {
+      setIsLoading(false);
     }
   }, [db]);
 
@@ -127,11 +130,11 @@ export default function ReportsScreen() {
             <View style={styles.barBackground}>
               <View style={[
                 styles.barFill, 
-                { width: guest.total_guests ? `${(guest.bride_side / guest.total_guests) * 100}%` : '50%', backgroundColor: '#EC4899' } // Pink
+                { width: guest.total_guests ? `${(guest.bride_side / guest.total_guests) * 100}%` : '50%', backgroundColor: theme.colors.primary }
               ]} />
               <View style={[
-                styles.barFill, 
-                { width: guest.total_guests ? `${(guest.groom_side / guest.total_guests) * 100}%` : '50%', backgroundColor: '#3B82F6' } // Blue
+                styles.barFill,
+                { width: guest.total_guests ? `${(guest.groom_side / guest.total_guests) * 100}%` : '50%', backgroundColor: theme.colors.accent }
               ]} />
             </View>
           </View>
@@ -294,13 +297,24 @@ export default function ReportsScreen() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <ScreenContainer edges={['top', 'left', 'right']} style={styles.container}>
+        <View style={styles.header}>
+          <Typography variant="screenTitle">Reports</Typography>
+        </View>
+        <LoadingState />
+      </ScreenContainer>
+    );
+  }
+
   return (
     <ScreenContainer edges={['top', 'left', 'right']} style={styles.container}>
       <View style={styles.header}>
         <Typography variant="screenTitle">Reports</Typography>
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >

@@ -137,6 +137,7 @@ export default function TabLayout() {
       <Tabs.Screen name="photos" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="memories" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="closing" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="search" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
 

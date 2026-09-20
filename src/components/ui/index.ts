@@ -22,3 +22,4 @@ export * from './WeddingCountdown';
 export * from './DateField';
 export * from './StatusPicker';
 export * from './Logo';
+export * from './QuickAddSheet';

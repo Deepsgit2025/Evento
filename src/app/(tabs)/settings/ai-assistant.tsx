@@ -1,89 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import React from 'react';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer, Typography, TextInput, Button, Card } from '../../../components/ui';
+import { ScreenContainer, Typography, Card } from '../../../components/ui';
 import { theme } from '../../../theme';
-import { AIService } from '../../../services/ai';
 
 export default function AIAssistantSettingsScreen() {
-  const router = useRouter();
-  const [apiKey, setApiKey] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isActive = true;
-    const loadKey = async () => {
-      try {
-        const key = await AIService.getApiKey();
-        if (key && isActive) {
-          setApiKey(key);
-        }
-      } catch (e) {
-        console.error(e instanceof Error ? e.message : String(e));
-      } finally {
-        if (isActive) setIsLoading(false);
-      }
-    };
-    loadKey();
-    return () => { isActive = false; };
-  }, []);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      if (apiKey.trim() === '') {
-        // Clear key
-        await AIService.setApiKey('');
-      } else {
-        await AIService.setApiKey(apiKey.trim());
-      }
-      Alert.alert('Success', 'AI Assistant configuration saved', [{ text: 'OK', onPress: () => router.back() }]);
-    } catch (e) {
-      console.error(e instanceof Error ? e.message : String(e));
-      Alert.alert('Error', 'Failed to save API key');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  if (isLoading) return <ScreenContainer><View /></ScreenContainer>;
-
   return (
     <ScreenContainer edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Typography variant="screenTitle">AI Assistant</Typography>
       </View>
-      
+
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.iconCircle}>
           <Ionicons name="sparkles" size={32} color={theme.colors.primary} />
         </View>
-        <Typography variant="sectionTitle" style={styles.title}>Gemini Configuration</Typography>
+        <Typography variant="sectionTitle" style={styles.title}>Built-in, on-device</Typography>
         <Typography variant="bodySecondary" color={theme.colors.textSecondary} style={styles.description}>
-          Evento uses Google's Gemini AI to power the intelligent wedding assistant. To use the AI Assistant, please provide your own Gemini API key.
+          Evento's AI Assistant answers questions about your guests, events, budget, and tasks by
+          reading your wedding data directly on this device. There's nothing to set up — it works
+          fully offline, with no external API, no API key, and no data ever leaving your phone.
         </Typography>
 
-        <Card>
-          <TextInput
-            label="API Key"
-            placeholder="AIzaSy..."
-            value={apiKey}
-            onChangeText={setApiKey}
-            secureTextEntry
-          />
-          <Typography variant="caption" color={theme.colors.textMuted} style={styles.hint}>
-            Your API key is stored securely on this device and is only used to communicate with the Gemini API directly.
-          </Typography>
+        <Card style={styles.exampleCard}>
+          <Typography variant="body" weight="semibold" style={{ marginBottom: theme.spacing.sm }}>Try asking things like:</Typography>
+          {[
+            'Is Rohan Mehta coming?',
+            'Which room is the Sharma family in?',
+            'How much have we spent so far?',
+            'What tasks are overdue?',
+          ].map((example) => (
+            <View key={example} style={styles.exampleRow}>
+              <Ionicons name="chatbubble-outline" size={16} color={theme.colors.textMuted} />
+              <Typography variant="bodySecondary" color={theme.colors.textSecondary} style={{ marginLeft: 8 }}>
+                "{example}"
+              </Typography>
+            </View>
+          ))}
         </Card>
-
-        <Button 
-          label="Save Configuration" 
-          onPress={handleSave} 
-          isLoading={isSaving} 
-          style={styles.saveBtn}
-        />
       </ScrollView>
     </ScreenContainer>
   );
@@ -117,11 +71,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
     paddingHorizontal: theme.spacing.md,
   },
-  hint: {
-    marginTop: theme.spacing.sm,
-  },
-  saveBtn: {
+  exampleCard: {
     width: '100%',
-    marginTop: theme.spacing.xl,
-  }
+  },
+  exampleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: theme.spacing.xs,
+  },
 });

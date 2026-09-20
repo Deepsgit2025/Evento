@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, Card, Button, ListItem, TextInput } from '../../../components/ui';
+import { ScreenContainer, Typography, Card, Button, ListItem, TextInput, LoadingState, EmptyState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme';
 import { FinanceService, OverallFinancialSummary } from '../../../services/finance';
@@ -85,7 +85,7 @@ export default function FinancialDashboardScreen() {
 
   const formatMoney = (amount: number) => `₹${amount.toLocaleString()}`;
 
-  if (!summary) return null;
+  if (!summary) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer>
@@ -184,7 +184,7 @@ export default function FinancialDashboardScreen() {
 
           <View style={styles.breakdownRow}>
             <View style={styles.iconBox}>
-              <Ionicons name="cart" size={24} color="#E09F3E" />
+              <Ionicons name="cart" size={24} color={theme.colors.accent} />
             </View>
             <View style={styles.breakdownText}>
               <Typography variant="body" weight="medium">General Expenses</Typography>
@@ -254,12 +254,13 @@ export default function FinancialDashboardScreen() {
             ))}
           </Card>
         ) : (
-          <View style={styles.emptyState}>
-            <Ionicons name="cart-outline" size={48} color={theme.colors.border} style={{marginBottom: 16}} />
-            <Typography variant="body" color={theme.colors.textSecondary} align="center">
-              No general expenses found.
-            </Typography>
-          </View>
+          <EmptyState
+            icon={<Ionicons name="cart-outline" size={48} color={theme.colors.textMuted} />}
+            title="No expenses yet"
+            description="Add your first expense to start tracking spend against your budget."
+            actionLabel="Add Expense"
+            onAction={() => router.push('/(tabs)/finance/add-expense' as any)}
+          />
         )}
 
       </ScrollView>

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, EmptyState, Card } from '../../../../components/ui';
+import { ScreenContainer, Typography, EmptyState, Card, LoadingState } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
@@ -17,7 +17,6 @@ export default function CampaignsDashboard() {
   const [campaigns, setCampaigns] = useState<InvitationCampaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [hasConfig, setHasConfig] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -25,9 +24,6 @@ export default function CampaignsDashboard() {
       if (!session) return;
       const wedding = await getUserWedding(db, session.id);
       if (!wedding) return;
-
-      const config = await WhatsAppService.getConfig(db, wedding.id);
-      setHasConfig(!!config);
 
       const items = await WhatsAppService.getCampaigns(db, wedding.id);
       setCampaigns(items);
@@ -50,28 +46,17 @@ export default function CampaignsDashboard() {
     setIsRefreshing(false);
   };
 
-  if (isLoading) return null;
+  if (isLoading) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Pressable onPress={() => router.push('/(tabs)/patrika' as any)} style={styles.backButton}>
+        <Pressable onPress={() => router.push('/(tabs)/patrika' as any)} style={styles.backButton} accessibilityLabel="Back to Patrikas">
           <Ionicons name="chevron-back" size={24} color={theme.colors.primary} />
           <Typography variant="body" color={theme.colors.primary}>Patrikas</Typography>
         </Pressable>
         <Typography variant="screenTitle" style={{flex: 1, textAlign: 'center', marginRight: 40}}>Bulk Campaigns</Typography>
       </View>
-
-      {!hasConfig && (
-        <Pressable style={styles.warningBanner} onPress={() => router.push('/(tabs)/settings/whatsapp' as any)}>
-          <Ionicons name="warning" size={20} color="#E09F3E" />
-          <View style={{flex: 1, marginLeft: 12}}>
-            <Typography variant="body" weight="semibold">WhatsApp API Not Configured</Typography>
-            <Typography variant="caption">Tap here to set up your official API credentials before sending campaigns.</Typography>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color="#E09F3E" />
-        </Pressable>
-      )}
 
       {campaigns.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -90,7 +75,7 @@ export default function CampaignsDashboard() {
         >
           <View style={styles.topRow}>
             <Typography variant="sectionTitle">Recent Campaigns</Typography>
-            <Pressable onPress={() => router.push('/(tabs)/patrika/campaigns/create' as any)}>
+            <Pressable onPress={() => router.push('/(tabs)/patrika/campaigns/create' as any)} accessibilityLabel="Create new campaign">
               <Ionicons name="add-circle" size={28} color={theme.colors.primary} />
             </Pressable>
           </View>
@@ -105,7 +90,7 @@ export default function CampaignsDashboard() {
                   <View style={styles.cardHeader}>
                     <Typography variant="body" weight="semibold">{camp.name}</Typography>
                     <View style={[styles.badge, camp.status === 'COMPLETED' ? styles.badgeComplete : styles.badgePending]}>
-                      <Typography variant="caption" color={camp.status === 'COMPLETED' ? '#fff' : '#333'}>{camp.status}</Typography>
+                      <Typography variant="caption" color={camp.status === 'COMPLETED' ? '#FFFFFF' : theme.colors.text}>{camp.status}</Typography>
                     </View>
                   </View>
                   <View style={styles.statsRow}>
@@ -138,12 +123,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: 80,
-  },
-  warningBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    padding: theme.spacing.md,
   },
   emptyContainer: {
     flex: 1,

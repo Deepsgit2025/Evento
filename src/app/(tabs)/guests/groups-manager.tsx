@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, Card, Button, TextInput, EmptyState } from '../../../components/ui';
+import { ScreenContainer, Typography, Card, Button, TextInput, EmptyState, LoadingState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme';
 import { GroupService } from '../../../services/group';
@@ -116,16 +116,16 @@ export default function GroupsManagerScreen() {
               </View>
               
               <View style={styles.groupActions}>
-                <Pressable onPress={() => handleReorder(index, 'up', side)} disabled={index === 0} style={[styles.iconBtn, index === 0 && styles.iconDisabled]}>
+                <Pressable onPress={() => handleReorder(index, 'up', side)} disabled={index === 0} style={[styles.iconBtn, index === 0 && styles.iconDisabled]} accessibilityLabel="Move group up">
                   <Ionicons name="chevron-up" size={20} color={index === 0 ? theme.colors.border : theme.colors.text} />
                 </Pressable>
-                <Pressable onPress={() => handleReorder(index, 'down', side)} disabled={index === sideGroups.length - 1} style={[styles.iconBtn, index === sideGroups.length - 1 && styles.iconDisabled]}>
+                <Pressable onPress={() => handleReorder(index, 'down', side)} disabled={index === sideGroups.length - 1} style={[styles.iconBtn, index === sideGroups.length - 1 && styles.iconDisabled]} accessibilityLabel="Move group down">
                   <Ionicons name="chevron-down" size={20} color={index === sideGroups.length - 1 ? theme.colors.border : theme.colors.text} />
                 </Pressable>
-                <Pressable onPress={() => { setIsCreating(true); setNewName(g.name); setNewSide(g.side); setEditingGroupId(g.id); }} style={styles.iconBtn}>
+                <Pressable onPress={() => { setIsCreating(true); setNewName(g.name); setNewSide(g.side); setEditingGroupId(g.id); }} style={styles.iconBtn} accessibilityLabel={`Edit ${g.name}`}>
                   <Ionicons name="pencil" size={20} color={theme.colors.primary} />
                 </Pressable>
-                <Pressable onPress={() => handleDelete(g.id, g.name)} style={styles.iconBtn}>
+                <Pressable onPress={() => handleDelete(g.id, g.name)} style={styles.iconBtn} accessibilityLabel={`Delete ${g.name}`}>
                   <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
                 </Pressable>
               </View>
@@ -136,7 +136,7 @@ export default function GroupsManagerScreen() {
     );
   };
 
-  if (isLoading) return null;
+  if (isLoading) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer>

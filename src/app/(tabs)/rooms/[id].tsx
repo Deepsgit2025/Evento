@@ -147,9 +147,10 @@ export default function RoomDetailsScreen() {
                     </Typography>
                   )}
                 </View>
-                <Pressable 
+                <Pressable
                   onPress={() => handleRemoveGuest(assignment.guest_id, assignment.guest_name)}
                   style={styles.removeBtn}
+                  accessibilityLabel={`Remove ${assignment.guest_name} from room`}
                 >
                   <Ionicons name="remove-circle-outline" size={24} color={theme.colors.error} />
                 </Pressable>
@@ -210,16 +211,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   badgeAvailable: {
-    backgroundColor: '#DCFCE7', // Light green
+    backgroundColor: theme.colors.cardGreen,
   },
   badgeTextAvailable: {
-    color: '#166534', // Dark green
+    color: theme.colors.success,
   },
   badgeFull: {
-    backgroundColor: '#FEE2E2', // Light red
+    backgroundColor: '#FEF2F2',
   },
   badgeTextFull: {
-    color: '#991B1B', // Dark red
+    color: theme.colors.error,
   },
   sectionHeader: {
     flexDirection: 'row',

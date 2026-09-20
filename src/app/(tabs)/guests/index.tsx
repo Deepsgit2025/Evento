@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, FlatList, Pressable, ScrollView, Alert, Modal } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ScreenContainer, Typography, EmptyState, TextInput, Card, Button } from '../../../components/ui';
+import { ScreenContainer, Typography, EmptyState, TextInput, Card, Button, LoadingState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
@@ -246,20 +246,20 @@ export default function GuestsListScreen() {
     );
   };
 
-  if (isLoading && guests.length === 0) return null;
+  if (isLoading && guests.length === 0) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer>
       <View style={styles.header}>
         <Typography variant="sectionTitle">Guests</Typography>
         <View style={styles.headerActions}>
-          <Pressable style={styles.iconBtn} onPress={() => router.push('/(tabs)/guests/groups-manager' as any)}>
+          <Pressable style={styles.iconBtn} onPress={() => router.push('/(tabs)/guests/groups-manager' as any)} accessibilityLabel="Manage guest groups">
             <Ionicons name="folder" size={24} color={theme.colors.primary} />
           </Pressable>
-          <Pressable style={styles.iconBtn} onPress={toggleSelectMode}>
+          <Pressable style={styles.iconBtn} onPress={toggleSelectMode} accessibilityLabel={isSelectMode ? 'Exit selection mode' : 'Select guests'}>
             <Ionicons name="checkmark-circle" size={24} color={isSelectMode ? theme.colors.success : theme.colors.primary} />
           </Pressable>
-          <Pressable style={styles.addButton} onPress={() => router.push('/(tabs)/guests/add')}>
+          <Pressable style={styles.addButton} onPress={() => router.push('/(tabs)/guests/add')} accessibilityLabel="Add guest">
             <Ionicons name="add" size={20} color={theme.colors.primary} />
           </Pressable>
         </View>
@@ -500,10 +500,10 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: theme.radii.sm,
   },
-  badgeGroom: { backgroundColor: '#E0F2FE' },
-  badgeTextGroom: { color: '#0369A1' },
-  badgeBride: { backgroundColor: '#FCE7F3' },
-  badgeTextBride: { color: '#BE185D' },
+  badgeGroom: { backgroundColor: theme.colors.cardPurple },
+  badgeTextGroom: { color: theme.colors.gradientEnd },
+  badgeBride: { backgroundColor: theme.colors.cardRose },
+  badgeTextBride: { color: theme.colors.primary },
   badgeGroup: {
     backgroundColor: theme.colors.surface,
     borderWidth: 1,

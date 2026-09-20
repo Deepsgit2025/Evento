@@ -101,12 +101,13 @@ export default function VendorsScreen() {
             placeholder="Search vendors..."
           />
         </View>
-        <Button 
-          variant="primary" 
+        <Button
+          variant="primary"
           label=""
-          leftIcon={<Ionicons name="add" size={20} color={theme.colors.surface} />} 
+          leftIcon={<Ionicons name="add" size={20} color={theme.colors.surface} />}
           onPress={() => router.push('/(tabs)/vendors/add' as any)}
           style={styles.addButton}
+          accessibilityLabel="Add vendor"
         />
       </View>
       {renderCategoryFilters()}
@@ -162,11 +163,11 @@ export default function VendorsScreen() {
           />
         )}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Typography variant="body" color={theme.colors.textSecondary} align="center">
-              No vendors match your search.
-            </Typography>
-          </View>
+          <EmptyState
+            icon={<Ionicons name="search-outline" size={48} color={theme.colors.border} />}
+            title="No vendors match"
+            description="Try a different search term or category filter."
+          />
         }
       />
     </ScreenContainer>

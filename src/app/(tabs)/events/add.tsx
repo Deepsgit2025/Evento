@@ -113,7 +113,7 @@ export default function AddEventScreen() {
     >
       <ScreenContainer>
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.closeButton}>
+          <Pressable onPress={() => router.back()} style={styles.closeButton} accessibilityLabel="Close">
             <Ionicons name="close" size={24} color={theme.colors.text} />
           </Pressable>
           <Typography variant="sectionTitle">New Event</Typography>

@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, Alert, Pressable, Platform } from 'react-
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ScreenContainer, Typography, Button, TextInput } from '../../../../components/ui';
+import { ScreenContainer, Typography, Button, TextInput, LoadingState } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../../theme';
 import { WhatsAppService } from '../../../../services/whatsapp';
@@ -139,7 +139,7 @@ export default function CreateCampaignScreen() {
     }
   };
 
-  if (isLoading) return null;
+  if (isLoading) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer>

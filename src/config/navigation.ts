@@ -16,43 +16,61 @@ export interface NavSection {
 
 // Mirrors the structure of the app's real screens/routes. Sections match the
 // sidebar/drawer groupings used across the app (desktop sidebar, mobile
-// "More" screen) so navigation stays consistent everywhere.
+// "More" screen) so navigation stays consistent everywhere. Grouped by what
+// the destination is *for* (People / Planning / Operations / Money /
+// Communication / Insights / Admin) rather than by when each module shipped.
 export const NAV_SECTIONS: NavSection[] = [
   {
-    title: 'Main',
+    title: 'People',
     items: [
-      { key: 'dashboard', label: 'Dashboard', route: '/(tabs)', icon: 'home' },
-      { key: 'wedding-day', label: 'Wedding Day', route: '/(tabs)/wedding-day', icon: 'sunny' },
-      { key: 'events', label: 'Events', route: '/(tabs)/events', icon: 'calendar' },
       { key: 'guests', label: 'Guests', route: '/(tabs)/guests', icon: 'people' },
-      { key: 'vendors', label: 'Vendors', route: '/(tabs)/vendors', icon: 'briefcase' },
-      { key: 'rooms', label: 'Rooms', route: '/(tabs)/rooms', icon: 'bed' },
-      { key: 'finance', label: 'Budget & Expenses', route: '/(tabs)/finance', icon: 'wallet' },
-      { key: 'tasks', label: 'Tasks', route: '/(tabs)/tasks', icon: 'checkbox' },
+      { key: 'checkin', label: 'Guest Check-in', route: '/(tabs)/checkin', icon: 'qr-code' },
     ],
   },
   {
-    title: 'Management',
+    title: 'Planning',
     items: [
-      { key: 'patrika', label: 'Invitations', route: '/(tabs)/patrika', icon: 'mail-open' },
+      { key: 'wedding-day', label: 'Wedding Day', route: '/(tabs)/wedding-day', icon: 'sunny' },
+      { key: 'events', label: 'Events', route: '/(tabs)/events', icon: 'calendar' },
+      { key: 'tasks', label: 'Tasks', route: '/(tabs)/tasks', icon: 'checkbox' },
+      { key: 'baraat', label: 'Baraat Tracker', route: '/(tabs)/baraat', icon: 'car' },
+      { key: 'dances', label: 'Dances', route: '/(tabs)/dances', icon: 'musical-notes' },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { key: 'rooms', label: 'Rooms', route: '/(tabs)/rooms', icon: 'bed' },
+      { key: 'vendors', label: 'Vendors', route: '/(tabs)/vendors', icon: 'briefcase' },
+      { key: 'vendor-arrival', label: 'Vendor Arrival', route: '/(tabs)/vendors/arrivals', icon: 'walk' },
+      { key: 'catering', label: 'Catering', route: '/(tabs)/catering', icon: 'restaurant' },
       { key: 'transportation', label: 'Transportation', route: '/(tabs)/transportation', icon: 'bus' },
       { key: 'seating', label: 'Seating Planner', route: '/(tabs)/seating', icon: 'grid' },
-      { key: 'catering', label: 'Catering', route: '/(tabs)/catering', icon: 'restaurant' },
-      { key: 'shopping', label: 'Shopping', route: '/(tabs)/shopping', icon: 'cart' },
-      { key: 'gifts', label: 'Gifts', route: '/(tabs)/gifts', icon: 'gift' },
       { key: 'inventory', label: 'Inventory', route: '/(tabs)/inventory', icon: 'cube' },
       { key: 'documents', label: 'Documents', route: '/(tabs)/documents', icon: 'document-text' },
     ],
   },
   {
-    title: 'Live Wedding',
+    title: 'Money',
     items: [
-      { key: 'control-room', label: 'Wedding Control Room', route: '/(tabs)/control-room', icon: 'tv' },
-      { key: 'baraat', label: 'Baraat Tracker', route: '/(tabs)/baraat', icon: 'car' },
-      { key: 'checkin', label: 'Guest Check-in', route: '/(tabs)/checkin', icon: 'qr-code' },
-      { key: 'vendor-arrival', label: 'Vendor Arrival', route: '/(tabs)/vendors/arrivals', icon: 'walk' },
+      { key: 'finance', label: 'Budget & Expenses', route: '/(tabs)/finance', icon: 'wallet' },
+      { key: 'shopping', label: 'Shopping', route: '/(tabs)/shopping', icon: 'cart' },
+      { key: 'gifts', label: 'Gifts', route: '/(tabs)/gifts', icon: 'gift' },
+    ],
+  },
+  {
+    title: 'Communication',
+    items: [
+      { key: 'patrika', label: 'Invitations', route: '/(tabs)/patrika', icon: 'mail-open' },
+      { key: 'whatsapp', label: 'WhatsApp', route: '/(tabs)/settings/whatsapp', icon: 'logo-whatsapp' },
       { key: 'announcements', label: 'Announcements', route: '/(tabs)/announcements', icon: 'megaphone' },
-      { key: 'emergency', label: 'Emergency Center', route: '/(tabs)/emergency', icon: 'alert-circle' },
+    ],
+  },
+  {
+    title: 'Insights',
+    items: [
+      { key: 'dashboard', label: 'Dashboard', route: '/(tabs)', icon: 'home' },
+      { key: 'reports', label: 'Reports', route: '/(tabs)/reports', icon: 'bar-chart' },
     ],
   },
   {
@@ -61,6 +79,16 @@ export const NAV_SECTIONS: NavSection[] = [
       { key: 'photos', label: 'Photo Collection', route: '/(tabs)/photos', icon: 'images' },
       { key: 'memories', label: 'Wedding Memories', route: '/(tabs)/memories', icon: 'heart' },
       { key: 'closing', label: 'Post-Wedding Closing', route: '/(tabs)/closing', icon: 'checkmark-done-circle' },
+    ],
+  },
+  {
+    title: 'Admin',
+    items: [
+      { key: 'control-room', label: 'Wedding Control Room', route: '/(tabs)/control-room', icon: 'tv' },
+      { key: 'emergency', label: 'Emergency Center', route: '/(tabs)/emergency', icon: 'alert-circle' },
+      { key: 'ai-assistant', label: 'AI Assistant', route: '/(tabs)/assistant', icon: 'sparkles' },
+      { key: 'backup', label: 'Backup & Restore', route: '/(tabs)/settings/backup', icon: 'cloud-upload' },
+      { key: 'sync', label: 'Cloud Sync', route: '/(tabs)/settings/sync', icon: 'sync' },
     ],
   },
 ];

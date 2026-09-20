@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Pressable, ScrollView, Dimensions } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ScreenContainer, Typography, EmptyState, Card, WeddingCountdown } from '../../components/ui';
+import { ScreenContainer, Typography, EmptyState, Card, WeddingCountdown, QuickAddSheet } from '../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { AuthService } from '../../services/auth';
@@ -14,6 +14,7 @@ import { HeaderNotificationIcon } from '../../components/ui/HeaderNotificationIc
 import { useLanguage } from '../../i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WeddingDayService, WeddingDaySnapshot } from '../../services/weddingDay';
+import { ReadinessService, ReadinessCategory } from '../../services/readiness';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -45,6 +46,8 @@ export default function HomeTab() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [liveSnapshot, setLiveSnapshot] = useState<WeddingDaySnapshot | null>(null);
+  const [readiness, setReadiness] = useState<ReadinessCategory[]>([]);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const { status, manualSync } = useSync();
   const { theme } = useTheme();
 
@@ -114,6 +117,11 @@ export default function HomeTab() {
                 const snapshot = await WeddingDayService.getSnapshot(db, wId);
                 if (isActive) setLiveSnapshot(snapshot);
               } catch { /* Live Wedding tables may not exist yet on a fresh DB */ }
+
+              try {
+                const readinessData = await ReadinessService.getReadiness(db, wId);
+                if (isActive) setReadiness(readinessData);
+              } catch { /* Non-critical widget; dashboard still works without it */ }
             }
           } else {
             if (isActive) setWedding(null);
@@ -163,9 +171,24 @@ export default function HomeTab() {
     <View style={[s.heroSection, { paddingTop: insets.top + 16 }]}>
       <View style={s.heroBackground} />
       
-      {/* Top bar — notification only, no settings gear */}
+      {/* Top bar — search + quick add on the left, notifications on the right */}
       <View style={s.topBar}>
-        <View style={{ width: 40 }} />
+        <View style={s.topBarLeftGroup}>
+          <Pressable
+            accessibilityLabel="Search"
+            style={s.topBarIconBtn}
+            onPress={() => router.push('/(tabs)/search' as any)}
+          >
+            <Ionicons name="search" size={20} color="#FFFFFF" />
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Quick add"
+            style={s.topBarIconBtn}
+            onPress={() => setShowQuickAdd(true)}
+          >
+            <Ionicons name="add" size={22} color="#FFFFFF" />
+          </Pressable>
+        </View>
         <HeaderNotificationIcon tintColor="#FFFFFF" />
       </View>
       
@@ -234,6 +257,33 @@ export default function HomeTab() {
       ))}
     </View>
   );
+
+  const renderReadiness = () => {
+    const withData = readiness.filter(r => r.percent !== null);
+    if (withData.length === 0) return null;
+    return (
+      <View style={s.section}>
+        <Typography variant="sectionTitle" weight="heavy" style={{ marginBottom: 12 }}>Wedding Readiness</Typography>
+        <Card style={s.readinessCard}>
+          {withData.map((cat) => {
+            const pct = cat.percent as number;
+            const barColor = pct >= 80 ? theme.colors.success : pct >= 40 ? theme.colors.accent : theme.colors.error;
+            return (
+              <Pressable key={cat.label} onPress={() => router.push(cat.route as any)} style={s.readinessRow}>
+                <View style={s.readinessLabelRow}>
+                  <Typography variant="body" weight="medium">{cat.label}</Typography>
+                  <Typography variant="body" weight="bold" color={barColor}>{pct}%</Typography>
+                </View>
+                <View style={[s.readinessTrack, { backgroundColor: theme.colors.borderLight }]}>
+                  <View style={[s.readinessFill, { width: `${pct}%`, backgroundColor: barColor }]} />
+                </View>
+              </Pressable>
+            );
+          })}
+        </Card>
+      </View>
+    );
+  };
 
   const renderFinanceCard = () => (
     <Pressable onPress={() => router.push('/(tabs)/finance')} style={({ pressed }) => [pressed && s.pressedState]}>
@@ -318,9 +368,10 @@ export default function HomeTab() {
   };
 
   return (
+    <>
     <ScreenContainer edges={['left', 'right', 'bottom']} style={{ backgroundColor: theme.colors.background }}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scrollContent}>
-        
+
         {renderHeroSection()}
 
         <View style={s.mainContent}>
@@ -385,6 +436,9 @@ export default function HomeTab() {
             </View>
           )}
 
+          {/* Wedding Readiness */}
+          {renderReadiness()}
+
           {/* Upcoming Events */}
           {renderUpcomingEvents()}
 
@@ -436,6 +490,8 @@ export default function HomeTab() {
         </View>
       </ScrollView>
     </ScreenContainer>
+    <QuickAddSheet visible={showQuickAdd} onClose={() => setShowQuickAdd(false)} />
+    </>
   );
 }
 
@@ -461,6 +517,12 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
   topBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     marginBottom: theme.spacing.xl,
+  },
+  topBarLeftGroup: { flexDirection: 'row', gap: 8 },
+  topBarIconBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   coupleHero: {
     alignItems: 'center',
@@ -586,6 +648,13 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
     padding: theme.spacing.lg, borderRadius: theme.radii.xl,
     ...theme.shadows.sm,
   },
+
+  // ─── WEDDING READINESS ───
+  readinessCard: { padding: theme.spacing.lg },
+  readinessRow: { marginBottom: theme.spacing.md },
+  readinessLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  readinessTrack: { height: 8, borderRadius: 4, overflow: 'hidden' },
+  readinessFill: { height: '100%', borderRadius: 4 },
 
   // ─── UPCOMING EVENTS ───
   eventCard: {

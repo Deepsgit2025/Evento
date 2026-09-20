@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, Alert, Pressable, Linking } from 'react-n
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
-import { ScreenContainer, Typography, TextInput, Button, DateField } from '../../../components/ui';
+import { ScreenContainer, Typography, TextInput, Button, DateField, LoadingState } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
 import { getUserWedding } from '../../../services/wedding';
@@ -131,12 +131,12 @@ export default function AddDanceScreen() {
     }
   };
 
-  if (isLoading) return <ScreenContainer><View /></ScreenContainer>;
+  if (isLoading) return <ScreenContainer><LoadingState /></ScreenContainer>;
 
   return (
     <ScreenContainer edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.closeButton}>
+        <Pressable onPress={() => router.back()} style={styles.closeButton} accessibilityLabel="Close">
           <Ionicons name="close" size={24} color={theme.colors.text} />
         </Pressable>
         <Typography variant="sectionTitle">{editId ? 'Edit Dance' : 'New Dance'}</Typography>

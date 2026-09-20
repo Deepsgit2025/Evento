@@ -84,10 +84,11 @@ export default function NotificationSettingsScreen() {
   return (
     <ScreenContainer edges={['top', 'left', 'right']} style={styles.container}>
       <View style={styles.header}>
-        <IconButton 
+        <IconButton
           icon={<Ionicons name="chevron-back" size={24} color={theme.colors.text} />}
           onPress={() => router.back()}
           style={styles.backBtn}
+          accessibilityLabel="Back"
         />
         <Typography variant="sectionTitle">Notification Preferences</Typography>
         <View style={{ width: 40 }} />

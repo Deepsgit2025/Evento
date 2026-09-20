@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, Card, Button, ListItem, SmartSuggestionBanner } from '../../../components/ui';
+import { ScreenContainer, Typography, Card, Button, ListItem, SmartSuggestionBanner, LoadingState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme';
 import { EventService } from '../../../services/event';
@@ -123,7 +123,7 @@ export default function EventProfileScreen() {
   if (!event) {
     return (
       <ScreenContainer style={styles.center}>
-        <Typography variant="body" color={theme.colors.textMuted}>Loading event...</Typography>
+        <LoadingState />
       </ScreenContainer>
     );
   }
@@ -335,8 +335,8 @@ export default function EventProfileScreen() {
         </View>
 
         <Button 
-          label="Delete Event" 
-          variant="outline"
+          label="Delete Event"
+          variant="destructive"
           onPress={handleDelete}
           style={styles.deleteButton}
         />
@@ -394,10 +394,10 @@ const styles = StyleSheet.create({
     borderRadius: theme.radii.sm,
   },
   badgeType: {
-    backgroundColor: '#F3E8FF', // Light purple
+    backgroundColor: theme.colors.cardPurple,
   },
   badgeTextType: {
-    color: '#7E22CE', // Dark purple
+    color: theme.colors.gradientEnd,
   },
   badgePast: {
     backgroundColor: theme.colors.surfaceElevated,
@@ -428,7 +428,6 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginTop: theme.spacing.xl,
-    borderColor: theme.colors.error,
   },
   section: {
     marginBottom: theme.spacing.xl,

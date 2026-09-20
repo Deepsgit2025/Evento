@@ -15,6 +15,7 @@ import { GOOGLE_DISCOVERY, GOOGLE_SCOPES, getGoogleClientId, isGoogleSyncConfigu
 import { useLanguage } from '../../../i18n';
 
 const GOOGLE_SESSION_KEY = 'evento_google_session';
+const LAST_SYNCED_KEY = 'evento_last_synced';
 
 interface GoogleSessionData {
   accessToken: string;
@@ -95,6 +96,17 @@ export default function SyncScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    SecureStore.getItemAsync(LAST_SYNCED_KEY).then(setLastSyncedAt).catch(() => {});
+  }, []);
+
+  const recordSyncSuccess = () => {
+    const now = new Date().toISOString();
+    setLastSyncedAt(now);
+    SecureStore.setItemAsync(LAST_SYNCED_KEY, now).catch(() => {});
+  };
 
   const handleDemoLoginSubmit = () => {
     if (!email.trim() || !email.includes('@')) {
@@ -130,6 +142,7 @@ export default function SyncScreen() {
         const success = await BackupService.restoreBackup(db, backup);
         setSyncStatus(success ? 'success' : 'error');
         setStatusMessage(success ? 'Successfully synced with your other devices!' : 'Found a backup, but failed to restore it. Data might be corrupted.');
+        if (success) recordSyncSuccess();
       } else {
         setStatusMessage('No backup found for this email. Creating one now...');
         setIsScanning(false);
@@ -142,6 +155,7 @@ export default function SyncScreen() {
         setStatusMessage(uploaded
           ? `Saved a local demo backup under ${targetEmail}. Enter the same email on another device (in this demo mode) to sync.`
           : 'Failed to create a new backup.');
+        if (uploaded) recordSyncSuccess();
       }
     } catch (e: any) {
       setSyncStatus('error');
@@ -177,6 +191,7 @@ export default function SyncScreen() {
         const success = await BackupService.restoreBackup(db, backup);
         setSyncStatus(success ? 'success' : 'error');
         setStatusMessage(success ? 'Successfully synced with your other devices!' : 'Found a backup, but failed to restore it.');
+        if (success) recordSyncSuccess();
       } else {
         setStatusMessage('No backup found. Creating one on your Google Drive...');
         setIsScanning(false);
@@ -185,6 +200,7 @@ export default function SyncScreen() {
         const uploaded = await GoogleDriveService.uploadBackupToDrive(googleSession.accessToken, newBackup);
         setSyncStatus(uploaded ? 'success' : 'error');
         setStatusMessage(uploaded ? 'Backed up to your Google Drive! Sign in with the same account on other devices to sync.' : 'Failed to upload backup to Google Drive.');
+        if (uploaded) recordSyncSuccess();
       }
     } catch (e: any) {
       setSyncStatus('error');
@@ -265,6 +281,11 @@ export default function SyncScreen() {
                 style={styles.syncBtn}
                 icon={isScanning || isUploading ? undefined : 'cloud-upload-outline'}
               />
+              {lastSyncedAt && (
+                <Typography variant="caption" color={theme.colors.textSecondary} style={styles.lastSynced}>
+                  Last synced {new Date(lastSyncedAt).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </Typography>
+              )}
             </Card>
           )
         ) : !loggedInEmail ? (
@@ -298,6 +319,11 @@ export default function SyncScreen() {
               style={styles.syncBtn}
               icon={isScanning || isUploading ? undefined : 'cloud-upload-outline'}
             />
+            {lastSyncedAt && (
+              <Typography variant="caption" color={theme.colors.textSecondary} style={styles.lastSynced}>
+                Last synced {new Date(lastSyncedAt).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              </Typography>
+            )}
           </Card>
         )}
 
@@ -432,6 +458,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   syncBtn: {
+    marginTop: theme.spacing.sm,
+  },
+  lastSynced: {
+    textAlign: 'center',
     marginTop: theme.spacing.sm,
   },
   statusBox: {

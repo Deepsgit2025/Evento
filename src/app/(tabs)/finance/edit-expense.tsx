@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, ActivityIndicator, Platform, KeyboardAvoidingView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { FinanceService, ExpenseDTO } from '../../../services/finance';
@@ -13,7 +14,8 @@ export default function EditExpenseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -125,6 +127,7 @@ export default function EditExpenseScreen() {
   }
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         
@@ -241,14 +244,15 @@ export default function EditExpenseScreen() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Update Expense" 
-          onPress={handleSave} 
-          isLoading={isSubmitting} 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Update Expense"
+          onPress={handleSave}
+          isLoading={isSubmitting}
         />
       </View>
     </ScreenContainer>
+    </KeyboardAvoidingView>
   );
 }
 

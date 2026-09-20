@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable, Share } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, Card, Button, ListItem } from '../../../components/ui';
+import { ScreenContainer, Typography, Card, Button, ListItem, LoadingState } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../theme';
 import { GuestService } from '../../../services/guest';
@@ -90,7 +90,7 @@ export default function GuestProfileScreen() {
   if (!guest) {
     return (
       <ScreenContainer style={styles.center}>
-        <Typography variant="body" color={theme.colors.textMuted}>Loading guest...</Typography>
+        <LoadingState />
       </ScreenContainer>
     );
   }
@@ -314,8 +314,8 @@ export default function GuestProfileScreen() {
         )}
 
         <Button 
-          label="Delete Guest" 
-          variant="outline"
+          label="Delete Guest"
+          variant="destructive"
           onPress={handleDelete}
           style={styles.deleteButton}
         />
@@ -428,6 +428,5 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginTop: theme.spacing.xxl,
-    borderColor: theme.colors.error,
   }
 });

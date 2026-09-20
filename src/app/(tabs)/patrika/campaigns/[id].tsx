@@ -152,7 +152,7 @@ export default function CampaignDetailsScreen() {
         <Card style={styles.card}>
           <Typography variant="sectionTitle">{campaign.name}</Typography>
           <View style={[styles.badge, campaign.status === 'COMPLETED' ? styles.badgeComplete : styles.badgePending]}>
-            <Typography variant="caption" color={campaign.status === 'COMPLETED' ? '#fff' : '#333'}>{campaign.status}</Typography>
+            <Typography variant="caption" color={campaign.status === 'COMPLETED' ? '#FFFFFF' : theme.colors.text}>{campaign.status}</Typography>
           </View>
 
           <View style={styles.statsGrid}>
@@ -194,7 +194,7 @@ export default function CampaignDetailsScreen() {
                 subtitle={`Status: ${r.status}`}
                 rightElement={
                   <View style={[styles.statusBadge, r.status === 'SENT' ? styles.statusBadgeSent : (r.status === 'FAILED' ? styles.statusBadgeFailed : styles.statusBadgePending)]}>
-                    <Typography variant="caption" color={r.status === 'QUEUED' ? '#333' : '#fff'}>{r.status}</Typography>
+                    <Typography variant="caption" color={r.status === 'QUEUED' ? theme.colors.text : '#FFFFFF'}>{r.status}</Typography>
                   </View>
                 }
                 style={{ borderBottomWidth: 1, borderBottomColor: theme.colors.borderLight }}

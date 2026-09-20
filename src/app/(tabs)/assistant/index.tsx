@@ -136,7 +136,7 @@ export default function AssistantScreen() {
         </View>
         
         {messages.length > 0 && (
-          <Pressable onPress={clearChat} style={s.clearBtn}>
+          <Pressable onPress={clearChat} style={s.clearBtn} accessibilityLabel="Clear chat">
             <Ionicons name="trash-outline" size={20} color={theme.colors.textMuted} />
           </Pressable>
         )}
@@ -230,7 +230,7 @@ export default function AssistantScreen() {
         </ScrollView>
 
         <View style={[s.inputArea, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
-          <Pressable style={s.expandButton} onPress={() => setIsComposerExpanded(true)}>
+          <Pressable style={s.expandButton} onPress={() => setIsComposerExpanded(true)} accessibilityLabel="Expand composer">
             <Ionicons name="expand-outline" size={20} color={theme.colors.textSecondary} />
           </Pressable>
           <TextInput
@@ -248,6 +248,7 @@ export default function AssistantScreen() {
             style={[s.sendButton, !inputText.trim() && s.sendButtonDisabled]}
             onPress={() => handleSend()}
             disabled={!inputText.trim() || isLoading}
+            accessibilityLabel="Send message"
           >
             <Ionicons name="send" size={20} color="#fff" />
           </Pressable>
@@ -263,7 +264,7 @@ export default function AssistantScreen() {
         <SafeAreaView style={[s.expandedContainer, { backgroundColor: theme.colors.background }]}>
           <View style={s.expandedHeader}>
             <Typography variant="sectionTitle">{t('assistant.title')}</Typography>
-            <Pressable onPress={() => setIsComposerExpanded(false)} style={s.expandedCloseBtn}>
+            <Pressable onPress={() => setIsComposerExpanded(false)} style={s.expandedCloseBtn} accessibilityLabel="Close">
               <Ionicons name="close" size={24} color={theme.colors.text} />
             </Pressable>
           </View>

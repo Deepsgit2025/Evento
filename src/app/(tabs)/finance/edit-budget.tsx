@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { FinanceService } from '../../../services/finance';
@@ -11,7 +12,8 @@ import { getUserWedding } from '../../../services/wedding';
 export default function EditBudgetScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [budget, setBudget] = useState('');
   const [weddingId, setWeddingId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -58,16 +60,29 @@ export default function EditBudgetScreen() {
     }
   };
 
-  const handleClear = async () => {
-    setIsSubmitting(true);
-    try {
-      await FinanceService.updateBudget(db, weddingId, null);
-      router.back();
-    } catch (error) {
-      Alert.alert('Error', 'Could not clear budget.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleClear = () => {
+    Alert.alert(
+      'Clear budget?',
+      'This removes the total budget amount. Your expenses and payments are not affected.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear Budget',
+          style: 'destructive',
+          onPress: async () => {
+            setIsSubmitting(true);
+            try {
+              await FinanceService.updateBudget(db, weddingId, null);
+              router.back();
+            } catch (error) {
+              Alert.alert('Error', 'Could not clear budget.');
+            } finally {
+              setIsSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (isLoading) {
@@ -79,6 +94,7 @@ export default function EditBudgetScreen() {
   }
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScreenContainer>
       <View style={styles.content}>
         
@@ -99,23 +115,24 @@ export default function EditBudgetScreen() {
           autoFocus
         />
 
-        <View style={styles.actions}>
-          <Button 
-            label="Save Budget" 
-            onPress={handleSave} 
-            isLoading={isSubmitting} 
+        <View style={[styles.actions, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+          <Button
+            label="Save Budget"
+            onPress={handleSave}
+            isLoading={isSubmitting}
             style={{ marginBottom: theme.spacing.md }}
           />
-          <Button 
-            label="Clear Budget" 
-            variant="outline"
-            onPress={handleClear} 
-            disabled={isSubmitting} 
+          <Button
+            label="Clear Budget"
+            variant="destructive"
+            onPress={handleClear}
+            disabled={isSubmitting}
           />
         </View>
 
       </View>
     </ScreenContainer>
+    </KeyboardAvoidingView>
   );
 }
 

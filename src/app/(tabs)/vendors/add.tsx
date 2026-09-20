@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { VendorService, VendorDTO } from '../../../services/vendor';
@@ -17,7 +18,8 @@ const PRESET_CATEGORIES = [
 export default function AddVendorScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [name, setName] = useState('');
   const [categorySelection, setCategorySelection] = useState(PRESET_CATEGORIES[0]);
   const [customCategory, setCustomCategory] = useState('');
@@ -77,6 +79,7 @@ export default function AddVendorScreen() {
   };
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         
@@ -134,7 +137,7 @@ export default function AddVendorScreen() {
         )}
 
         <TextInput
-          label="Agreed Amount (₹) *"
+          label="Agreed Amount (₹)"
           placeholder="e.g. 50000"
           value={agreedAmount}
           onChangeText={(text) => {
@@ -203,14 +206,15 @@ export default function AddVendorScreen() {
 
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Save Vendor" 
-          onPress={handleSave} 
-          isLoading={isSubmitting} 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Save Vendor"
+          onPress={handleSave}
+          isLoading={isSubmitting}
         />
       </View>
     </ScreenContainer>
+    </KeyboardAvoidingView>
   );
 }
 

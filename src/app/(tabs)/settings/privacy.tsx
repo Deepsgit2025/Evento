@@ -60,14 +60,17 @@ export default function PrivacyScreen() {
         <Card style={styles.card}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>Cloud Synchronization</Typography>
           <Typography variant="body" color={theme.colors.textSecondary} style={styles.paragraph}>
-            If you enable Cloud Sync, your local data is securely transmitted and stored in our cloud infrastructure (Supabase) to allow multi-device access and backup. Data in transit is encrypted using standard HTTPS/WSS protocols.
+            Evento does not run its own cloud servers. Backing up and syncing between devices works by
+            exporting your data to your own Google Drive account (or as a local file you share yourself) —
+            we never receive or store a copy of it.
           </Typography>
         </Card>
 
         <Card style={styles.card}>
           <Typography variant="sectionTitle" style={styles.sectionTitle}>AI Assistant Data</Typography>
           <Typography variant="body" color={theme.colors.textSecondary} style={styles.paragraph}>
-            When using the AI Assistant, messages are sent directly to the Gemini API using the API key you provide. We do not store or intercept these chat messages on our servers.
+            The AI Assistant runs entirely on your device. It reads your wedding data locally to answer
+            questions and never sends messages or data to any external server.
           </Typography>
         </Card>
 
@@ -77,11 +80,11 @@ export default function PrivacyScreen() {
             Permanently delete your account and all associated local data. If you are a wedding owner, this action is destructive.
           </Typography>
           <Button 
-            label="Delete Account & Data" 
-            variant="outline" 
-            onPress={handleDeleteData} 
+            label="Delete Account & Data"
+            variant="destructive"
+            onPress={handleDeleteData}
             isLoading={isDeleting}
-            style={{ marginTop: theme.spacing.md, borderColor: theme.colors.error }}
+            style={{ marginTop: theme.spacing.md }}
           />
         </Card>
       </ScrollView>
