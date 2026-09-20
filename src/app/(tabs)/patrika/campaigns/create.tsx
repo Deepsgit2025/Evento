@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, Button, TextInput } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../../theme';
@@ -17,6 +18,7 @@ import { Guest, Event, GuestGroup, Invitation } from '../../../../database/types
 export default function CreateCampaignScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
 
   const [isLoading, setIsLoading] = useState(true);
   const [weddingId, setWeddingId] = useState('');
@@ -230,8 +232,8 @@ export default function CreateCampaignScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
           label={`Review Campaign (${selectedGuestIds.size})`}
           onPress={handleLaunch}
           disabled={selectedGuestIds.size === 0 || isSubmitting}

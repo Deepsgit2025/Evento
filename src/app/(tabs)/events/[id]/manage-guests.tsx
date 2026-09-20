@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, EmptyState, TextInput, Card, Button } from '../../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../../theme';
@@ -16,7 +17,8 @@ export default function EventManageGuestsScreen() {
   const { id: eventId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [weddingId, setWeddingId] = useState('');
   const [guests, setGuests] = useState<Guest[]>([]);
   const [groups, setGroups] = useState<GuestGroup[]>([]);
@@ -263,7 +265,7 @@ export default function EventManageGuestsScreen() {
         />
       )}
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
         <Typography variant="body" weight="medium">
           {selectedGuestIds.size} guests selected
         </Typography>

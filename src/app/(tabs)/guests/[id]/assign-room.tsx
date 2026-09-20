@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, Card, Button, EmptyState } from '../../../../components/ui';
 import { theme } from '../../../../theme';
 import { RoomAssignmentService } from '../../../../services/roomAssignment';
@@ -20,6 +21,7 @@ export default function AssignRoomModal() {
   const { id } = useLocalSearchParams<{ id: string }>(); // guest id
   const router = useRouter();
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
 
   const [guest, setGuest] = useState<Guest | null>(null);
   const [rooms, setRooms] = useState<RoomWithOccupancy[]>([]);
@@ -192,9 +194,9 @@ export default function AssignRoomModal() {
         }
       />
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Cancel"
           variant="outline" 
           onPress={() => router.back()} 
           style={styles.footerButton} 

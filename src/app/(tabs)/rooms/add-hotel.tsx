@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
@@ -11,7 +12,8 @@ import { HotelService } from '../../../services/hotel';
 export default function AddHotelModal() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -104,9 +106,9 @@ export default function AddHotelModal() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Cancel"
           variant="outline" 
           onPress={() => router.back()} 
           style={styles.footerButton} 

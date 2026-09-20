@@ -43,20 +43,46 @@ export const BackupService = {
       'invitation_recipients',
       'invitation_campaigns',
       'whatsapp_configs',
-      'reminders'
+      'reminders',
+      'emergency_contacts',
+      'announcements',
+      'baraat_trips',
+      'baraat_trip_guests',
+      'seating_tables',
+      'seating_assignments',
+      'inventory_items',
+      'transport_requests',
+      'catering_items',
+      'shopping_items',
+      'gifts',
+      'documents',
+      'wedding_photos',
     ];
+
+    // Tables that have a wedding_id column but no soft-delete (deleted_at) column.
+    const noSoftDelete = new Set(['announcements', 'documents', 'wedding_photos']);
 
     for (const table of tables) {
       // We backup only non-deleted records for this specific wedding, or all if it's the weddings table itself
       let query = `SELECT * FROM ${table} WHERE wedding_id = ? AND deleted_at IS NULL`;
       let params = [weddingId];
-      
+
       if (table === 'weddings') {
         query = `SELECT * FROM ${table} WHERE id = ?`;
       } else if (table === 'room_assignments') {
-        query = `SELECT ra.* FROM room_assignments ra 
-                 JOIN guests g ON ra.guest_id = g.id 
+        query = `SELECT ra.* FROM room_assignments ra
+                 JOIN guests g ON ra.guest_id = g.id
                  WHERE g.wedding_id = ? AND ra.deleted_at IS NULL`;
+      } else if (table === 'baraat_trip_guests') {
+        query = `SELECT btg.* FROM baraat_trip_guests btg
+                 JOIN baraat_trips bt ON btg.trip_id = bt.id
+                 WHERE bt.wedding_id = ?`;
+      } else if (table === 'seating_assignments') {
+        query = `SELECT sa.* FROM seating_assignments sa
+                 JOIN seating_tables st ON sa.table_id = st.id
+                 WHERE st.wedding_id = ?`;
+      } else if (noSoftDelete.has(table)) {
+        query = `SELECT * FROM ${table} WHERE wedding_id = ?`;
       }
 
       const rows = await db.getAllAsync(query, params);
@@ -172,7 +198,21 @@ export const BackupService = {
         'invitation_recipients',
         'invitation_campaigns',
         'whatsapp_configs',
-        'reminders'
+        'reminders',
+        // Order matters: parent tables before the join tables that reference them.
+        'emergency_contacts',
+        'announcements',
+        'baraat_trips',
+        'baraat_trip_guests',
+        'seating_tables',
+        'seating_assignments',
+        'inventory_items',
+        'transport_requests',
+        'catering_items',
+        'shopping_items',
+        'gifts',
+        'documents',
+        'wedding_photos',
       ];
 
       await db.execAsync('BEGIN TRANSACTION;');

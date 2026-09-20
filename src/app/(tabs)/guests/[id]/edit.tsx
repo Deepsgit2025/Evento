@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../../components/ui';
 import { theme } from '../../../../theme';
 import { GuestService } from '../../../../services/guest';
@@ -13,7 +14,8 @@ export default function EditGuestModal() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [fullName, setFullName] = useState('');
   const [side, setSide] = useState<'Groom' | 'Bride'>('Groom');
@@ -241,9 +243,9 @@ export default function EditGuestModal() {
         </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Cancel"
           variant="outline" 
           onPress={() => router.back()} 
           style={styles.footerButton} 

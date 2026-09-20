@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Pressable, Keyboard, Modal, SafeAreaView } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, EmptyState, Button } from '../../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -34,7 +35,8 @@ export default function AssistantScreen() {
   const db = useSQLiteContext();
   const { t, language } = useLanguage();
   const { theme } = useTheme();
-  
+  const insets = useSafeAreaInsets();
+
   const [weddingId, setWeddingId] = useState('');
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputText, setInputText] = useState('');
@@ -227,7 +229,7 @@ export default function AssistantScreen() {
           )}
         </ScrollView>
 
-        <View style={s.inputArea}>
+        <View style={[s.inputArea, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
           <Pressable style={s.expandButton} onPress={() => setIsComposerExpanded(true)}>
             <Ionicons name="expand-outline" size={20} color={theme.colors.textSecondary} />
           </Pressable>
@@ -276,7 +278,7 @@ export default function AssistantScreen() {
             autoFocus
             textAlignVertical="top"
           />
-          <View style={s.expandedFooter}>
+          <View style={[s.expandedFooter, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
             <Button
               label="Send"
               onPress={() => handleSend()}

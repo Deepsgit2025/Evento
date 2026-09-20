@@ -55,7 +55,7 @@ export default function TabLayout() {
           elevation: 0,
           shadowOpacity: 0,
           height: 68 + insets.bottom,
-          paddingBottom: insets.bottom + 10,
+          paddingBottom: insets.bottom + 16,
           paddingTop: 10,
           // Always reserve real layout space for the tab bar instead of floating
           // it over content (position: 'absolute' on iOS made bottom-pinned

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, Card, Button, EmptyState } from '../../../../components/ui';
 import { theme } from '../../../../theme';
 import { RoomAssignmentService } from '../../../../services/roomAssignment';
@@ -15,6 +16,7 @@ export default function AssignGuestModal() {
   const { id } = useLocalSearchParams<{ id: string }>(); // room id
   const router = useRouter();
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
 
   const [unassignedGuests, setUnassignedGuests] = useState<Guest[]>([]);
   const [room, setRoom] = useState<Room | null>(null);
@@ -147,16 +149,16 @@ export default function AssignGuestModal() {
         />
       )}
 
-      <View style={styles.footer}>
-        <Button 
-          label="Cancel" 
-          variant="outline" 
-          onPress={() => router.back()} 
-          style={styles.footerButton} 
+      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+        <Button
+          label="Cancel"
+          variant="outline"
+          onPress={() => router.back()}
+          style={styles.footerButton}
           disabled={isSaving}
         />
-        <Button 
-          label={isSaving ? "Assigning..." : "Assign"} 
+        <Button
+          label={isSaving ? "Assigning..." : "Assign"}
           variant="primary" 
           onPress={handleAssign} 
           style={styles.footerButton} 

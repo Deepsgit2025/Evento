@@ -6,6 +6,7 @@ export interface Wedding {
   venue: string | null;
   cover_photo_uri: string | null;
   budget: number | null;
+  closed_at?: number | null;
   created_at: number;
   updated_at: number;
 }
@@ -48,6 +49,9 @@ export interface Guest {
   rsvp_status: 'PENDING' | 'ATTENDING' | 'DECLINED' | 'MAYBE';
   dietary_requirements: string | null;
   notes: string | null;
+  checkin_code?: string | null;
+  checked_in_at?: number | null;
+  checked_in_by?: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -306,5 +310,127 @@ export interface BaraatTripGuest {
   id: string;
   trip_id: string;
   guest_id: string;
+  created_at: number;
+}
+
+export interface SeatingTable {
+  id: string;
+  wedding_id: string;
+  name: string;
+  capacity: number;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface SeatingAssignment {
+  id: string;
+  table_id: string;
+  guest_id: string;
+  created_at: number;
+}
+
+export const INVENTORY_CATEGORIES = [
+  'Chairs', 'Tables', 'Garlands', 'Water Bottles', 'Gifts', 'Blankets',
+  'Room Keys', 'Decoration Materials', 'Crockery', 'Rental Equipment', 'Other'
+] as const;
+
+export type InventoryStatus = 'OK' | 'DAMAGED' | 'MISSING';
+
+export interface InventoryItem {
+  id: string;
+  wedding_id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  available_quantity: number;
+  location: string | null;
+  owner_source: string | null;
+  status: InventoryStatus;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export type TransportStatus = 'PENDING' | 'ASSIGNED' | 'COMPLETED';
+
+export interface TransportRequest {
+  id: string;
+  wedding_id: string;
+  guest_id: string | null;
+  guest_name: string | null;
+  pickup_location: string | null;
+  drop_location: string | null;
+  requested_time: string | null;
+  vehicle_info: string | null;
+  status: TransportStatus;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export const CATERING_CATEGORIES = ['Starter', 'Main Course', 'Dessert', 'Beverage', 'Other'] as const;
+export type CateringStatus = 'PLANNED' | 'CONFIRMED';
+
+export interface CateringItem {
+  id: string;
+  wedding_id: string;
+  event_id: string | null;
+  name: string;
+  category: string;
+  guest_count_estimate: number | null;
+  status: CateringStatus;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface ShoppingItem {
+  id: string;
+  wedding_id: string;
+  title: string;
+  category: string | null;
+  estimated_cost: number | null;
+  purchased: boolean | number;
+  assigned_to: string | null;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface Gift {
+  id: string;
+  wedding_id: string;
+  guest_id: string | null;
+  giver_name: string;
+  description: string | null;
+  estimated_value: number | null;
+  date_received: string | null;
+  thank_you_sent: boolean | number;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export const DOCUMENT_CATEGORIES = ['Contract', 'Permit', 'Invoice', 'ID Proof', 'Booking Confirmation', 'Other'] as const;
+
+export interface WeddingDocument {
+  id: string;
+  wedding_id: string;
+  title: string;
+  category: string;
+  file_uri: string;
+  file_name: string | null;
+  mime_type: string | null;
+  notes: string | null;
+  created_at: number;
+}
+
+export interface WeddingPhoto {
+  id: string;
+  wedding_id: string;
+  event_id: string | null;
+  uri: string;
+  caption: string | null;
   created_at: number;
 }

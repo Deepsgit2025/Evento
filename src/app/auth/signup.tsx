@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ScreenContainer, Typography, TextInput, Button, Card } from '../../components/ui';
+import { ScreenContainer, Typography, TextInput, Button, Card, Logo } from '../../components/ui';
 import { theme } from '../../theme';
 import { AuthService } from '../../services/auth';
 
@@ -39,7 +39,7 @@ export default function SignupScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         
         <View style={styles.header}>
-          <Typography variant="hero" color={theme.colors.primary}>Evento</Typography>
+          <Logo size="lg" />
           <Typography variant="body" color={theme.colors.textSecondary} style={styles.subtitle}>
             Create your account to get started.
           </Typography>

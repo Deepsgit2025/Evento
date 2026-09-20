@@ -35,13 +35,13 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'Management',
     items: [
       { key: 'patrika', label: 'Invitations', route: '/(tabs)/patrika', icon: 'mail-open' },
-      { key: 'transportation', label: 'Transportation', route: '/(tabs)/transportation', icon: 'bus', comingSoon: true },
-      { key: 'seating', label: 'Seating Planner', route: '/(tabs)/seating', icon: 'grid', comingSoon: true },
-      { key: 'catering', label: 'Catering', route: '/(tabs)/catering', icon: 'restaurant', comingSoon: true },
-      { key: 'shopping', label: 'Shopping', route: '/(tabs)/shopping', icon: 'cart', comingSoon: true },
-      { key: 'gifts', label: 'Gifts', route: '/(tabs)/gifts', icon: 'gift', comingSoon: true },
-      { key: 'inventory', label: 'Inventory', route: '/(tabs)/inventory', icon: 'cube', comingSoon: true },
-      { key: 'documents', label: 'Documents', route: '/(tabs)/documents', icon: 'document-text', comingSoon: true },
+      { key: 'transportation', label: 'Transportation', route: '/(tabs)/transportation', icon: 'bus' },
+      { key: 'seating', label: 'Seating Planner', route: '/(tabs)/seating', icon: 'grid' },
+      { key: 'catering', label: 'Catering', route: '/(tabs)/catering', icon: 'restaurant' },
+      { key: 'shopping', label: 'Shopping', route: '/(tabs)/shopping', icon: 'cart' },
+      { key: 'gifts', label: 'Gifts', route: '/(tabs)/gifts', icon: 'gift' },
+      { key: 'inventory', label: 'Inventory', route: '/(tabs)/inventory', icon: 'cube' },
+      { key: 'documents', label: 'Documents', route: '/(tabs)/documents', icon: 'document-text' },
     ],
   },
   {
@@ -49,7 +49,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { key: 'control-room', label: 'Wedding Control Room', route: '/(tabs)/control-room', icon: 'tv' },
       { key: 'baraat', label: 'Baraat Tracker', route: '/(tabs)/baraat', icon: 'car' },
-      { key: 'checkin', label: 'Guest Check-in', route: '/(tabs)/checkin', icon: 'qr-code', comingSoon: true },
+      { key: 'checkin', label: 'Guest Check-in', route: '/(tabs)/checkin', icon: 'qr-code' },
       { key: 'vendor-arrival', label: 'Vendor Arrival', route: '/(tabs)/vendors/arrivals', icon: 'walk' },
       { key: 'announcements', label: 'Announcements', route: '/(tabs)/announcements', icon: 'megaphone' },
       { key: 'emergency', label: 'Emergency Center', route: '/(tabs)/emergency', icon: 'alert-circle' },
@@ -58,9 +58,9 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Memories',
     items: [
-      { key: 'photos', label: 'Photo Collection', route: '/(tabs)/photos', icon: 'images', comingSoon: true },
-      { key: 'memories', label: 'Wedding Memories', route: '/(tabs)/memories', icon: 'heart', comingSoon: true },
-      { key: 'closing', label: 'Post-Wedding Closing', route: '/(tabs)/closing', icon: 'checkmark-done-circle', comingSoon: true },
+      { key: 'photos', label: 'Photo Collection', route: '/(tabs)/photos', icon: 'images' },
+      { key: 'memories', label: 'Wedding Memories', route: '/(tabs)/memories', icon: 'heart' },
+      { key: 'closing', label: 'Post-Wedding Closing', route: '/(tabs)/closing', icon: 'checkmark-done-circle' },
     ],
   },
 ];

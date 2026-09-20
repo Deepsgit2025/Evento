@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, Pressable, KeyboardAvoidingView, Platform
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button } from '../../../components/ui';
 import { useTheme } from '../../../theme/ThemeContext';
 import { AuthService } from '../../../services/auth';
@@ -13,6 +14,7 @@ export default function AddBaraatTripScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [weddingId, setWeddingId] = useState<string | null>(null);
   const [vehicle, setVehicle] = useState('');
@@ -85,7 +87,7 @@ export default function AddBaraatTripScreen() {
           <TextInput label="Notes" placeholder="Any extra details" value={notes} onChangeText={setNotes} multiline numberOfLines={3} />
         </ScrollView>
 
-        <View style={[styles.footer, { borderTopColor: theme.colors.borderLight, backgroundColor: theme.colors.surface }]}>
+        <View style={[styles.footer, { borderTopColor: theme.colors.borderLight, backgroundColor: theme.colors.surface, paddingBottom: insets.bottom + theme.spacing.lg }]}>
           <Button label={isSaving ? 'Saving...' : 'Save Vehicle'} onPress={handleSave} disabled={isSaving || !weddingId} />
         </View>
       </ScreenContainer>

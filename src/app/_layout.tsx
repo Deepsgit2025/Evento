@@ -120,10 +120,10 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 }
 
 const ebStyles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF7F9' },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FDF7E8' },
   emoji: { fontSize: 48, marginBottom: 16 },
-  title: { fontSize: 20, fontWeight: '700', color: '#18181B', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#52525B' },
+  title: { fontSize: 20, fontWeight: '700', color: '#2E2013', marginBottom: 8 },
+  subtitle: { fontSize: 14, color: '#6B5D4A' },
 });
 
 import React from 'react';

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer, Typography, TextInput, Button, DateField } from '../../../components/ui';
 import { theme } from '../../../theme';
 import { AuthService } from '../../../services/auth';
@@ -12,7 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 export default function AddEventScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
-  
+  const insets = useSafeAreaInsets();
+
   const [weddingId, setWeddingId] = useState<string | null>(null);
   
   const [name, setName] = useState('');
@@ -195,9 +197,9 @@ export default function AddEventScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.footer}>
-          <Button 
-            label={isSaving ? "Saving..." : "Save Event"} 
+        <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.lg }]}>
+          <Button
+            label={isSaving ? "Saving..." : "Save Event"}
             variant="primary" 
             onPress={handleSave} 
             disabled={isSaving || !weddingId}

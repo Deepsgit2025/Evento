@@ -763,6 +763,219 @@ export const setupMigrations = async (db: SQLite.SQLiteDatabase) => {
           } catch (e) {}
         }
       }
+    },
+    {
+      name: '031_seating_planner',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS seating_tables (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            capacity INTEGER NOT NULL DEFAULT 8,
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE TABLE IF NOT EXISTS seating_assignments (
+            id TEXT PRIMARY KEY,
+            table_id TEXT NOT NULL,
+            guest_id TEXT NOT NULL UNIQUE,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            FOREIGN KEY (table_id) REFERENCES seating_tables (id) ON DELETE CASCADE,
+            FOREIGN KEY (guest_id) REFERENCES guests (id) ON DELETE CASCADE
+          );
+          CREATE INDEX IF NOT EXISTS idx_seating_tables_wedding ON seating_tables(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '032_wedding_inventory',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS inventory_items (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            quantity INTEGER NOT NULL DEFAULT 1,
+            available_quantity INTEGER NOT NULL DEFAULT 1,
+            location TEXT,
+            owner_source TEXT,
+            status TEXT NOT NULL DEFAULT 'OK' CHECK(status IN ('OK', 'DAMAGED', 'MISSING')),
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE INDEX IF NOT EXISTS idx_inventory_wedding ON inventory_items(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '033_transportation',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS transport_requests (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            guest_id TEXT,
+            guest_name TEXT,
+            pickup_location TEXT,
+            drop_location TEXT,
+            requested_time TEXT,
+            vehicle_info TEXT,
+            status TEXT NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING', 'ASSIGNED', 'COMPLETED')),
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE,
+            FOREIGN KEY (guest_id) REFERENCES guests (id) ON DELETE SET NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_transport_wedding ON transport_requests(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '034_catering',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS catering_items (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            event_id TEXT,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL DEFAULT 'Main Course',
+            guest_count_estimate INTEGER,
+            status TEXT NOT NULL DEFAULT 'PLANNED' CHECK(status IN ('PLANNED', 'CONFIRMED')),
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE SET NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_catering_wedding ON catering_items(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '035_shopping_list',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS shopping_items (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            category TEXT,
+            estimated_cost REAL,
+            purchased INTEGER NOT NULL DEFAULT 0,
+            assigned_to TEXT,
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE INDEX IF NOT EXISTS idx_shopping_wedding ON shopping_items(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '036_gifts',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS gifts (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            guest_id TEXT,
+            giver_name TEXT NOT NULL,
+            description TEXT,
+            estimated_value REAL,
+            date_received TEXT,
+            thank_you_sent INTEGER NOT NULL DEFAULT 0,
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE,
+            FOREIGN KEY (guest_id) REFERENCES guests (id) ON DELETE SET NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_gifts_wedding ON gifts(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '037_documents',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS documents (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            category TEXT NOT NULL DEFAULT 'Other',
+            file_uri TEXT NOT NULL,
+            file_name TEXT,
+            mime_type TEXT,
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE INDEX IF NOT EXISTS idx_documents_wedding ON documents(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '038_guest_checkin',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        const columns: [string, string][] = [
+          ['checkin_code', 'TEXT'],
+          ['checked_in_at', 'INTEGER'],
+          ['checked_in_by', 'TEXT'],
+        ];
+        for (const [col, def] of columns) {
+          try {
+            await database.execAsync(`ALTER TABLE guests ADD COLUMN ${col} ${def}`);
+          } catch (e) {}
+        }
+        // Backfill a short check-in code for any guest that doesn't have one yet.
+        const guests = await database.getAllAsync<{ id: string }>(`SELECT id FROM guests WHERE checkin_code IS NULL`);
+        for (const g of guests) {
+          const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+          await database.runAsync(`UPDATE guests SET checkin_code = ? WHERE id = ?`, [code, g.id]);
+        }
+      }
+    },
+    {
+      name: '039_wedding_photos',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS wedding_photos (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            event_id TEXT,
+            uri TEXT NOT NULL,
+            caption TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE SET NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_wedding_photos_wedding ON wedding_photos(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '040_post_wedding_closing',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        try {
+          await database.execAsync(`ALTER TABLE weddings ADD COLUMN closed_at INTEGER DEFAULT NULL`);
+        } catch (e) {}
+      }
     }
   ];
 

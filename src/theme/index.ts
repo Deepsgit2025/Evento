@@ -1,86 +1,87 @@
 import { Platform } from 'react-native';
 
 export const lightColors = {
-  // Premium Indian Wedding Palette
-  primary: '#E11D48',       // Rose
-  primaryLight: '#F43F5E',  // Lighter Rose
-  primaryDark: '#BE123C',   // Deeper Rose
-  primaryPressed: '#BE123C',
-  
-  accent: '#F59E0B',        // Gold
-  accentLight: '#FBBF24',   // Light gold
-  accentDark: '#D97706',    // Dark gold
+  // Royal Creamy Gold Palette — deep wine as the "royal" primary, warm gold
+  // as the accent, set against an ivory/creamy base.
+  primary: '#7A1F3D',       // Royal wine/maroon
+  primaryLight: '#9A3057',  // Lighter wine
+  primaryDark: '#57162C',   // Deeper wine
+  primaryPressed: '#57162C',
 
-  background: '#FFF7F9',    // Warm Rose tinted cream
-  surface: '#FFFFFF',
+  accent: '#C9A227',        // Rich gold
+  accentLight: '#E0C158',   // Light gold
+  accentDark: '#9C7B1C',    // Dark gold / bronze
+
+  background: '#FDF7E8',    // Creamy ivory
+  surface: '#FFFEFA',       // Warm off-white
   surfaceElevated: '#FFFFFF',
-  
-  text: '#18181B',          // Charcoal Black
-  textSecondary: '#52525B', // Muted grey
-  textMuted: '#A1A1AA',     // Soft grey
-  
-  border: '#E4E4E7',        // Light grey border
-  borderLight: '#F4F4F5',   // Very light grey
-  
+
+  text: '#2E2013',          // Deep warm brown-black
+  textSecondary: '#6B5D4A', // Warm taupe
+  textMuted: '#A99A80',     // Warm muted tan
+
+  border: '#E9DDBE',        // Warm gold-tinted border
+  borderLight: '#F5EFDA',   // Very light cream border
+
   success: '#16A34A',       // Emerald green
-  warning: '#F59E0B',       // Amber
-  error: '#DC2626',         // Red
-  
-  disabled: '#E4E4E7',      // Muted grey
-  disabledText: '#A1A1AA',
-  
+  warning: '#C9A227',       // Gold (doubles as warning to stay on-palette)
+  error: '#B3261E',         // Deep red
+
+  disabled: '#E9DDBE',
+  disabledText: '#A99A80',
+
   // Gradient color stops
-  gradientStart: '#E11D48',
-  gradientEnd: '#C026D3',   // Orchid
-  gradientGold: '#F59E0B',
-  
+  gradientStart: '#7A1F3D',
+  gradientEnd: '#C9A227',   // Wine → gold
+  gradientGold: '#C9A227',
+
   // Card overlay backgrounds
-  cardPurple: '#FDF4FF',    // Light Orchid
-  cardGold: '#FEF3C7',      // Light Gold
-  cardGreen: '#DCFCE7',     // Light Green
-  cardRose: '#FFE4E6',      // Light Rose
+  cardPurple: '#F1E6EC',    // Soft plum tint
+  cardGold: '#FBF0D1',      // Light gold
+  cardGreen: '#E7F2E2',     // Light green
+  cardRose: '#F5E3E9',      // Light wine/blush
   isDark: false,
 };
 
 export const darkColors = {
-  // Premium Dark Theme Palette
-  primary: '#F43F5E',       // Brighter Rose for dark mode contrast
-  primaryLight: '#FB7185',  
-  primaryDark: '#BE123C',   
-  primaryPressed: '#9F1239',
-  
-  accent: '#FBBF24',        // Brighter Gold
-  accentLight: '#FCD34D',   
-  accentDark: '#D97706',    
+  // Royal Creamy Gold — dark mode variant (deep espresso base, glowing gold)
+  primary: '#C2517A',       // Brighter wine/rose for dark contrast
+  primaryLight: '#D97A9B',
+  primaryDark: '#8F3358',
+  primaryPressed: '#8F3358',
 
-  background: '#121212',    // True Dark Charcoal
-  surface: '#1E1E1E',       // Slightly elevated dark
-  surfaceElevated: '#2A2A2A',
-  
-  text: '#F4F4F5',          // Near White
-  textSecondary: '#A1A1AA', // Soft light grey
-  textMuted: '#71717A',     // Muted grey
-  
-  border: '#3F3F46',        // Dark grey border
-  borderLight: '#27272A',   // Very dark grey
-  
-  success: '#22C55E',       // Bright emerald
-  warning: '#FBBF24',       // Amber
-  error: '#EF4444',         // Bright red
-  
-  disabled: '#3F3F46',      
-  disabledText: '#71717A',
-  
+  accent: '#E5C158',        // Bright gold
+  accentLight: '#F0D385',
+  accentDark: '#B8933B',
+
+  background: '#18140D',    // Deep espresso brown
+  surface: '#241E14',       // Slightly elevated warm dark
+  surfaceElevated: '#2F281B',
+
+  text: '#F5EEDC',          // Creamy near-white
+  textSecondary: '#C9BB9E', // Warm light taupe
+  textMuted: '#8C7F67',     // Muted warm grey-brown
+
+  border: '#3D3423',        // Warm dark border
+  borderLight: '#2A2417',   // Very dark warm border
+
+  success: '#22C55E',
+  warning: '#E5C158',
+  error: '#E5605A',
+
+  disabled: '#3D3423',
+  disabledText: '#8C7F67',
+
   // Gradient color stops
-  gradientStart: '#E11D48',
-  gradientEnd: '#C026D3',   
-  gradientGold: '#F59E0B',
-  
+  gradientStart: '#7A1F3D',
+  gradientEnd: '#C9A227',
+  gradientGold: '#E5C158',
+
   // Card overlay backgrounds (darker tints)
-  cardPurple: '#3B0764',    
-  cardGold: '#451A03',      
-  cardGreen: '#064E3B',     
-  cardRose: '#4C0519',      
+  cardPurple: '#2E2430',
+  cardGold: '#3A2E10',
+  cardGreen: '#173322',
+  cardRose: '#3A1723',
   isDark: true,
 };
 
@@ -134,21 +135,21 @@ export const typography = {
 // Richer shadow system with warm tones
 export const shadows = {
   sm: {
-    shadowColor: '#E11D48',
+    shadowColor: '#7A1F3D',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 3,
     elevation: 1,
   },
   md: {
-    shadowColor: '#E11D48',
+    shadowColor: '#7A1F3D',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
   },
   lg: {
-    shadowColor: '#E11D48',
+    shadowColor: '#7A1F3D',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 24,

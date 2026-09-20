@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, Image } from 'react-native';
-import { ScreenContainer, Typography, Card } from '../../../components/ui';
+import { ScreenContainer, Typography, Card, Logo } from '../../../components/ui';
 import { theme } from '../../../theme';
 
 export default function AboutScreen() {
@@ -12,12 +12,8 @@ export default function AboutScreen() {
       
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.logoContainer}>
-          {/* Use a placeholder local app icon or a styled text */}
-          <View style={styles.iconPlaceholder}>
-            <Typography variant="display" color={theme.colors.surface}>E</Typography>
-          </View>
-          <Typography variant="screenTitle" style={styles.appName}>Evento</Typography>
-          <Typography variant="bodySecondary" color={theme.colors.textSecondary}>Version 1.0.0 (Build 42)</Typography>
+          <Logo size="lg" />
+          <Typography variant="bodySecondary" color={theme.colors.textSecondary} style={{ marginTop: theme.spacing.sm }}>Version 1.0.0 (Build 42)</Typography>
         </View>
 
         <Card style={styles.card}>
@@ -53,19 +49,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginVertical: theme.spacing.xxl,
-  },
-  iconPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
-    ...theme.shadows.sm,
-  },
-  appName: {
-    marginBottom: 4,
   },
   card: {
     paddingHorizontal: theme.spacing.lg,

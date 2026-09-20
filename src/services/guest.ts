@@ -20,12 +20,14 @@ export const GuestService = {
   async addGuest(db: SQLite.SQLiteDatabase, params: AddGuestParams): Promise<string> {
     const id = Crypto.randomUUID();
     const party_size = params.party_size && params.party_size > 0 ? params.party_size : 1;
-    
+    // Short code used for fast manual check-in at the entrance (see CheckinService).
+    const checkinCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+
     await db.runAsync(
       `INSERT INTO guests (
-        id, wedding_id, full_name, phone, alternate_phone, 
-        side, group_id, party_size, rsvp_status, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id, wedding_id, full_name, phone, alternate_phone,
+        side, group_id, party_size, rsvp_status, notes, checkin_code
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         params.wedding_id,
@@ -37,6 +39,7 @@ export const GuestService = {
         party_size,
         'PENDING',
         params.notes?.trim() || null,
+        checkinCode,
       ]
     );
 

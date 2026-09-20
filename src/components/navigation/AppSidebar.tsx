@@ -3,6 +3,7 @@ import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from '../ui/Typography';
+import { Logo } from '../ui/Logo';
 import { useTheme } from '../../theme/ThemeContext';
 import { NAV_SECTIONS, NAV_BOTTOM_ITEMS, NavItem } from '../../config/navigation';
 
@@ -80,9 +81,7 @@ export function AppSidebar() {
   return (
     <View style={[styles.container, { width, backgroundColor: theme.colors.surface, borderRightColor: theme.colors.borderLight }]}>
       <View style={styles.header}>
-        {!collapsed && (
-          <Typography variant="sectionTitle" weight="heavy" color={theme.colors.primary}>Evento</Typography>
-        )}
+        {!collapsed && <Logo size="sm" />}
         <Pressable onPress={() => setCollapsed((c) => !c)} style={styles.collapseButton}>
           <Ionicons name={collapsed ? 'chevron-forward' : 'chevron-back'} size={18} color={theme.colors.textSecondary} />
         </Pressable>
