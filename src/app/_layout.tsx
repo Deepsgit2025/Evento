@@ -23,58 +23,57 @@ function InitialRoot() {
   const [isReady, setIsReady] = useState(false);
   const [authState, setAuthState] = useState<{session: any, wedding: any} | null>(null);
 
-  // 1. Fetch auth state once on mount
+  // Top-level route group (e.g. 'auth' vs '(tabs)'). Actions like signing up,
+  // logging in, or creating/joining a wedding change the underlying session
+  // and wedding rows without going through this component, so the auth state
+  // captured on first mount goes stale. Re-fetching it fresh every time the
+  // user crosses in or out of the auth group (rather than caching it once)
+  // avoids bouncing a freshly-authenticated user back to the login screen.
+  const topSegment = segments[0];
+
   useEffect(() => {
     let active = true;
-    const fetchAuth = async () => {
+    const fetchAuthAndRoute = async () => {
+      let session: any = null;
+      let wedding: any = null;
       try {
-        const session = await AuthService.getCurrentSession(db);
-        let wedding = null;
+        session = await AuthService.getCurrentSession(db);
         if (session) {
           wedding = await getUserWedding(db, session.id);
         }
-        if (active) {
-          setAuthState({ session, wedding });
-          setIsReady(true);
-          try { SplashScreen.hideAsync(); } catch {}
-        }
       } catch (e) {
         console.error('Auth init error:', e);
-        if (active) {
-          setAuthState({ session: null, wedding: null });
-          setIsReady(true);
-          try { SplashScreen.hideAsync(); } catch {}
+      }
+
+      if (!active) return;
+      setAuthState({ session, wedding });
+
+      const inAuthGroup = topSegment === 'auth';
+      const isAuthJoin = inAuthGroup && (segments as string[])[1] === 'join';
+
+      if (!session) {
+        // No session, ensure they are in auth group
+        if (!inAuthGroup) {
+          router.replace('/auth/login');
+        }
+      } else if (!wedding) {
+        // Has session but no wedding, ensure they are at /auth/join
+        if (!isAuthJoin) {
+          router.replace('/auth/join');
+        }
+      } else {
+        // Has session and wedding, prevent them from accessing auth screens
+        if (inAuthGroup) {
+          router.replace('/(tabs)');
         }
       }
+
+      setIsReady(true);
+      try { SplashScreen.hideAsync(); } catch {}
     };
-    fetchAuth();
+    fetchAuthAndRoute();
     return () => { active = false; };
-  }, [db]);
-
-  // 2. React to segments + authState changes to route the user
-  useEffect(() => {
-    if (!isReady || !authState) return;
-
-    const inAuthGroup = segments[0] === 'auth';
-    const isAuthJoin = inAuthGroup && segments[1] === 'join';
-
-    if (!authState.session) {
-      // No session, ensure they are in auth group
-      if (!inAuthGroup) {
-        router.replace('/auth/login');
-      }
-    } else if (!authState.wedding) {
-      // Has session but no wedding, ensure they are at /auth/join
-      if (!isAuthJoin) {
-        router.replace('/auth/join');
-      }
-    } else {
-      // Has session and wedding, prevent them from accessing auth screens
-      if (inAuthGroup) {
-        router.replace('/(tabs)');
-      }
-    }
-  }, [segments, isReady, authState]);
+  }, [db, topSegment]);
 
   if (!isReady) return null;
 
