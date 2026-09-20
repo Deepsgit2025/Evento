@@ -13,6 +13,7 @@ import { useSync } from '../../context/SyncContext';
 import { HeaderNotificationIcon } from '../../components/ui/HeaderNotificationIcon';
 import { useLanguage } from '../../i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WeddingDayService, WeddingDaySnapshot } from '../../services/weddingDay';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -43,6 +44,7 @@ export default function HomeTab() {
     remainingBudget: null, upcomingEvents: []
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [liveSnapshot, setLiveSnapshot] = useState<WeddingDaySnapshot | null>(null);
   const { status, manualSync } = useSync();
   const { theme } = useTheme();
 
@@ -107,6 +109,11 @@ export default function HomeTab() {
                   remainingBudget, upcomingEvents
                 });
               }
+
+              try {
+                const snapshot = await WeddingDayService.getSnapshot(db, wId);
+                if (isActive) setLiveSnapshot(snapshot);
+              } catch { /* Live Wedding tables may not exist yet on a fresh DB */ }
             }
           } else {
             if (isActive) setWedding(null);
@@ -326,8 +333,8 @@ export default function HomeTab() {
           </View>
 
           {/* AI Assistant Banner */}
-          <Pressable 
-            style={({pressed}) => [s.aiBanner, pressed && s.pressedState]} 
+          <Pressable
+            style={({pressed}) => [s.aiBanner, pressed && s.pressedState]}
             onPress={() => router.push('/(tabs)/assistant')}
           >
             <View style={s.aiBannerContent}>
@@ -338,6 +345,31 @@ export default function HomeTab() {
               <Ionicons name="sparkles" size={24} color={theme.colors.primary} />
             </View>
           </Pressable>
+
+          {/* Live Wedding Banner — Wedding Day Mode + Control Room */}
+          <Pressable
+            style={({ pressed }) => [s.liveBanner, { backgroundColor: theme.colors.gradientEnd }, pressed && s.pressedState]}
+            onPress={() => router.push('/(tabs)/wedding-day')}
+          >
+            <View style={s.aiBannerContent}>
+              <Typography variant="body" weight="heavy" color="#FFFFFF">Wedding Day Mode</Typography>
+              <Typography variant="caption" color="rgba(255,255,255,0.8)">Live status for every function, in one place</Typography>
+            </View>
+            <View style={s.aiIconWrapper}>
+              <Ionicons name="tv" size={24} color={theme.colors.gradientEnd} />
+            </View>
+          </Pressable>
+
+          {/* Active urgent/high announcements */}
+          {liveSnapshot && liveSnapshot.activeAnnouncements.filter(a => a.priority === 'URGENT' || a.priority === 'HIGH').slice(0, 2).map(a => (
+            <Pressable key={a.id} style={[s.announcementBanner, { backgroundColor: a.priority === 'URGENT' ? '#FEF2F2' : theme.colors.cardGold }]} onPress={() => router.push('/(tabs)/announcements')}>
+              <Ionicons name="megaphone" size={20} color={a.priority === 'URGENT' ? theme.colors.error : theme.colors.accentDark} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Typography variant="body" weight="semibold">{a.title}</Typography>
+                <Typography variant="caption" color={theme.colors.textSecondary} numberOfLines={1}>{a.message}</Typography>
+              </View>
+            </Pressable>
+          ))}
 
           {/* Finance Overview Card */}
           {renderFinanceCard()}
@@ -357,7 +389,9 @@ export default function HomeTab() {
           {renderUpcomingEvents()}
 
           {/* Needs Attention */}
-          {(stats.unassignedGuests > 0 || stats.pendingPayments > 0) && (
+          {(stats.unassignedGuests > 0 || stats.pendingPayments > 0 ||
+            (liveSnapshot?.delayedOrProblemEvents.length || 0) > 0 ||
+            (liveSnapshot?.delayedVendors.length || 0) > 0) && (
              <View style={s.section}>
                <Typography variant="sectionTitle" weight="heavy" style={{ marginBottom: 12 }}>Needs Attention</Typography>
                {stats.unassignedGuests > 0 && (
@@ -374,6 +408,24 @@ export default function HomeTab() {
                    <Ionicons name="card" size={24} color={theme.colors.error} />
                    <Typography variant="body" weight="semibold" style={s.alertText}>
                      {stats.pendingPayments} Vendor payments pending
+                   </Typography>
+                   <Ionicons name="chevron-forward" size={20} color={theme.colors.border} />
+                 </Pressable>
+               )}
+               {(liveSnapshot?.delayedOrProblemEvents.length || 0) > 0 && (
+                 <Pressable style={[s.alertCard, { marginTop: 8 }]} onPress={() => router.push('/(tabs)/control-room')}>
+                   <Ionicons name="tv" size={24} color={theme.colors.error} />
+                   <Typography variant="body" weight="semibold" style={s.alertText}>
+                     {liveSnapshot!.delayedOrProblemEvents.length} event{liveSnapshot!.delayedOrProblemEvents.length > 1 ? 's' : ''} delayed or need attention
+                   </Typography>
+                   <Ionicons name="chevron-forward" size={20} color={theme.colors.border} />
+                 </Pressable>
+               )}
+               {(liveSnapshot?.delayedVendors.length || 0) > 0 && (
+                 <Pressable style={[s.alertCard, { marginTop: 8 }]} onPress={() => router.push('/(tabs)/vendors/arrivals')}>
+                   <Ionicons name="briefcase" size={24} color={theme.colors.warning} />
+                   <Typography variant="body" weight="semibold" style={s.alertText}>
+                     {liveSnapshot!.delayedVendors.length} vendor{liveSnapshot!.delayedVendors.length > 1 ? 's' : ''} delayed
                    </Typography>
                    <Ionicons name="chevron-forward" size={20} color={theme.colors.border} />
                  </Pressable>
@@ -483,6 +535,19 @@ const getDynamicStyles = (theme: any) => StyleSheet.create({
     width: 48, height: 48, borderRadius: 24,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center', alignItems: 'center',
+  },
+
+  // ─── LIVE WEDDING BANNER ───
+  liveBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: theme.radii.xl, padding: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.md,
+  },
+  announcementBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: theme.radii.lg, padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
 
   // ─── FINANCE CARD ───

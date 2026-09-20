@@ -84,6 +84,8 @@ export interface RoomAssignment {
   updated_at: number;
 }
 
+export type EventStatus = 'UPCOMING' | 'RUNNING' | 'DELAYED' | 'COMPLETED' | 'PROBLEM';
+
 export interface Event {
   id: string;
   wedding_id: string;
@@ -94,6 +96,12 @@ export interface Event {
   end_time: string | null;
   location: string | null;
   description: string | null;
+  /** Defaults to 'UPCOMING' in the database; optional here so existing create/update call sites don't need to pass it. */
+  status?: EventStatus;
+  responsible_person?: string | null;
+  responsible_phone?: string | null;
+  delay_reason?: string | null;
+  manager_notes?: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -107,6 +115,19 @@ export interface EventGuest {
   notes: string | null;
   created_at: number;
   updated_at: number;
+}
+
+export type VendorArrivalStatus = 'NOT_ARRIVED' | 'ON_THE_WAY' | 'ARRIVED' | 'DELAYED' | 'COMPLETED';
+
+export interface VendorEventAssignment {
+  id: string;
+  vendor_id: string;
+  event_id: string;
+  status: VendorArrivalStatus;
+  expected_arrival: string | null;
+  actual_arrival: string | null;
+  notes: string | null;
+  created_at: number;
 }
 
 export interface Vendor {
@@ -229,4 +250,61 @@ export interface Dance {
   sort_order: number;
   created_at: number;
   updated_at?: number;
+}
+
+export const EMERGENCY_CONTACT_CATEGORIES = [
+  'Ambulance', 'Hospital', 'Police', 'Security', 'Venue Manager',
+  'Electrician', 'Plumber', 'Driver', 'Family Emergency Contact', 'Other'
+] as const;
+
+export interface EmergencyContact {
+  id: string;
+  wedding_id: string;
+  category: string;
+  name: string;
+  phone: string;
+  notes: string | null;
+  sort_order: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export type AnnouncementPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+export type AnnouncementStatus = 'ACTIVE' | 'EXPIRED';
+
+export interface Announcement {
+  id: string;
+  wedding_id: string;
+  title: string;
+  message: string;
+  event_id: string | null;
+  priority: AnnouncementPriority;
+  status: AnnouncementStatus;
+  created_at: number;
+  updated_at: number;
+}
+
+export type BaraatStatus = 'PREPARING' | 'STARTED' | 'ON_THE_WAY' | 'ARRIVED' | 'COMPLETED';
+
+export interface BaraatTrip {
+  id: string;
+  wedding_id: string;
+  vehicle: string;
+  driver_name: string | null;
+  driver_phone: string | null;
+  pickup_location: string | null;
+  destination: string | null;
+  capacity: number | null;
+  status: BaraatStatus;
+  estimated_arrival: string | null;
+  notes: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface BaraatTripGuest {
+  id: string;
+  trip_id: string;
+  guest_id: string;
+  created_at: number;
 }

@@ -1,10 +1,16 @@
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { HeaderNotificationIcon } from '../../components/ui/HeaderNotificationIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppSidebar } from '../../components/navigation/AppSidebar';
+
+// Below this width we keep the existing mobile bottom-tab navigation
+// untouched; at/above it we switch to the persistent desktop/tablet sidebar
+// and hide the tab bar (it would just duplicate the sidebar's Main section).
+const SIDEBAR_BREAKPOINT = 900;
 
 function TabIcon({ name, color, focused, theme }: { name: keyof typeof Ionicons.glyphMap; color: string; focused: boolean; theme: any }) {
   return (
@@ -22,8 +28,10 @@ function TabIcon({ name, color, focused, theme }: { name: keyof typeof Ionicons.
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { theme, mode } = useTheme();
+  const { width } = useWindowDimensions();
+  const showSidebar = width >= SIDEBAR_BREAKPOINT;
 
-  return (
+  const tabs = (
     <Tabs
       screenOptions={{
         headerShown: true,
@@ -40,7 +48,7 @@ export default function TabLayout() {
           color: theme.colors.text,
         },
         headerShadowVisible: false,
-        tabBarStyle: {
+        tabBarStyle: showSidebar ? { display: 'none' } : {
           backgroundColor: theme.colors.surface + (Platform.OS === 'ios' ? 'E6' : 'FF'), // 90% opaque on iOS for subtle blur feel
           borderTopColor: theme.colors.borderLight,
           borderTopWidth: 1,
@@ -113,7 +121,37 @@ export default function TabLayout() {
       <Tabs.Screen name="finance" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="tasks" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="dances" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="control-room" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="wedding-day" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="baraat" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="emergency" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="announcements" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="transportation" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="seating" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="catering" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="shopping" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="gifts" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="inventory" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="documents" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="checkin" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="photos" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="memories" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="closing" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
+
+  if (!showSidebar) return tabs;
+
+  return (
+    <View style={styles.desktopRow}>
+      <AppSidebar />
+      <View style={styles.desktopContent}>{tabs}</View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  desktopRow: { flex: 1, flexDirection: 'row' },
+  desktopContent: { flex: 1, minWidth: 0 },
+});
 

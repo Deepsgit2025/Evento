@@ -49,9 +49,9 @@ export default function VendorsLayout() {
           title: 'Vendor Details',
         }} 
       />
-      <Stack.Screen 
-        name="[id]/edit" 
-        options={{ 
+      <Stack.Screen
+        name="[id]/edit"
+        options={{
           title: 'Edit Vendor',
           presentation: 'modal',
           headerLeft: () => (
@@ -59,7 +59,14 @@ export default function VendorsLayout() {
               <Ionicons name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
           )
-        }} 
+        }}
+      />
+      <Stack.Screen
+        name="arrivals"
+        options={{
+          title: 'Vendor Arrivals',
+          headerShown: false,
+        }}
       />
     </Stack>
   );

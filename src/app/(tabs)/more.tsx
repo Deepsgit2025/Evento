@@ -3,80 +3,93 @@ import { View, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenContainer, Typography } from '../../components/ui';
-import { theme } from '../../theme';
+import { useTheme } from '../../theme/ThemeContext';
 import { HeaderNotificationIcon } from '../../components/ui/HeaderNotificationIcon';
 import { useLanguage } from '../../i18n';
+import { NAV_SECTIONS, NAV_BOTTOM_ITEMS, NavItem } from '../../config/navigation';
 
-interface ModuleTile {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  route: string;
-  color: string;
-  bgColor: string;
-}
+// Routes already reachable from the main bottom tab bar — no need to repeat
+// them here so the full nav (sidebar on desktop, this screen on mobile)
+// stays consistent without duplicating entry points.
+const HIDDEN_ON_MORE = new Set(['dashboard', 'events', 'guests', 'vendors']);
 
 export default function MoreScreen() {
   const router = useRouter();
+  const { theme } = useTheme();
   const { t } = useLanguage();
 
-  const modules: ModuleTile[] = [
-    { icon: 'bed', label: t('more.rooms'), route: '/(tabs)/rooms', color: '#7C3AED', bgColor: theme.colors.cardPurple },
-    { icon: 'sparkles', label: t('more.assistant'), route: '/(tabs)/assistant', color: '#D4A056', bgColor: theme.colors.cardGold },
-    { icon: 'bar-chart', label: t('more.reports'), route: '/(tabs)/reports', color: '#10B981', bgColor: theme.colors.cardGreen },
-    { icon: 'mail-open', label: t('more.invitations'), route: '/(tabs)/patrika', color: '#EF4444', bgColor: theme.colors.cardRose },
-    { icon: 'wallet', label: t('more.finance'), route: '/(tabs)/finance', color: '#F59E0B', bgColor: theme.colors.cardGold },
-    { icon: 'checkbox', label: t('more.checklist'), route: '/(tabs)/tasks', color: '#10B981', bgColor: theme.colors.cardGreen },
-    { icon: 'musical-notes', label: t('more.dances'), route: '/(tabs)/dances', color: '#C026D3', bgColor: theme.colors.cardPurple },
-    { icon: 'settings', label: t('more.settings'), route: '/(tabs)/settings', color: '#6B6178', bgColor: theme.colors.borderLight },
-  ];
+  const sections = NAV_SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !HIDDEN_ON_MORE.has(item.key)),
+  })).filter((section) => section.items.length > 0);
+
+  const renderTile = (item: NavItem) => (
+    <Pressable
+      key={item.key}
+      style={({ pressed }) => [styles.tile, { backgroundColor: theme.colors.surface, borderColor: theme.colors.borderLight }, pressed && styles.tilePressed]}
+      onPress={() => router.push(item.route as any)}
+    >
+      <View style={[styles.tileIcon, { backgroundColor: theme.colors.cardRose }]}>
+        <Ionicons name={item.icon} size={26} color={theme.colors.primary} />
+      </View>
+      <Typography variant="body" weight="medium" style={styles.tileLabel} numberOfLines={2}>
+        {item.label}
+      </Typography>
+      {item.comingSoon && (
+        <View style={[styles.soonBadge, { backgroundColor: theme.colors.cardGold }]}>
+          <Typography variant="caption" weight="bold" color={theme.colors.accentDark} style={{ fontSize: 9 }}>SOON</Typography>
+        </View>
+      )}
+    </Pressable>
+  );
 
   return (
-    <ScreenContainer edges={['top', 'left', 'right']} style={styles.container}>
+    <ScreenContainer edges={['top', 'left', 'right']} style={{ backgroundColor: theme.colors.background }}>
       <View style={styles.header}>
         <Typography variant="screenTitle">{t('more.title')}</Typography>
         <HeaderNotificationIcon />
       </View>
 
-      <ScrollView contentContainerStyle={styles.grid}>
-        {modules.map((mod, idx) => (
-          <Pressable
-            key={idx}
-            style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
-            onPress={() => router.push(mod.route as any)}
-          >
-            <View style={[styles.tileIcon, { backgroundColor: mod.bgColor }]}>
-              <Ionicons name={mod.icon} size={28} color={mod.color} />
-            </View>
-            <Typography variant="body" weight="medium" style={styles.tileLabel}>
-              {mod.label}
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {sections.map((section) => (
+          <View key={section.title} style={styles.section}>
+            <Typography variant="caption" weight="bold" color={theme.colors.textMuted} style={styles.sectionTitle}>
+              {section.title.toUpperCase()}
             </Typography>
-          </Pressable>
+            <View style={styles.grid}>
+              {section.items.map(renderTile)}
+            </View>
+          </View>
         ))}
+
+        <View style={styles.section}>
+          <Typography variant="caption" weight="bold" color={theme.colors.textMuted} style={styles.sectionTitle}>ACCOUNT</Typography>
+          <View style={styles.grid}>
+            {NAV_BOTTOM_ITEMS.map(renderTile)}
+          </View>
+        </View>
       </ScrollView>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: theme.spacing.xl, paddingTop: theme.spacing.lg, paddingBottom: theme.spacing.md,
+    paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8,
   },
-  grid: {
-    flexDirection: 'row', flexWrap: 'wrap',
-    paddingHorizontal: theme.spacing.lg, paddingTop: theme.spacing.md, gap: theme.spacing.md,
-    paddingBottom: 100,
-  },
+  scroll: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 120 },
+  section: { marginBottom: 20 },
+  sectionTitle: { marginBottom: 12, marginLeft: 4, letterSpacing: 0.5 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   tile: {
-    width: '47%', backgroundColor: theme.colors.surface,
-    borderRadius: theme.radii.xl, padding: theme.spacing.xl, alignItems: 'center',
-    ...theme.shadows.sm, borderWidth: 1, borderColor: theme.colors.borderLight,
+    width: '47%', borderRadius: 20, padding: 18, alignItems: 'center', borderWidth: 1, position: 'relative',
   },
   tilePressed: { transform: [{ scale: 0.96 }], opacity: 0.85 },
   tileIcon: {
-    width: 56, height: 56, borderRadius: 28,
-    justifyContent: 'center', alignItems: 'center', marginBottom: theme.spacing.md,
+    width: 52, height: 52, borderRadius: 26,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 10,
   },
   tileLabel: { textAlign: 'center' },
+  soonBadge: { position: 'absolute', top: 10, right: 10, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 999 },
 });

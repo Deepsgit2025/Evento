@@ -652,6 +652,117 @@ export const setupMigrations = async (db: SQLite.SQLiteDatabase) => {
           await database.execAsync(`ALTER TABLE tasks ADD COLUMN reminder_lead_minutes INTEGER DEFAULT 5`);
         } catch(e) {}
       }
+    },
+    {
+      name: '026_wedding_control_room',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        // Live status tracking for the Wedding Control Room / Wedding Day Mode.
+        const columns: [string, string][] = [
+          ['status', `TEXT NOT NULL DEFAULT 'UPCOMING'`],
+          ['responsible_person', 'TEXT'],
+          ['responsible_phone', 'TEXT'],
+          ['delay_reason', 'TEXT'],
+          ['manager_notes', 'TEXT'],
+        ];
+        for (const [col, def] of columns) {
+          try {
+            await database.execAsync(`ALTER TABLE events ADD COLUMN ${col} ${def}`);
+          } catch (e) {}
+        }
+      }
+    },
+    {
+      name: '027_emergency_contacts',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS emergency_contacts (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            category TEXT NOT NULL,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            notes TEXT,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE INDEX IF NOT EXISTS idx_emergency_contacts_wedding ON emergency_contacts(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '028_announcements',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS announcements (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            event_id TEXT,
+            priority TEXT NOT NULL DEFAULT 'NORMAL' CHECK(priority IN ('LOW', 'NORMAL', 'HIGH', 'URGENT')),
+            status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK(status IN ('ACTIVE', 'EXPIRED')),
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE,
+            FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE SET NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_announcements_wedding ON announcements(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '029_baraat_tracker',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        await database.execAsync(`
+          CREATE TABLE IF NOT EXISTS baraat_trips (
+            id TEXT PRIMARY KEY,
+            wedding_id TEXT NOT NULL,
+            vehicle TEXT NOT NULL,
+            driver_name TEXT,
+            driver_phone TEXT,
+            pickup_location TEXT,
+            destination TEXT,
+            capacity INTEGER,
+            status TEXT NOT NULL DEFAULT 'PREPARING' CHECK(status IN ('PREPARING', 'STARTED', 'ON_THE_WAY', 'ARRIVED', 'COMPLETED')),
+            estimated_arrival TEXT,
+            notes TEXT,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            updated_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            deleted_at INTEGER DEFAULT NULL,
+            FOREIGN KEY (wedding_id) REFERENCES weddings (id) ON DELETE CASCADE
+          );
+          CREATE TABLE IF NOT EXISTS baraat_trip_guests (
+            id TEXT PRIMARY KEY,
+            trip_id TEXT NOT NULL,
+            guest_id TEXT NOT NULL,
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as int)),
+            FOREIGN KEY (trip_id) REFERENCES baraat_trips (id) ON DELETE CASCADE,
+            FOREIGN KEY (guest_id) REFERENCES guests (id) ON DELETE CASCADE,
+            UNIQUE(trip_id, guest_id)
+          );
+          CREATE INDEX IF NOT EXISTS idx_baraat_trips_wedding ON baraat_trips(wedding_id);
+        `);
+      }
+    },
+    {
+      name: '030_vendor_arrival_tracking',
+      query: async (database: SQLite.SQLiteDatabase) => {
+        // Per (vendor, event) arrival tracking, used by the Vendor Arrival Tracker.
+        const columns: [string, string][] = [
+          ['status', `TEXT NOT NULL DEFAULT 'NOT_ARRIVED'`],
+          ['expected_arrival', 'TEXT'],
+          ['actual_arrival', 'TEXT'],
+          ['notes', 'TEXT'],
+        ];
+        for (const [col, def] of columns) {
+          try {
+            await database.execAsync(`ALTER TABLE vendor_events ADD COLUMN ${col} ${def}`);
+          } catch (e) {}
+        }
+      }
     }
   ];
 
